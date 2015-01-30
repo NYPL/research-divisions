@@ -1,0 +1,526 @@
+/* 
+** All Locations Landing Page
+*/
+
+.container__all-locations {
+
+	/** Search Area **/
+	.search-locations {
+
+		.search-box-label {
+			text-align: center;
+
+			@include breakpoint($min, $post-palm) {
+				text-align: left;
+			}
+		}
+
+		.search-box-area {
+			position: relative;
+			height: 45px;
+			display: block;
+
+			@include breakpoint($min, $post-palm) {
+				width: 80%;
+				display: inline-block;
+			}
+
+			// Search Input Field
+			.search-box {
+				height: 45px;
+				padding: 0 30px;
+				line-height: normal;
+			}
+
+			// Search magnyfing glass icon
+			.icon-search {
+				position: absolute;
+				left: 0px;
+				top: 12px;
+				font-size: 20px;
+				color: #c5c2bb;
+			}
+
+			// Clear Search icon
+			#clear-search {
+				position: absolute;
+				right: 0px;
+				top: 12px;
+				font-size: 20px;
+				color: #c5c2bb;
+
+				&:hover {
+					cursor: pointer;
+				}
+			}
+		}
+
+		.search-button-area {
+			height: 60px;
+
+			@include breakpoint($min, $post-palm) {
+				height: auto;
+				display: inline-block;
+				width: 19.5%;
+				vertical-align: 1px;
+				margin-left: -2.61px;
+			}
+
+			// Button for Location Search
+			#find-location {
+				margin: 15px auto 0;
+				position: absolute;
+				left: 0;
+				right: 0;
+				width: 55%;
+				height: 45px;
+
+				@include breakpoint($min, $post-palm) {
+					position: relative;
+					left: inherit;
+					right: inherit;
+					width: 99%;
+					margin: 0;
+					border-radius: 0;
+				}
+
+				@include breakpoint($min, $pre-laptop) {
+					width: 80%
+				}
+			}
+		}
+	}
+
+	/** Filters Section **/
+	.search-filters {
+		margin: 1em 0 0;
+		text-align: center;
+
+		@include breakpoint($min, $post-palm) {
+			text-align: left;
+			margin: 1em 0;
+		}
+
+		.filters__current {
+			margin: 0;
+
+			@include breakpoint($min, $post-palm) {
+				display: inline-block;
+			}
+
+			p {
+				margin: 0;
+				max-width: none;
+
+				.current-location-container {
+					display: block; 
+
+					@include breakpoint($min, $post-palm) {
+						display: inline;
+					}
+				}
+			}
+		}
+
+		.filters__research {
+
+			@include breakpoint($min, $post-palm) {
+				display: inline-block;
+			}
+
+			p {
+				text-align: center;
+				margin: 0;
+				max-width: none;
+
+				@include breakpoint($min, $post-palm) {
+					text-align: left;
+				}
+
+				.only-research-container {
+					display: block; 
+
+					@include breakpoint($min, $post-palm) {
+						display: inline;
+					}
+				}
+			}
+		}
+	}
+
+	// Search/Error results container
+	.search__results {
+
+		#results, #search-error, #distance-error {
+			margin-top: 15px;
+			margin-bottom: 20px;
+			padding: 6px;
+			border-radius: 2px;
+			font-size: 13.5px;
+
+			@include breakpoint($min, $mobile-phone) {
+				font-size: inherit;
+			}
+			@include breakpoint($min, $post-palm) {
+				margin-top: 0px;
+			}
+
+		}
+
+		#results {
+			background-color: #FFFFCD;
+			border: 1px solid #EEE;
+		}
+	}
+
+	.views-tab-controls {
+		display: none;
+		border-bottom: 1px solid #e2dedb;
+
+		@include breakpoint($min, $post-palm) {
+			display: block;
+		}
+
+		div {
+			display: inline-block;
+			padding: 10px;
+			background-color: #5e564b;
+			color: #fff;
+			opacity: .65;
+			margin-bottom: -1px;
+
+			&.list-view-btn {
+				margin-right: 5px;
+			}
+			&.active {
+				opacity: 1;
+			}
+
+			&:hover {
+				cursor: pointer;
+			}
+		}
+
+	}
+
+	/** Locations List View (no-map) **/
+	.locations-results-list {
+		margin-top: 0px;
+		@include breakpoint($min, $post-palm) {
+			margin-top: 10px;
+		}
+
+		table.locations-list-view {
+			display: block;
+			width: 100%; 
+			border-collapse: collapse;
+
+			@include breakpoint($min, $post-palm) {
+				display: table;
+			}
+
+			thead {
+				// display: block;
+				background: rgba(#e2dedb, .3);
+
+				// @include breakpoint($min, $post-palm) {
+				// 	display: table-header-group;
+				// }
+
+				tr {
+					position: absolute;
+					top: -9999px;
+					left: -9999px;
+
+					@include breakpoint($min, $post-palm) {
+						display: table-row;
+						position: relative;
+						top: inherit;
+						left: inherit;
+					}
+
+					th {
+						display: block;
+						width: 33%;
+						// background: rgba(#e2dedb, .3);
+
+						@include breakpoint($min, $post-palm) {
+							display: inline-block;
+						}
+					}
+				}
+			}
+
+			tbody {
+				display: block;
+				overflow: auto;
+				height: 500px;
+				border-bottom: 1px solid #EEE;
+				border-top: 1px solid #EEE;
+				-webkit-overflow-scrolling: touch;
+
+				tr {
+					display: block;
+					border: 1px solid #EEE;
+
+					@include breakpoint($min, $post-palm) {
+						display: table-row;
+						border-bottom: 1px solid #EEE;
+					}
+
+					&.active {
+						background-color: #FFFFED;
+					}
+
+					td {
+						border: none;
+						position: relative;
+						padding-left: 37%;
+						display: block;
+						font-size: 13.5px;
+
+						@include breakpoint($min, $mobile-phone) {
+							padding-left: 35%;
+							font-size: inherit;
+						}
+
+						@include breakpoint($min, $post-palm) {
+							display: table-cell;
+							padding-left: 12px;
+							width: 30%;
+						}
+
+						&:before {
+							font-weight: bold;
+							position: absolute;
+							top: .5rem;
+							left: 6px;
+							width: 45%;
+							padding-right: 10px;
+							white-space: nowrap;
+
+							@include breakpoint($min, $post-palm) {
+								position: relative;
+								top: inherit;
+								left: inherit;
+								width: auto;
+								padding-left: initial;
+								white-space: nowrap;
+							}
+						}
+
+						&:nth-of-type(1):before {
+							@include breakpoint($max, $post-palm) {
+								content: "Location";
+								top: 7%;
+							}
+						}
+
+						&:nth-of-type(2):before {
+							@include breakpoint($max, $post-palm) {
+								content: "";
+							}
+						}
+
+						&:nth-of-type(3):before {
+							top: 35.5%;
+							@include breakpoint($max, $post-palm) {
+								content: "Today's Hours";
+							}
+						}
+
+					}
+				}
+			}
+
+			td {
+
+				&.location-info {
+
+					.p-org {
+						font-size: 1.2rem;
+						font-weight: bold;
+					}
+
+					.directions-link {
+						display: block; 
+
+						@include breakpoint($min, $tablet) {
+							display: inline;
+						}
+					}
+					// Accessibility
+					.accessible, .not-accessible {
+						margin: 4px 0px;
+					}
+
+					// Hide map-link on mobile devices
+					.map-link {
+						display: block;
+
+						@include breakpoint($min, $post-tablet) {
+							display: inline;
+						}
+					}
+				}
+
+				&.amenities-info {
+					ul {
+						margin: 0 0 0 1.5em;
+						@include breakpoint($min, $post-palm) {
+							margin: 0 0 0 .5em;
+						}
+					}
+				}
+
+				&.hours-info {
+					p {
+						padding-top: 22px;
+
+						@include breakpoint($min, $post-tablet) {
+							padding-top: 0px;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/** Locations Map View **/
+	.locations-results-map {
+		padding-top: 0px;
+		margin: -25px 0px 20px 0px;
+
+		@include breakpoint($min, $post-palm) {
+			margin: 0px 0px 20px 0px;
+			padding-top: 10px;
+		}
+
+		.locations-data-wrapper {
+			border: 1px solid #eee;
+			padding: 7px;
+			height: 500px;
+			overflow-y: scroll;
+			overflow-x: hidden;
+			-webkit-overflow-scrolling: touch;
+
+			.location-data {
+				border-bottom: 1px solid #EEE;
+				padding: 5px 0px;
+
+				&.active {
+					background-color: #FFFFED;
+				}
+
+				.p-org {
+					font-size: 1.2rem;
+					font-weight: bold;
+				}
+
+				.highlighted-amenities-list {
+					margin: .5em 0 .5em 1.25em;
+					list-style-type: disc;
+
+					li {
+						display: list-item;
+					}
+				}
+
+				.todays-hours, .distance {
+					margin: 1em 0;
+
+					span {
+						margin-right: .05em;
+					}
+					strong {
+						margin-left: .1em;
+					}
+				}
+
+				// Accessibility
+				.accessible, .not-accessible {
+					margin: 4px 0px;
+				}
+
+				.directions-link {
+					margin: .35em 0 .5em;
+				}
+
+				.map-link {
+					display: block;
+				}
+
+			}
+		}
+
+		// Google Map
+		.map-wrapper {
+			margin: 24px 5px;
+			@include breakpoint($min, $post-palm) {
+				margin: 0;
+			}
+			#all-locations-map {
+				height: 260px;
+				width: 100%;
+
+				@include breakpoint($min, $post-palm) {
+					height: 500px;
+				}
+			}
+
+			#all-locations-map-legend {
+				padding: 5px;
+			  font-size: 11px;
+			  font-size: 1.1em;
+			  background: #fff;
+			  @include breakpoint($min, $post-palm) {
+			  	padding: 10px;
+				  font-size: 13px;
+				  font-size: 1.3em;
+			  }
+			  div {
+			  	margin: .5px 0px;
+			  }
+
+			  img.map-marker {
+			  	max-width: 15%;
+
+		  	 @include breakpoint($min, $post-palm) {
+		  	 	max-width: 100%;
+		  	 }
+			  }
+
+			  span {
+			  	vertical-align: top;
+			  }
+			}
+
+			.hide-legend {
+			  display: none;
+			}
+
+			.show-legend {
+			  display: block;
+			}
+			// Fix to display the closing 'X' on marker's infowindow
+			img[src*="gstatic.com/"], 
+			img[src*="googleapis.com/"] {
+				max-width: none;
+			}
+		}
+	}
+
+	// Branch Exception Messages
+	.loc-exceptions {
+		background-color: #ffcdcd;
+		border: 1px solid #eee;
+		border-radius: 2px;
+		padding: 5px;
+		margin-bottom: 7px;
+
+		p {
+			padding: 2px;
+			margin: 0;
+		}
+	}
+}

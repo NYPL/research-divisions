@@ -1,0 +1,173 @@
+/* Research Collections page */
+.research-collections {
+
+  button {
+  	&.active {
+	    background: #fff;
+	    border: 1px solid #0090c4;
+	    color: #0090c4;
+  	}
+  }
+}
+
+.collection-filters {
+	background-color: #ebe8e6;
+	border-width: 1px;
+	border-style: solid;
+	border-color: #c5c2bb;
+	border-radius: 2px;
+	padding: 12px;
+	margin: 0px 0px 24px 0px;
+
+	.active-filters {
+		margin-bottom: 15px;
+
+		div {
+			display: inline;
+
+			> span {
+				margin-left: 5px;
+				display: block;
+
+				@include breakpoint($min, $mobile-phone) {
+					display: inline-block;
+				}
+			}
+		}
+
+		a.active-filter {
+			cursor: pointer;
+		}
+
+		.icon-cancel-circle {
+			margin-left: -5px;
+		}
+	}
+
+	.main-filters {
+		.heading {
+			display: block;
+			position: relative;
+
+			@include breakpoint($min, $mobile-phone) {
+				display: inline;
+			}
+
+			.main-filter-toggle {
+				display: inline;
+				position: absolute;
+				width: 88px;
+				left: 0px;
+				top: 5px;
+				text-align: right;
+
+				&:hover {
+					cursor: pointer;
+				}
+
+				@include breakpoint($min, $post-palm) {
+					display: none;
+				}
+			}
+		}
+
+		.filters-wrapper {
+			display: block;
+			@include breakpoint($min, $post-palm) {
+				display: inline !important;
+			}
+		}
+
+		.filterable-by {
+			button {
+				display: block;
+				margin: 10px auto;
+				width: 100%;
+				@include breakpoint($min, $post-palm) {
+					display: inline;
+					width: auto;
+					margin: 6px;
+				}
+			}
+		}
+	}
+
+	.sub-filters {
+		margin: 5px 0px;
+
+		@include breakpoint($min, $post-palm) {
+			margin: 0 0 0 73px;
+		}
+
+		> ul {
+			margin: 0;
+			padding: 0;
+			list-style-type: none;
+
+			> li {
+				margin: 6px 10px 8px;
+				padding: 2px 0px;
+
+				@include breakpoint($min, 481px) {
+					margin: 8px 0px;
+				}
+
+				> a {
+					margin: 0px;
+					padding: 5px;
+					display: inline-block;
+					text-decoration: none;
+					border: 1px solid #CCC;
+					width: 82%;
+					@include breakpoint($min, 360px) {
+						width: 85%;
+					}
+
+					@include breakpoint($min, 481px) {
+						width: auto;
+						padding: 5px 10px;
+					}
+					&.active {
+				    background: #fff;
+				    border: 1px solid #0090c4;
+				    color: #0090c4;
+				    border-radius: 2px;
+			 		}
+				}
+			}
+		}
+	}
+}
+
+.repeat-animation.ng-enter, 
+.repeat-animation.ng-leave, 
+.repeat-animation.ng-move {
+  -webkit-transition: 0.5s linear all;
+  transition: 0.5s linear all;
+  position:relative;
+}
+
+.repeat-animation.ng-enter {
+  left:-10px;
+  opacity:0;
+}
+.repeat-animation.ng-enter.ng-enter-active {
+  left:0;
+  opacity:1;
+}
+
+.repeat-animation.ng-leave {
+  left:0;
+  opacity:1;
+}
+.repeat-animation.ng-leave.ng-leave-active {
+  left:-10px;
+  opacity:0;
+}
+
+.repeat-animation.ng-move {
+  opacity:0.5;
+}
+.repeat-animation.ng-move.ng-move-active {
+  opacity:1;
+}

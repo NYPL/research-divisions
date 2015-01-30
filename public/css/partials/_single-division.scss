@@ -1,0 +1,59 @@
+.container__about, .container__special_projects, .container__blogs {
+	clear: both;
+	margin: 24px 0px;
+}
+
+#container__div_image {
+	float: left; // Fix for proper positioning on desktop
+	display: none; // Hidden on mobile
+	margin-bottom: 34px;
+
+	@include breakpoint($min, $desktop) {
+		display: inline-block;
+	}
+	img {
+		@include breakpoint($min, $desktop) {
+			max-height: 275px;
+		}
+	}
+}
+
+#container__div_address {
+	.div_name {
+		margin-left: .55em;
+	}
+
+	.div_loc_info {
+		margin-left: .55em;
+
+		.room {
+			margin-left: -5px;
+		}
+	}
+
+	#accessibility__container {
+		margin: .5em 0 .5em .55em;
+	}
+}
+
+
+.container__sub_divisions {
+	clear: both;
+	margin-top: 24px;
+	.subdivision-wrapper {
+		margin-bottom: 3em;
+		
+		img {
+			height: 250px;
+		}
+		
+		h4 {
+			margin-bottom: .5rem;
+		}
+
+		p {
+			max-width: 100%;
+			margin: .5em 0;
+		}
+	}
+}

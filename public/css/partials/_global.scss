@@ -1,0 +1,616 @@
+/**
+** Global Rules
+**
+**/
+
+// Main page wrapper (Necessary for centering grid items)
+.wrapper {
+	margin: 55px auto 0;
+	padding: 0 24px;
+	max-width: 1200px;
+	@include breakpoint($min, $pre-tablet) {
+		margin: 0 auto;
+	}
+}
+
+// Loader
+#loadingWidget {
+	display: none;
+	z-index: 5;
+	background: rgba(0,0,0,.6);
+	position: fixed;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	right: 0;
+	color: #fff;
+	text-align: center;
+
+	&.show {
+		display: block;
+		z-index: 9999;
+	}
+
+	.loader-icon {
+		position: absolute;
+		display: block;
+		width: 55px;
+		height: 40px;
+		margin-top: -27.5px;
+		margin-left: -20px;
+		font-size: 2.5em;
+		left: 50%;
+		top: 40%;
+    -webkit-animation: spin 2.5s linear infinite;
+    animation: spin 2.5s linear infinite;
+	}
+
+	[data-icon]:before, [class^="icon-"]:before, [class*=" icon-"]:before {
+		margin: 0;
+	}
+}
+
+// Lokinator content wrapper
+.nypl-locations {
+	min-height: 700px;
+
+	@include breakpoint($min, $tablet) {
+		margin-top: 8px;
+	}
+}
+
+// general "chunk" styling
+.chunk {
+	.desc {
+		color: #7d7872;
+	}
+	
+	.date {
+		font-style: italic;
+		margin-bottom: .5rem;
+	}
+}
+
+time {
+	&.date {
+		font-style: italic;
+		margin-bottom: .5rem;
+		display: inline-block;
+	}
+}
+
+
+.nypl-alerts {
+	background-color: #ECE94C;
+	padding: 12px;
+	position: relative;
+	top: 50px;
+	width: 100%;
+
+	@include breakpoint($min, $pre-tablet) {
+		width: auto;
+		top: inherit;
+		margin-bottom: 10px;
+	}
+
+	p {
+		margin: .25em 0;
+		text-align: center;
+		max-width: none;
+		font-size: 13px;
+	}
+}
+
+// breadcrumbs
+.breadcrumb{
+	font-size: .8rem;
+	margin-left: 0;
+	list-style-type: none;
+	padding-bottom: 2px;
+	margin-bottom: 1em;
+	border-bottom: 1px solid #E8E4E1;
+
+	li {
+		display: inline;
+
+		a {
+			text-decoration: none;
+			&:hover {
+				text-decoration: underline;
+			}
+		}
+	}
+}
+
+// Ask & Donate section
+.ask-donate{
+	margin-top: 60px;
+
+	.appeal {
+
+		.primary-text {
+			font-weight: bold;
+		}
+		.secondary-text {
+			font-size: 18px;
+		}
+	}
+}
+
+// AskNYPL
+.askNYPL {
+	padding-left: 0px;
+	
+	@include breakpoint($min, $post-palm) {
+		padding-left: 24px;
+	}
+
+	ul {
+		text-align: center;
+		color: #5e564b;
+		margin: 1em 0 0;
+
+		@include breakpoint($min, $post-palm) {
+			margin: 0;
+		}
+
+		li {
+			display: block;
+			list-style-type: none;
+			margin-bottom: .5rem;
+
+			&.asknum {
+				font-size: 24px;
+
+				@include breakpoint($min, $post-palm) {
+					font-size: 36px;
+				}
+
+				a {
+					text-decoration: none;
+				}
+			}
+
+			.askchat,.askemail {
+				display: inline-block;
+				background-color: #ece94c;
+				border-radius: 2px;
+				border: 1px solid transparent;
+				color: #5e564b;
+				padding: 6px;		
+				text-decoration: none;
+				
+				&:hover {
+					background-color: #fff;
+					border: 1px solid lighten(#5e564b, 50%);
+					cursor: pointer;
+				}
+			}
+
+			[data-icon]:before, [class^="icon-"]:before, [class*=" icon-"]:before {
+				vertical-align: baseline;
+			}
+		}
+	}	
+}
+
+// Accessibility Icons
+.icon-accessibility {
+	padding: 3px 0px;
+	margin-right: 2px;
+
+	&:before {
+		margin: 0;
+		padding: 0px 3px;
+	}
+	&.fully {
+		background-color: #0090c4;
+		color: #FFF;
+	}
+	&.partially {
+		color: #0090c4;
+	}
+	&.none {
+		color: #d62828;
+	}
+}
+
+.autofill-container {
+	position: absolute;
+	width: 100%;
+	z-index: 1;
+	background-color: #fcfaf7;
+	border: 1px solid #CCC;
+	padding: 10px;
+
+	.location-item {
+		border-bottom: 1px solid #eee;
+		margin: 0;
+		padding: 10px;
+		position: relative;
+
+		&.active {
+			background-color: #FFFFCD;
+		}
+
+		.location-name {
+			margin: 5px 0px;
+			padding: 5px;
+			display: block;
+			@include breakpoint($min, 720px) {
+				margin: 0;
+				display: inline-block;
+			}
+		}
+		.view-on-map {
+			display: block;
+			@include breakpoint($min, 720px) {
+				display: inline-block;
+				position: absolute;
+				right: 15px;
+				top: 18px;
+			}
+			&:hover {
+				cursor: pointer;
+			}
+		}
+	}
+
+	.geocoding-search {
+		padding: 10px;
+		
+		&.active {
+			background-color: #FFFFCD;
+		}
+
+		&:hover {
+			cursor: pointer;
+		}
+
+		p {
+			margin: 0;
+			max-width: none;
+		}
+	}
+}
+
+.lookahead {
+	position: absolute;
+	top: 0;
+	left: 0;
+	height: 45px;
+
+	p {
+		color: #ccc;
+		position: relative;
+		margin: 0;
+		padding: 0;
+		top: 10.5px;
+		left: 32px;
+		height: 25px;
+		overflow: hidden;
+
+		@include breakpoint($max, 320px) {
+			max-width: 180px;
+		}
+
+		@include breakpoint(null, 321px, 480px) {
+			max-width: 225px;
+		}
+
+		@include breakpoint($min, 481px) {
+			max-width: 100%;
+		}
+
+		&.hidden {
+			display: none;
+		}
+
+		span {
+			color: transparent !important;
+		}
+	}
+}
+
+// Firefox specific override rules
+@-moz-document url-prefix() {
+
+	.search-button {
+		vertical-align: -1.15px !important;
+	}
+}
+
+// Spin Animation
+@-webkit-keyframes spin {
+  0% {-webkit-transform: rotate(0deg);}
+  100% {-webkit-transform: rotate(360deg);}
+}
+@keyframes spin {
+  0% {transform: rotate(0deg);}
+  100% {transform: rotate(360deg);}
+}
+
+.browser-upgrade {
+	width: 100%;
+	text-align: center;
+	padding: 10px 0px;
+	border-bottom: 1px solid #CCC;
+	margin-bottom: 10px;
+	font-size: 1.5em;
+}
+
+#nyplFeedback {
+	position: fixed;
+	z-index: 1000;
+	bottom: 0;
+	width: 100%;
+
+	@include breakpoint ($min, $post-palm) {
+		width: 390px;
+	}
+
+	&.left {
+		left: -300px;
+		-webkit-transition: left 0.3s ease;
+		-moz-transition: left 0.3s ease;
+		-ms-transition: left 0.3s ease;
+		-o-transition: left 0.3s ease;
+		transition: left 0.3s ease;
+
+		&.open {
+			@include breakpoint($min, $post-palm) {
+				left: 0px;
+			}
+		}
+
+		a {
+			right: 0;
+		}
+	}
+
+	&.right {
+		right: -390px;
+		-webkit-transition: right 0.3s ease;
+		-moz-transition: right 0.3s ease;
+		-ms-transition: right 0.3s ease;
+		-o-transition: right 0.3s ease;
+		transition: right 0.3s ease;
+
+		&.open {
+			@include breakpoint($min, $post-palm) {
+				right: -90px;
+			}
+		}
+
+		a {
+			right: 390px;
+		}
+	}
+
+	a {
+		z-index: 1000;
+		display: block;
+		position: absolute;
+		height: 60px;
+		text-align: center;
+		bottom: 0;
+		color: #fff;
+		background-color: #5e564b;
+		padding: 10px;
+		width: 100%;
+		text-decoration: none;
+		-webkit-transition: background-color 0.5s ease;
+		-moz-transition: background-color 0.5s ease;
+		-ms-transition: background-color 0.5s ease;
+		-o-transition: background-color 0.5s ease;
+		transition: background-color 0.5s ease;
+
+		@include breakpoint($min, $post-palm) {
+			bottom: 50px;
+			width: 90px;
+			height: 50px;
+		}
+
+		&:hover {
+			background-color: #9b958f;
+		}
+	}
+
+	&.open {
+		.embedded {
+			iframe {
+				bottom: 60px;
+
+				@include breakpoint($min, $post-palm) {
+					bottom: 0px;
+					right: 90px;
+				}
+			}
+		}
+	}
+
+	.embedded {
+		iframe {
+			z-index: 999;
+			bottom: -290px;
+			position: absolute;
+			max-height: 350px;
+			width: 100%;
+			right: 390px;
+
+			-webkit-transition: bottom 0.5s ease;
+			-moz-transition: bottom 0.5s ease;
+			-ms-transition: bottom 0.5s ease;
+			-o-transition: bottom 0.5s ease;
+			transition: bottom 0.5s ease;
+
+			@include breakpoint($min, $post-palm) {
+				right: auto;
+				bottom: 0;
+				width: 300px;
+				min-height: 500px;
+				max-height: 800px;
+			}
+		}
+	}
+
+}
+
+// Brooklyn/Queens Libraries
+.partner-libraries {
+	width: 100%;
+	padding: 10px 0px;
+	text-align: center;
+	@include breakpoint($min, $post-palm) {
+		padding: 20px 0px;
+	}
+
+	p {
+		max-width: none;
+		margin-bottom: 1em;
+	}
+
+	.brooklyn-library, .queens-library {
+		text-decoration: none;
+		&:hover {
+			text-decoration: none;
+		}
+
+		img {
+			display: block;
+			margin: 10px auto;
+			@include breakpoint($min, $post-palm) {
+				display: inline-block;
+			}
+		}
+	}
+
+	.brooklyn-library {
+		img {
+			@include breakpoint($min, $post-palm) {
+				margin-right: 20px;
+			}
+		}
+	}
+	.queens-library {
+		img {
+			@include breakpoint($min, $post-palm) {
+				margin-left: 20px;
+			}
+		}
+	}
+}
+
+// Utility classes that generate column based lists
+.two-columns {
+	overflow: hidden;
+	> li {
+			@include breakpoint($min, $post-palm) {
+				width: 50%;
+				float:left;
+				display:inline;
+			}
+	}
+}
+.three-columns {
+	overflow: hidden;
+	> li {
+		@include breakpoint($min, 481px) {
+			width: 50%;
+			float:left;
+			display:inline;			
+		}
+		@include breakpoint($min, $post-palm) {
+			width: 33.333%;
+		}
+	}
+}
+
+// Collapsible Filters Directive (Research Collections)
+.collapsible-filters {
+	position: absolute;
+	z-index: 2;
+	color: black;
+	background-color: white;
+	margin-top: 2px;
+	width: 80%;
+	box-shadow: 2px 2px 6px #C5C2BB;
+	display: none;
+	// Toggled within the directive
+	&.open {
+		display: block;
+	}
+
+	@include breakpoint($min, 481px) {
+		width: auto;
+	}
+
+	> ul {
+		margin: 10px;
+		padding: 0;
+		list-style-type: none;
+
+		@include breakpoint($min, 481px) {
+			max-width: 280px;
+	    -webkit-column-count: 2; /* Chrome, Safari, Opera */
+	    -moz-column-count: 2; /* Firefox */
+	    column-count: 2;
+	    -webkit-column-gap: 20px; /* Chrome, Safari, Opera */
+	    -moz-column-gap: 20px; /* Firefox */
+	    column-gap: 20px;
+  	}
+
+		> li {
+			margin: 10px 0px;
+			display: block;
+
+			@include breakpoint($min, 481px) {
+				margin: 0px;
+				overflow: hidden; /* Fix for firefox and IE 10-11  */
+				-webkit-column-break-inside: avoid; /* Chrome, Safari, Opera */
+				page-break-inside: avoid; /* Deprecated Firefox */
+				-moz-column-break-inside:avoid; /* Current Firefox */
+				column-break-inside:avoid;
+				break-inside: avoid; /* IE 10+ */
+				break-inside: avoid-column;
+			}
+
+			> a {
+				margin: 0px;
+
+				@include breakpoint($min, 481px) {
+					margin: 8px 0px;
+					display: inline-block;
+				}
+
+
+				&.active {
+					color: #0090c4;
+				}
+			}
+		}
+	}
+}
+
+// Toggle Arrow displays/hides pop-up filters
+.collapsible-control {
+	display: inline-block;
+	font-size: 18px;
+	vertical-align: -2px;
+	border: 1px solid #CCC;
+	position: relative;
+	left: -3px;
+	&.open {
+    background: #fff;
+    border: 1px solid #0090c4;
+    color: #0090c4;
+	}
+
+	&:before {
+		margin: 8px 6px 8px 6px;
+	}
+
+	&:hover {
+		cursor: pointer;
+	}
+}

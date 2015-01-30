@@ -1,0 +1,231 @@
+/**
+** Main Navigation Styles
+**
+**/
+
+#main-nav {
+	display: none;
+	background-color: #FFF;
+	position: absolute;
+	height: auto;
+	box-shadow: 0 4px 5px 1px #aaa;
+	z-index: 2;
+
+	&.open-navigation {
+		display: block;
+		top: 50px;
+		width: 100%;	
+	}
+
+	@include breakpoint($min, $pre-tablet) {
+		position: relative;
+		display: block;
+		top: inherit !important;
+		background-color: #000;
+		box-shadow: none;
+		height: auto;
+	}
+
+	.nav-wrapper {
+		padding: 10px;
+		margin: 0;
+		max-width: none;
+
+		@include breakpoint($min, $pre-tablet) {
+			max-width: 1200px;
+			margin: 0 auto;
+			padding: 0 24px;
+		}
+
+		.container__primary-links {
+			text-align: left;
+ 			margin: 0;
+			padding: 0;
+			list-style-type: none;
+			
+			@include breakpoint($min, $pre-tablet) {
+				text-align: center;
+			}
+
+			> li {
+				display: block;
+				margin: 2px 0px;
+				
+				@include breakpoint($min, $pre-tablet) {
+					display: inline-block;
+					margin: 0;
+					position: inherit;
+				}
+
+				@include breakpoint(null, $pre-tablet, 900px) {
+					width: 22%;
+				}
+
+				> a {
+					display: block;
+					text-decoration: none;
+					color: #000;
+					padding: 4px 0px 4px 3px;
+
+					@include breakpoint($min, $pre-tablet) {
+						color: #FFF;
+						padding: 8px 10px;
+						border-top: 1px solid transparent;
+					}
+
+					@include breakpoint(null, $pre-tablet, 900px) {
+						border-bottom: 1px solid transparent;
+					}
+
+					&:hover {
+						@include breakpoint($min, $pre-tablet) {
+							background-color: #fcfaf7;
+							color: #000;
+							border-top: 1px solid #000;
+						}
+
+						@include breakpoint(null, $pre-tablet, 900px) {
+							border-bottom: 1px solid #000;
+						}
+					}
+
+				}
+				// Drop down primary link elements
+				&.dropDown {
+
+					&.openDropDown {
+
+						> a {
+
+							@include breakpoint($min, $pre-tablet) {
+								background-color: #fcfaf7;
+								color: #000;
+								border-top: 1px solid #000;
+							}
+
+							@include breakpoint(null, $pre-tablet, 900px) {
+								border-bottom: 1px solid #000;
+							}
+						}
+
+						.dropDown_Content {
+							@include breakpoint($min, 900px) {
+								display: block;
+								width: auto;
+								background-color: #fcfaf7;
+								position: absolute;
+								padding: 12px;
+								margin-left: -1px;
+								border-left: 1px solid #71695E;
+								border-right: 1px solid #71695E;
+								border-bottom: 1px solid #71695E;
+							}
+						}
+					}
+
+					.dropDown_Content {
+						display: none;
+
+						ul {
+							margin: 0;
+							list-style-type: none;
+							text-align: left;
+
+							li {
+
+								ul {
+									margin: 0;
+
+									li {
+										border-bottom: 1px solid #CBC8C1;
+										margin: 0px 12px 0px 5px;
+
+										a {
+											text-decoration: none;
+											display: block;
+											padding: 5px 7px;
+
+											&:hover {
+												color: #FFF;
+												background-color: #E3332C;
+												text-decoration: none;
+											}
+										}
+
+										&:last-of-type {
+											border-bottom: none;
+										}
+									}
+								}
+
+								a {
+									text-decoration: none;
+									display: block;
+									padding: 5px 7px;
+
+									&:hover {
+										color: #FFF;
+										background-color: #E3332C;
+										text-decoration: none;
+									}
+								}
+
+								&:last-of-type {
+									border-bottom: none;
+								}	
+							}
+
+							& > li {
+								border-bottom: 1px solid #CBC8C1;
+
+								&.last {
+									border-bottom: none;
+								}
+							}
+						}
+
+						.top-level {
+							clear: both;
+							width: 100%;
+							margin: 0;
+
+							> li {
+								display: block;
+								float: left;
+								margin: 0;
+								border-bottom: none !important;
+
+								h5 {
+									color: #E3332C;
+									font-size: .85em;
+									font-weight: 700;
+									letter-spacing: 0.01em;
+									line-height: 1.5em;
+									margin: 0 0 5px 5px;
+									text-transform: uppercase;
+								}
+							}
+						}
+					}
+				}
+
+				&.active {
+					> a {
+						background-color: #E3332C !important;
+						color: #FFFFFF !important;
+					}
+				}
+			}
+
+			.mobile-login {
+				display: block;
+
+				@include breakpoint($min, $pre-tablet) {
+					display: none;
+				}
+
+			}
+		}
+	}
+
+}

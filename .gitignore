@@ -1,0 +1,12 @@
+.tmp
+.sass-cache
+.idea/
+.idea
+node_modules
+test/results
+.DS_Store
+*~
+\#*
+.#*
+\#*\#
+test/coverage/*
