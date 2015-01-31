@@ -1,272 +1,6 @@
 /*jslint nomen: true, indent: 4, maxlen: 80 */
 /*globals angular, window, headerScripts */
 
-
-/**
- * @ngdoc overview
- * @module nypl_locations
- * @name nypl_locations
- * @requires ngSanitize
- * @requires ui.router
- * @requires ngAnimate
- * @requires locationService
- * @requires coordinateService
- * @requires nyplFeedback
- * @requires nyplSearch
- * @requires nyplSSO
- * @requires nyplNavigation
- * @requires nyplBreadcrumbs
- * @requires angulartics
- * @requires angulartics.google.analytics
- * @requires newrelic-timing
- * @description
- * AngularJS app for NYPL's new Locations section.
- */
-var nypl_locations = angular.module('nypl_locations', [
-    'ngSanitize',
-    'ui.router',
-    'ngAnimate',
-    'locationService',
-    'coordinateService',
-    'nyplFeedback',
-    'nyplSearch',
-    'nyplSSO',
-    'nyplNavigation',
-    'nyplBreadcrumbs',
-    'angulartics',
-    'angulartics.google.analytics',
-    'newrelic-timing'
-]);
-
-nypl_locations.constant('_', window._);
-
-nypl_locations.config([
-    '$analyticsProvider',
-    '$locationProvider',
-    '$stateProvider',
-    '$urlRouterProvider',
-    '$crumbProvider',
-    function (
-        $analyticsProvider,
-        $locationProvider,
-        $stateProvider,
-        $urlRouterProvider,
-        $crumbProvider
-    ) {
-        'use strict';
-
-        // Turn off automatic virtual pageviews for GA.
-        // In $stateChangeSuccess, /locations/ is added to each page hit.
-        $analyticsProvider.virtualPageviews(false);
-
-        // uses the HTML5 History API, remove hash (need to test)
-        $locationProvider.html5Mode(true);
-
-        function LoadLocation($stateParams, config, nyplLocationsService) {
-            return nyplLocationsService
-                .singleLocation($stateParams.location)
-                .then(function (data) {
-                    return data.location;
-                })
-                .catch(function (err) {
-                    throw err;
-                });
-        }
-        LoadLocation.$inject = ["$stateParams", "config", "nyplLocationsService"];
-
-        function LoadSubDivision($q, $stateParams, config, nyplLocationsService) {
-            var division    = nyplLocationsService
-                                .singleDivision($stateParams.division),
-                subdivision = nyplLocationsService
-                                .singleDivision($stateParams.subdivision);
-
-            return $q.all([division, subdivision]).then(function (data) {
-                var div = data[0].division,
-                    subdiv = data[1].division;
-
-                return subdiv;
-            });
-        }
-        LoadSubDivision.$inject = ["$q", "$stateParams", "config", "nyplLocationsService"];
-
-        function LoadDivision($stateParams, config, nyplLocationsService) {
-            return nyplLocationsService
-                .singleDivision($stateParams.division)
-                .then(function (data) {
-                    return data.division;
-                })
-                .catch(function (err) {
-                    throw err;
-                });
-        }
-        LoadDivision.$inject = ["$stateParams", "config", "nyplLocationsService"];
-
-        function Amenities($stateParams, config, nyplLocationsService) {
-            return nyplLocationsService
-                .amenities($stateParams.amenity)
-                .then(function (data) {
-                    return data;
-                })
-                .catch(function (error) {
-                    throw error;
-                });
-        }
-        Amenities.$inject = ["$stateParams", "config", "nyplLocationsService"];
-
-        function getConfig(nyplLocationsService) {
-            return nyplLocationsService.getConfig();
-        }
-        getConfig.$inject = ["nyplLocationsService"];
-
-        $crumbProvider.setOptions({
-            primaryState: {name:'Home', customUrl: 'http://nypl.org' },
-            secondaryState: {name:'Locations', customUrl: 'home.index' }
-        });
-
-        $urlRouterProvider.rule(function ($injector, $location) {
-            var path = $location.url();
-
-            // Remove trailing slash if found
-            if (path[path.length - 1] === '/') {
-                return path.slice(0, -1);
-            }
-        })
-
-        // This next line breaks unit tests which doesn't make sense since
-        // unit tests should not test the whole app. BUT since we are testing
-        // directives and using $rootScope.$digest or $rootScope.$apply,
-        // it will run the app. It may not be necessary for the app though
-        // since, in the run phase, if there is an error when changing state,
-        // the app will go to the 404 state.
-        $urlRouterProvider.otherwise('/404');
-        $stateProvider
-            .state('home', {
-                url: '/',
-                abstract: true,
-                templateUrl: 'views/locations.html',
-                controller: 'LocationsCtrl',
-                label: 'Locations',
-                resolve: {
-                    config: getConfig
-                }
-            })
-            .state('home.index', {
-                templateUrl: 'views/location-list-view.html',
-                url: '',
-                label: 'Locations'
-            })
-            .state('home.list', {
-                templateUrl: 'views/location-list-view.html',
-                url: 'list',
-                label: 'Locations'
-            })
-            .state('home.map', {
-                templateUrl: 'views/location-map-view.html',
-                url: 'map',
-                controller: 'MapCtrl',
-                label: 'Locations'
-            })
-            .state('subdivision', {
-                url: '/divisions/:division/:subdivision',
-                templateUrl: 'views/division.html',
-                controller: 'DivisionCtrl',
-                label: 'Division',
-                resolve: {
-                    config: getConfig,
-                    division: LoadSubDivision
-                },
-                data: {
-                    parentState: 'location',
-                    crumbName: '{{division.name}}'
-                }
-            })
-            .state('division', {
-                url: '/divisions/:division',
-                templateUrl: 'views/division.html',
-                controller: 'DivisionCtrl',
-                label: 'Division',
-                resolve: {
-                    config: getConfig,
-                    division: LoadDivision
-                },
-                data: {
-                    parentState: 'location',
-                    crumbName: '{{division.name}}'
-                }
-            })
-            .state('amenities', {
-                url: '/amenities',
-                templateUrl: 'views/amenities.html',
-                controller: 'AmenitiesCtrl',
-                label: 'Amenities',
-                resolve: {
-                    config: getConfig,
-                    amenities: Amenities
-                },
-                data: {
-                    crumbName: 'Amenities'
-                }
-            })
-            .state('amenity', {
-                url: '/amenities/id/:amenity',
-                templateUrl: 'views/amenities.html',
-                controller: 'AmenityCtrl',
-                label: 'Amenities',
-                resolve: {
-                    config: getConfig,
-                    amenity: Amenities
-                },
-                data: {
-                    parentState: 'amenities',
-                    crumbName: '{{amenity.amenity.name}}'
-                }
-
-            })
-            .state('amenities-at-location', {
-                url: '/amenities/loc/:location',
-                templateUrl: 'views/amenitiesAtLibrary.html',
-                controller: 'AmenitiesAtLibraryCtrl',
-                resolve: {
-                    config: getConfig,
-                    location: LoadLocation
-                },
-                data: {
-                    parentState: 'amenities',
-                    crumbName: '{{location.name}}'
-                }
-            })
-            .state('404', {
-                url: '/404',
-                templateUrl: 'views/404.html'
-            })
-            .state('location', {
-                url: '/:location',
-                templateUrl: 'views/location.html',
-                controller: 'LocationCtrl',
-                resolve: {
-                    config: getConfig,
-                    location: LoadLocation
-                },
-                data: {
-                    crumbName: '{{location.name}}'
-                }
-            });
-    }
-]);
-
-nypl_locations.run(["$analytics", "$state", "$rootScope", "$location", function ($analytics, $state, $rootScope, $location) {
-    $rootScope.$on('$stateChangeStart', function () {
-        $rootScope.close_feedback = true;
-    });
-    $rootScope.$on('$viewContentLoaded', function () {
-        $analytics.pageTrack('/locations' + $location.path());
-        $rootScope.current_url = $location.absUrl();
-    });
-    $rootScope.$on('$stateChangeError', function () {
-        $state.go('404');
-    });
-}]);
-
 // Declare an http interceptor that will signal
 // the start and end of each request
 // Credit: Jim Lasvin -- https://github.com/lavinjj/angularjs-spinner
@@ -337,117 +71,6 @@ function httpInterceptor($httpProvider) {
 }
 httpInterceptor.$inject = ["$httpProvider"];
 
-nypl_locations.config(httpInterceptor);
-
-/**
- * @ngdoc overview
- * @module nypl_widget
- * @name nypl_widget
- * @requires ngSanitize
- * @requires ui.router
- * @requires locationService
- * @requires coordinateService
- * @requires angulartics
- * @requires angulartics.google.analytics
- * @description
- * AngularJS widget app for About pages on nypl.org.
- */
-var nypl_widget = angular.module('nypl_widget', [
-    'ngSanitize',
-    'ui.router',
-    'locationService',
-    'coordinateService',
-    'angulartics',
-    'angulartics.google.analytics'
-])
-.config(['$locationProvider', '$stateProvider', '$urlRouterProvider',
-    function ($locationProvider, $stateProvider, $urlRouterProvider) {
-        'use strict';
-
-        function LoadLocation($stateParams, config, nyplLocationsService) {
-            return nyplLocationsService
-                .singleLocation($stateParams.location)
-                .then(function (data) {
-                    return data.location;
-                })
-                .catch(function (err) {
-                    throw err;
-                });
-        }
-        LoadLocation.$inject = ["$stateParams", "config", "nyplLocationsService"];
-
-        function LoadSubDivision($q, $stateParams, config, nyplLocationsService) {
-            var division    = nyplLocationsService
-                                .singleDivision($stateParams.division),
-                subdivision = nyplLocationsService
-                                .singleDivision($stateParams.subdivision);
-
-            return $q.all([division, subdivision]).then(function (data) {
-                var div = data[0],division,
-                    subdiv = data[1].division;
-
-                return subdiv;
-            });
-        }
-        LoadSubDivision.$inject = ["$q", "$stateParams", "config", "nyplLocationsService"];
-
-        function LoadDivision($stateParams, config, nyplLocationsService) {
-            return nyplLocationsService
-                .singleDivision($stateParams.division)
-                .then(function (data) {
-                    return data.division;
-                })
-                .catch(function (err) {
-                    throw err;
-                });
-        }
-        LoadDivision.$inject = ["$stateParams", "config", "nyplLocationsService"];
-
-        function getConfig(nyplLocationsService) {
-            return nyplLocationsService.getConfig();
-        }
-        getConfig.$inject = ["nyplLocationsService"];
-
-        // uses the HTML5 History API, remove hash (need to test)
-        $locationProvider.html5Mode(true);
-        // $urlRouterProvider.otherwise('/widget/sasb');
-
-        $stateProvider
-            .state('subdivision', {
-                url: '/widget/divisions/:division/:subdivision',
-                templateUrl: 'views/widget.html',
-                controller: 'WidgetCtrl',
-                resolve: {
-                    config: getConfig,
-                    data: LoadSubDivision
-                }
-            })
-            .state('division', {
-                url: '/widget/divisions/:division',
-                templateUrl: 'views/widget.html',
-                controller: 'WidgetCtrl',
-                label: 'Division',
-                resolve: {
-                    config: getConfig,
-                    data: LoadDivision
-                }
-            })
-            .state('widget', {
-                url: '/widget/:location',
-                templateUrl: 'views/widget.html',
-                controller: 'WidgetCtrl',
-                resolve: {
-                    config: getConfig,
-                    data: LoadLocation
-                },
-            });
-    }
-]);
-
-// Add Holiday Closings
-nypl_widget.run(["$rootScope", "nyplUtility", function ($rootScope, nyplUtility) {
-    $rootScope.holiday = nyplUtility.holidayClosings();
-}]);
 
 /**
  * @ngdoc overview
@@ -459,6 +82,7 @@ nypl_widget.run(["$rootScope", "nyplUtility", function ($rootScope, nyplUtility)
  * @requires coordinateService
  * @requires angulartics
  * @requires angulartics.google.analytics
+ * @requires nyplBreadcrumbs
  * @description
  * Research collections.
  */
@@ -472,10 +96,20 @@ angular.module('nypl_research_collections', [
     'angulartics.google.analytics',
     'nyplNavigation',
     'nyplSSO',
+    'nyplBreadcrumbs',
     'nyplSearch'
 ])
-.config(['$locationProvider', '$stateProvider', '$urlRouterProvider',
-    function ($locationProvider, $stateProvider, $urlRouterProvider) {
+.config([
+    '$locationProvider',
+    '$stateProvider',
+    '$urlRouterProvider',
+    '$crumbProvider',
+    function (
+        $locationProvider,
+        $stateProvider,
+        $urlRouterProvider,
+        $crumbProvider
+    ) {
         'use strict';
 
         function LoadDivisions(config, nyplLocationsService) {
@@ -497,26 +131,34 @@ angular.module('nypl_research_collections', [
 
         // uses the HTML5 History API
         $locationProvider.html5Mode(true);
+        $urlRouterProvider.rule(function ($injector, $location) {
+            var path = $location.url();
 
-        // $urlRouterProvider.rule(function ($injector, $location) {
-        //     var path = $location.url();
+            // Remove trailing slash if found
+            if (path[path.length - 1] === '/') {
+                return path.slice(0, -1);
+            }
+        });
 
-        //     // Remove trailing slash if found
-        //     if (path[path.length - 1] === '/') {
-        //         return path.slice(0, -1);
-        //     }
-        // });
-        var home_url = window.rq_forwarded ? '/' : '/research-collections';
-        $urlRouterProvider.otherwise(home_url);
+        // Assign proper Breadcrumb name/paths
+        $crumbProvider.setOptions({
+            primaryState: {name:'Home', customUrl: 'http://nypl.org' }
+        });
+
+        // var home_url = window.rq_forwarded ? '/' : '/research-collections';
+        // $urlRouterProvider.otherwise('/');
         $stateProvider
             .state('division', {
-                url: home_url,
+                url: '/',
                 templateUrl: 'views/research-collections.html',
                 controller: 'CollectionsCtrl',
                 label: 'Research Collections',
                 resolve: {
                     config: getConfig,
                     divisions: LoadDivisions
+                },
+                data: {
+                    crumbName: 'Research Collections'
                 }
             });
     }
@@ -1615,7 +1257,9 @@ angular.module('nypl_research_collections', [
   function nyplNavigation(ssoStatus, $window, $rootScope) {
     return {
       restrict: 'E',
-      scope: {},
+      scope: {
+        activenav: '@'
+      },
       replace: true,
       templateUrl: 'scripts/components/nypl_navigation/nypl_navigation.html',
       link: function (scope, element, attrs) {
@@ -2150,53 +1794,6 @@ angular.module('nypl_research_collections', [
 })();
 
 
-/*jslint indent: 2, maxlen: 80 */
-/*global nypl_locations, angular */
-
-(function () {
-  'use strict';
-
-  function AmenitiesCtrl($rootScope, $scope, amenities, config, nyplAmenities) {
-    $rootScope.title = "Amenities";
-
-    $scope.amenitiesCategories =
-      nyplAmenities.createAmenitiesCategories(amenities.amenities);
-  }
-  AmenitiesCtrl.$inject = ["$rootScope", "$scope", "amenities", "config", "nyplAmenities"];
-
-  // Load an amenity and list all the locations
-  // where the amenity can be found.
-  function AmenityCtrl($rootScope, $scope, amenity, config) {
-    var amenityProper = amenity.amenity;
-    var name = amenityProper.name;
-
-    $rootScope.title = name;
-    $scope.amenity = amenityProper;
-    $scope.locations = amenityProper._embedded.locations;
-    $scope.amenity_name = name;
-  }
-  AmenityCtrl.$inject = ["$rootScope", "$scope", "amenity", "config"];
-
-  // Load one location and list all the amenities found in that location.
-  function AmenitiesAtLibraryCtrl($rootScope, $scope, config, location, nyplAmenities) {
-    var updatedAmenities =
-      nyplAmenities.allAmenitiesArray(location._embedded.amenities);
-
-    $scope.amenitiesCategories =
-      nyplAmenities.createAmenitiesCategories(updatedAmenities);
-
-    $rootScope.title = location.name;
-    $scope.location = location;
-  }
-  AmenitiesAtLibraryCtrl.$inject = ["$rootScope", "$scope", "config", "location", "nyplAmenities"];
-
-  angular
-    .module('nypl_locations')
-    .controller('AmenityCtrl', AmenityCtrl)
-    .controller('AmenitiesCtrl', AmenitiesCtrl)
-    .controller('AmenitiesAtLibraryCtrl', AmenitiesAtLibraryCtrl);
-})();
-
 /*jslint indent: 2, maxlen: 80, nomen: true */
 /*globals nypl_locations, _, angular, jQuery,
 console, $location, $ */
@@ -2206,6 +1803,7 @@ console, $location, $ */
   function CollectionsCtrl(
     $scope,
     $rootScope,
+    $timeout,
     config,
     divisions,
     nyplLocationsService,
@@ -2283,6 +1881,10 @@ console, $location, $ */
             $scope.filteredDivisions.push(sibl);
             $scope.divisions.push(sibl);
             $scope.divisionLocations.push(sibl);
+
+            _.each($scope.divisionLocations, function (location) {
+              location.short_name = config.research_shortnames[location.id];
+            });
           });
       };
 
@@ -2459,14 +2061,17 @@ console, $location, $ */
     }
 
     function fixTermName(label, term) {
-      var name;
+      var name, parentSubject = '';
 
-      if (label === "Locations") {
-        if (term.id === "SIBL" || term.id === "LPA") {
-          name = term.slug.toUpperCase();
-        } else {
-          name = (term.slug).charAt(0).toUpperCase() + (term.slug).slice(1);
-        }
+      if (label === "Subjects") {
+        _.each($scope.terms[0].terms, function (childterm) {
+          if (_.findWhere(childterm.terms, {name: term.name})) {
+            parentSubject = childterm.name + ' - ';
+          }
+        });
+        name = parentSubject + term.name;
+      } else if (label === "Locations") {
+          name = term.short_name;
       } else {
         name = term.name;
       }
@@ -2490,6 +2095,7 @@ console, $location, $ */
             subterm.active = true;
             subterm.id = term.id;
             if (subterm.label === 'Subjects') {
+              subterm.name = name;
               subterm.subterms = term.terms;
             }
           }
@@ -2523,6 +2129,14 @@ console, $location, $ */
       // Highlight the current selected subterm
       activeSubterm(selectedTerm);
 
+      // Hides wrapper on mobile only after selection of filter
+      if (nyplUtility.isMobile().any()) {
+        $timeout( function(){
+          $scope.categorySelected = undefined;
+          $scope.activeCategory = undefined;
+        }, 700);
+      }
+
       // // Save the filtered divisions for later.
       // researchCollectionService
       //   .setResearchValue('filteredDivisions', $scope.filteredDivisions);
@@ -2541,723 +2155,12 @@ console, $location, $ */
     };
 
   }
-  CollectionsCtrl.$inject = ["$scope", "$rootScope", "config", "divisions", "nyplLocationsService", "nyplUtility", "researchCollectionService"];
+  CollectionsCtrl.$inject = ["$scope", "$rootScope", "$timeout", "config", "divisions", "nyplLocationsService", "nyplUtility", "researchCollectionService"];
 
   angular
     .module('nypl_research_collections')
     .controller('CollectionsCtrl', CollectionsCtrl);
 
-})();
-
-/*jslint indent: 4, maxlen: 80, nomen: true */
-/*globals nypl_locations, angular */
-
-(function () {
-    'use strict';
-
-    function DivisionCtrl($rootScope, $scope, config, division, nyplUtility) {
-        var divisionsWithApt = config.divisions_with_appointments;
-
-        $scope.division = division;
-        $scope.location = division._embedded.location;
-
-        $rootScope.title = division.name;
-        $scope.calendarLink = nyplUtility.calendarLink;
-        $scope.icalLink = nyplUtility.icalLink;
-
-        if (division.hours) {
-            $scope.hoursToday = nyplUtility.hoursToday(division.hours);
-
-            if (division.hours.exceptions) {
-                division.hours.exceptions.description =
-                    nyplUtility
-                        .returnHTML(division.hours.exceptions.description);
-            }
-        }
-
-        // Calculate hours today for sub-divisions
-        if (division._embedded.divisions) {
-            _.each(division._embedded.divisions, function (division) {
-                division.hoursToday = nyplUtility.hoursToday(division.hours);
-            });
-        }
-
-        $scope.division.social_media =
-            nyplUtility.socialMediaColor(division.social_media);
-
-        $scope.has_appointment =
-            nyplUtility.divisionHasAppointment(divisionsWithApt, division.id);
-    }
-    DivisionCtrl.$inject = ["$rootScope", "$scope", "config", "division", "nyplUtility"];
-
-    angular
-        .module('nypl_locations')
-        .controller('DivisionCtrl', DivisionCtrl);
-})();
-
-/*jslint indent: 4, maxlen: 80, nomen: true */
-/*globals nypl_locations, _, angular, jQuery, $ */
-
-(function () {
-    'use strict';
-
-    function LocationsCtrl(
-        $rootScope,
-        $scope,
-        $timeout,
-        $state,
-        config,
-        nyplCoordinatesService,
-        nyplGeocoderService,
-        nyplLocationsService,
-        nyplUtility,
-        nyplSearch,
-        nyplAmenities
-    ) {
-        var locations,
-            searchValues = nyplSearch.getSearchValues(),
-            research_order =
-                config.research_order || ['SASB', 'LPA', 'SC', 'SIBL'],
-            user = { coords: {}, address: '' },
-            sortListBy = function (type) {
-                $scope.predicate = type;
-            },
-
-            resetProperty = function (arr, property) {
-                _.each(arr, function (location) {
-                    location[property] = '';
-                });
-            },
-
-            resetPage = function () {
-                $scope.searchMarker = false;
-                $scope.researchBranches = false;
-                $scope.userMarker = false;
-                $scope.reverse = false;
-                $scope.searchTerm = '';
-                $scope.geolocationAddressOrSearchQuery = '';
-                $scope.select_library_for_map = '';
-
-                sortListBy('name');
-
-                resetProperty($scope.locations, 'distance');
-                resetProperty($scope.locations, 'highlight');
-            },
-
-            geolocationAvailable = function () {
-                // After loading all locations, check if the browser supports
-                // geolocation before the user tries to geolocate their
-                // location. If available, the button to geolocate appears.
-                if (nyplCoordinatesService.geolocationAvailable()) {
-                    $scope.geolocationOn = true;
-                }
-            },
-
-            isMapPage = function () {
-                return $state.current.name === 'home.map';
-            },
-
-            loadUserCoordinates = function () {
-                return nyplCoordinatesService
-                    .getBrowserCoordinates()
-                    .then(function (position) {
-                        user.coords = _.pick(position, 'latitude', 'longitude');
-                        return user;
-                    });
-            },
-
-            checkUserDistance = function (user) {
-                // add a distance property to every location
-                // from that location to the user's coordinates
-                $scope.locations =
-                    nyplUtility.calcDistance($scope.locations, user.coords);
-
-                // Must be within 25 miles
-                if (nyplUtility.checkDistance($scope.locations)) {
-                    // The user is too far away, reset everything
-                    resetPage();
-                    throw (new Error('You are not within 25 ' +
-                        'miles of any NYPL library.'));
-                }
-
-                return user.coords;
-            },
-
-            loadUserVariables = function () {
-                // Used for 'Get Address' link.
-                $scope.locationStart =
-                    user.coords.latitude + "," + user.coords.longitude;
-                $scope.userMarker = true;
-
-                if (!isMapPage()) {
-                    $state.go('home.map');
-                }
-                sortListBy('distance');
-                nyplGeocoderService
-                    .createMarker('user', user.coords, "Your Current Location");
-
-                $scope.drawUserMarker();
-            },
-
-            // convert coordinate into address
-            loadReverseGeocoding = function (coords) {
-                nyplSearch.resetSearchValues();
-                return nyplGeocoderService
-                    .reverseGeocoding({
-                        lat: coords.latitude,
-                        lng: coords.longitude
-                    })
-                    .then(function (address) {
-                        $scope.geolocationAddressOrSearchQuery = address;
-                        nyplSearch
-                            .setSearchValue('resultsNear', address)
-                            .setSearchValue('locations', $scope.locations);
-
-                        return address;
-                    });
-            },
-
-            // convert address to geographic coordinate
-            loadGeocoding = function (searchTerm) {
-                nyplSearch.setSearchValue('searchTerm', searchTerm);
-                return nyplGeocoderService.geocodeAddress(searchTerm)
-                    .then(function (coords) {
-                        return {
-                            coords: coords,
-                            searchTerm: coords.name
-                        };
-                    })
-                    .catch(function (error) {
-                        throw error;
-                    });
-            },
-
-            searchByCoordinates = function (searchObj) {
-                var locationsCopy = $scope.locations,
-                    coords = searchObj.coords,
-                    searchterm = searchObj.searchTerm;
-
-                locationsCopy = nyplUtility.calcDistance(locationsCopy, coords);
-
-                // Must be within 25 miles or throws the error:
-                if (nyplUtility.checkDistance(locationsCopy)) {
-                    // The search query is too far
-                    $scope.searchError = searchterm;
-                    nyplGeocoderService.panMap();
-                    throw (new Error('The search query is too far'));
-                }
-
-                $scope.userMarker = false;
-                nyplGeocoderService.removeMarker('user');
-
-                nyplSearch.setSearchValue('resultsNear', searchObj.searchTerm);
-                $scope.geolocationAddressOrSearchQuery = searchterm;
-                $scope.searchError = '';
-                return locationsCopy;
-            },
-
-            organizeLocations =
-                function (locations, filteredLocations, sortByFilter) {
-                    resetProperty(locations, 'highlight');
-
-                    _.each(filteredLocations, function (location) {
-                        // To differentiate between angular matched filter 
-                        // results and reverse geocoding results.
-                        location.highlight = 'active';
-                        location.distance = '';
-                    });
-
-                    // Sort the locations array here instead of using angular
-                    // orderBy filter. That way we can display the matched
-                    // locations first and then display the results from
-                    // the geocoder service.
-                    locations = _.sortBy(locations, function (location) {
-                        return location[sortByFilter];
-                    });
-
-                    // Remove the matched libraries from the filter search term.
-                    locations = _.difference(locations, filteredLocations);
-
-                    // Use union to add the matched locations in front
-                    // of the rest of the locations.
-                    $scope.locations = _.union(filteredLocations, locations);
-
-                    nyplSearch.setSearchValue('locations', $scope.locations);
-                    // Don't sort by distance or the matched results
-                    // will not display first.
-                    sortListBy('');
-                },
-
-            scrollListTop = function () {
-                var scrollable_lists = [
-                        angular.element('.locations-list-view tbody'),
-                        angular.element('.locations-data-wrapper')
-                    ];
-
-                _.each(scrollable_lists, function (list) {
-                    $(list).animate({scrollTop: '0px'}, 1000);
-                });
-            },
-
-            showLibrariesTypeOf = function (type) {
-                // undefined value for type is actually okay, 
-                // as it will show all locations if that's the case
-                $scope.location_type = type;
-            },
-
-            loadPreviousStateOrNewState = function () {
-                if (searchValues.locations) {
-                    // Assigning the saved values to scope variables that
-                    // should get loaded.
-                    $scope.locations = searchValues.locations;
-                    $scope.searchTerm = searchValues.searchTerm;
-                    $scope.geolocationAddressOrSearchQuery =
-                        searchValues.resultsNear;
-                    $scope.searchMarker = searchValues.searchMarker;
-                    if ($scope.searchMarker) {
-                        nyplGeocoderService.drawSearchMarker();
-                    }
-
-                    // If the user searched by zip code, name or address,
-                    // then sort by relevancy or distance. If not, they used
-                    // geolocation so sort by distance. Default is by name.
-                    if ($scope.geolocationAddressOrSearchQuery) {
-                        sortListBy('distance');
-                    } else {
-                        sortListBy('name');
-                    }
-                } else {
-                    $scope.loadLocations();
-                }
-            };
-
-        $scope.loadLocations = function () {
-            return nyplLocationsService
-                .allLocations()
-                .then(function (data) {
-                    var amenitiesCount = nyplAmenities.getAmenityConfig(config);
-                    locations = data.locations;
-                    $scope.locations = locations;
-
-                    _.each($scope.locations, function (location) {
-                        var locationAddress =
-                                nyplUtility.getAddressString(location, true),
-                            markerCoordinates = {};
-
-                        if (location.geolocation &&
-                                location.geolocation.coordinates) {
-                            markerCoordinates = {
-                                'latitude': location.geolocation.coordinates[1],
-                                'longitude': location.geolocation.coordinates[0]
-                            };
-                        };
-
-                        location.hoursToday = nyplUtility.hoursToday;
-                        location.locationDest =
-                            nyplUtility.getAddressString(location);
-
-                        location.amenities_list =
-                            nyplAmenities.getHighlightedAmenities(
-                                location._embedded.amenities,
-                                amenitiesCount.global,
-                                amenitiesCount.local
-                            );
-
-                        // Individual location exception data
-                        location.branchException =
-                            nyplUtility.branchException(location.hours);
-
-                        location.research_order =
-                            nyplUtility.researchLibraryOrder(
-                                research_order,
-                                location.id
-                            );
-
-                        // Initially, when the map is drawn and 
-                        // markers are available, they will be drawn too. 
-                        // No need to draw them again if they exist.
-                        if (!nyplGeocoderService
-                                .doesMarkerExist(location.slug) &&
-                                location.geolocation) {
-                            nyplGeocoderService
-                                .createMarker(location.slug,
-                                    markerCoordinates,
-                                    locationAddress);
-                        }
-                    });
-
-                    resetPage();
-                    nyplSearch.setSearchValue('locations', $scope.locations);
-
-                    return locations;
-                })
-                .catch(function (error) {
-                    $state.go('404');
-                    throw error;
-                });
-        };
-
-        $scope.scrollPage = function () {
-            var content = angular.element('.container__all-locations'),
-                containerWidth = parseInt(content.css('width'), 10),
-                top;
-
-            // only scroll the page on mobile
-            if (containerWidth < 601) {
-                top = angular.element('.map-search__results').offset() ||
-                    angular.element('.search__results').offset();
-                $timeout(function () {
-                    angular.element('body').animate({scrollTop: top.top}, 1000);
-                }, 1000);
-            }
-        };
-
-        $scope.viewMapLibrary = function (library_id) {
-            var location = _.where($scope.locations, { 'slug' : library_id });
-            $scope.select_library_for_map = library_id;
-
-            $scope.searchMarker = false;
-
-            if (!isMapPage()) {
-                $state.go('home.map');
-            } else {
-                nyplGeocoderService
-                    .hideSearchInfowindow()
-                    .panExistingMarker(library_id);
-            }
-
-            organizeLocations($scope.locations, location, 'name');
-            $scope.scrollPage();
-        };
-
-        $scope.useGeolocation = function () {
-            // Remove any existing search markers on the map.
-            nyplGeocoderService.removeMarker('search');
-            resetPage();
-
-            $scope.scrollPage();
-            scrollListTop();
-
-            loadUserCoordinates()
-                .then(checkUserDistance)
-                .then(loadReverseGeocoding)
-                .then(loadUserVariables)
-                .catch(function (error) {
-                    $scope.distanceError = error.message;
-                    $scope.geolocationOn = false;
-                });
-        };
-
-        $scope.clearSearch = function () {
-            nyplSearch.resetSearchValues();
-
-            showLibrariesTypeOf();
-            nyplGeocoderService
-                .showAllLibraries()
-                .removeMarker('user');
-
-            if (isMapPage()) {
-                nyplGeocoderService.removeMarker('search')
-                    .hideInfowindow()
-                    .panMap();
-            }
-
-            resetPage();
-            scrollListTop();
-        };
-
-        $scope.drawUserMarker = function () {
-            if (nyplGeocoderService.doesMarkerExist('user')) {
-                nyplGeocoderService.panExistingMarker('user');
-            }
-        };
-
-        $scope.geocodeAddress = function (searchTerm) {
-            // What should be the minimum length of the search?
-            if (!searchTerm || searchTerm.length < 3) {
-                return;
-            }
-
-            $scope.geolocationAddressOrSearchQuery = '';
-            $scope.searchError = '';
-            showLibrariesTypeOf();
-            $scope.researchBranches = false;
-            nyplGeocoderService.showAllLibraries();
-            $scope.searchTerm =  searchTerm;
-
-            searchTerm = nyplSearch.searchWordFilter(searchTerm);
-            scrollListTop();
-
-            if (!isMapPage()) {
-                $state.go('home.map');
-            }
-
-            loadGeocoding(searchTerm)
-                .then(function (searchObj) {
-                    nyplGeocoderService.createSearchMarker(
-                        searchObj.coords,
-                        searchObj.searchTerm
-                    );
-
-                    return searchByCoordinates(searchObj);
-                })
-                .then(function (locations) {
-                    $scope.scrollPage();
-                    // Variable to draw a green marker on the map legend.
-                    $scope.searchMarker = true;
-                    nyplSearch.setSearchValue('searchMarker', true);
-                    nyplGeocoderService.drawSearchMarker();
-                    organizeLocations(locations, [], 'distance');
-                })
-                // Catch any errors at any point
-                .catch(function (error) {
-                    nyplGeocoderService.removeMarker('search');
-                    $scope.searchMarker = false;
-                    nyplSearch.resetSearchValues();
-
-                    resetPage();
-                });
-        };
-
-        $scope.showResearch = function () {
-            nyplGeocoderService.hideInfowindow();
-            scrollListTop();
-
-            $scope.researchBranches = !$scope.researchBranches;
-
-            if ($scope.researchBranches) {
-                nyplGeocoderService.showResearchLibraries().panMap();
-                showLibrariesTypeOf('research');
-                sortListBy('research_order');
-            } else {
-                nyplGeocoderService.showAllLibraries().panMap();
-                showLibrariesTypeOf();
-                sortListBy('name');
-            }
-        };
-
-        $rootScope.title = "Locations";
-        $scope.$state = $state;
-
-        loadPreviousStateOrNewState();
-        geolocationAvailable();
-    }
-    LocationsCtrl.$inject = ["$rootScope", "$scope", "$timeout", "$state", "config", "nyplCoordinatesService", "nyplGeocoderService", "nyplLocationsService", "nyplUtility", "nyplSearch", "nyplAmenities"];
-    // End LocationsCtrl
-
-    function MapCtrl($scope, $timeout, nyplGeocoderService) {
-        var loadMapMarkers = function () {
-                $timeout(function () {
-                    if ($scope.locations) {
-                        nyplGeocoderService.showAllLibraries();
-                        if ($scope.researchBranches) {
-                            nyplGeocoderService.showResearchLibraries();
-                        }
-                    }
-                }, 1200);
-            },
-
-            drawMap = function () {
-                $timeout(function () {
-                    nyplGeocoderService
-                        .drawMap({
-                            lat: 40.7532,
-                            long: -73.9822
-                        }, 12, 'all-locations-map')
-                        .drawLegend('all-locations-map-legend');
-
-                    if ($scope.locations) {
-                        nyplGeocoderService.showAllLibraries();
-                    }
-                    loadMapMarkers();
-
-                    $scope.drawUserMarker();
-
-                    if ($scope.searchMarker) {
-                        nyplGeocoderService.drawSearchMarker();
-                    }
-
-                    if ($scope.researchBranches) {
-                        nyplGeocoderService.showResearchLibraries();
-                    }
-
-                    if ($scope.select_library_for_map) {
-                        nyplGeocoderService
-                            .panExistingMarker($scope.select_library_for_map);
-                    }
-
-                    $scope.scrollPage();
-                }, 1200);
-            };
-
-        drawMap();
-
-        $scope.panToLibrary = function (slug) {
-            nyplGeocoderService
-                .hideSearchInfowindow()
-                .panExistingMarker(slug);
-
-            $scope.scrollPage();
-        };
-    }
-    MapCtrl.$inject = ["$scope", "$timeout", "nyplGeocoderService"];
-
-    function LocationCtrl(
-        $rootScope,
-        $scope,
-        $timeout,
-        config,
-        location,
-        nyplCoordinatesService,
-        nyplUtility,
-        nyplAmenities
-    ) {
-        var amenities = location._embedded.amenities,
-            amenitiesCount = nyplAmenities.getAmenityConfig(config),
-            loadUserCoordinates = function () {
-                return nyplCoordinatesService
-                    .getBrowserCoordinates()
-                    .then(function (position) {
-                        var userCoords =
-                            _.pick(position, 'latitude', 'longitude');
-
-                        // Needed to update async var on geolocation success
-                        $timeout(function () {
-                            $scope.locationStart = userCoords.latitude +
-                                "," + userCoords.longitude;
-                        });
-                    });
-            };
-
-        // Load the user's geolocation coordinates
-        loadUserCoordinates();
-
-        $scope.location = location;
-        $rootScope.title = location.name;
-
-        if (location.hours.exceptions) {
-            location.hours.exceptions.description =
-                nyplUtility.returnHTML(location.hours.exceptions.description);
-        }
-
-        // Add icons to the amenities.
-        _.each(location._embedded.amenities, function (amenity) {
-            amenity.amenity = nyplAmenities.addAmenitiesIcon(amenity.amenity);
-        });
-
-        // Get three institution ranked and two location ranked amenities.
-        location.amenities_list =
-            nyplAmenities.getHighlightedAmenities(
-                amenities,
-                amenitiesCount.global,
-                amenitiesCount.local
-            );
-
-        $scope.calendarLink = nyplUtility.calendarLink;
-        $scope.icalLink = nyplUtility.icalLink;
-
-        $scope.location.social_media =
-            nyplUtility.socialMediaColor($scope.location.social_media);
-
-        if (location.hours) {
-            $scope.hoursToday = nyplUtility.hoursToday(location.hours);
-        }
-
-        // Build exhibition pretty date
-        if (location._embedded.exhibitions) {
-            _.each(location._embedded.exhibitions, function (exh) {
-                if (exh.start && exh.end) {
-                    exh.prettyDate = nyplUtility.formatDate(exh.start, exh.end);
-                }
-            });
-        }
-
-        _.each(location._embedded.divisions, function (division) {
-            division.hoursToday = nyplUtility.hoursToday(division.hours);
-        });
-
-        _.each(location._embedded.features, function (feature) {
-            feature.body = nyplUtility.returnHTML(feature.body);
-        });
-
-        // Used for the Get Directions link to Google Maps
-        $scope.locationDest = nyplUtility.getAddressString(location);
-
-        // Assign closed image
-        if (config.closed_img) {
-            $scope.location.images.closed = config.closed_img;
-        }
-    }
-    LocationCtrl.$inject = ["$rootScope", "$scope", "$timeout", "config", "location", "nyplCoordinatesService", "nyplUtility", "nyplAmenities"];
-
-    angular
-        .module('nypl_locations')
-        .controller('LocationsCtrl', LocationsCtrl)
-        .controller('MapCtrl', MapCtrl)
-        .controller('LocationCtrl', LocationCtrl);
-})();
-
-(function () {
-  'use strict';
-
-  function WidgetCtrl(
-    $location,
-    $rootScope,
-    $scope,
-    $timeout,
-    $window,
-    config,
-    data,
-    nyplCoordinatesService,
-    nyplUtility
-  ) {
-    // var loadUserCoordinates = function () {
-    //   return nyplCoordinatesService
-    //     .getBrowserCoordinates()
-    //     .then(function (position) {
-    //       var userCoords =
-    //         _.pick(position, 'latitude', 'longitude');
-
-    //       // Needed to update async var on geolocation success
-    //       $timeout(function () {
-    //         $scope.locationStart = userCoords.latitude +
-    //           "," + userCoords.longitude;
-    //       });
-    //     });
-    // };
-
-    $rootScope.title = data.name;
-    $scope.data = data;
-    $scope.locinator_url = "http://www.nypl.org/locations" +
-      $location.path().substr(7);
-    $scope.widget_name = data.name;
-
-    if (data._embedded.location) {
-      $scope.division = true;
-      $scope.data.images.exterior = data.images.interior;
-    }
-
-    if (config.closed_img) { 
-      $scope.data.images.closed = config.closed_img;
-    }
-
-    // loadUserCoordinates();
-
-    if (data.hours) {
-        $scope.hoursToday = nyplUtility.hoursToday(data.hours);
-    }
-
-    $scope.data.social_media =
-      nyplUtility.socialMediaColor($scope.data.social_media);
-
-    // Used for the Get Directions link to Google Maps
-    $scope.locationDest = nyplUtility.getAddressString(data);
-  }
-  WidgetCtrl.$inject = ["$location", "$rootScope", "$scope", "$timeout", "$window", "config", "data", "nyplCoordinatesService", "nyplUtility"];
-
-  angular
-    .module('nypl_widget')
-    .controller('WidgetCtrl', WidgetCtrl);
 })();
 
 /*jslint unparam: true, indent: 2, maxlen: 80 */
@@ -3398,7 +2301,6 @@ console, $location, $ */
       }
     };
   }
-  librarianchatbutton.$inject = ["nyplUtility"];
 
   /**
    * @ngdoc directive
@@ -3414,7 +2316,6 @@ console, $location, $ */
       });
     };
   }
-  scrolltop.$inject = ["$window"];
 
   /**
    * @ngdoc directive
@@ -3461,7 +2362,6 @@ console, $location, $ */
       }
     };
   }
-  eventRegistration.$inject = ["$filter"];
 
   /**
    * @ngdoc directive
@@ -3491,7 +2391,6 @@ console, $location, $ */
       }
     };
   }
-  nyplSiteAlerts.$inject = ["$timeout", "nyplLocationsService", "nyplUtility"];
 
   /**
    * @ngdoc directive
@@ -3530,7 +2429,6 @@ console, $location, $ */
       }
     };
   }
-  nyplLibraryAlert.$inject = ["nyplUtility"];
 
   /**
    * @ngdoc directive
@@ -3619,7 +2517,6 @@ console, $location, $ */
       }
     };
   }
-  nyplFundraising.$inject = ["$timeout", "nyplLocationsService"];
 
   /**
    * @ngdoc directive
@@ -3710,10 +2607,21 @@ console, $location, $ */
         filteredResults: '='
       },
       link: function ($scope, elem, attrs) {
-        $scope.showFilters = false;
-        $scope.toggleShowFilter = function() {
-          $scope.showFilters = !$scope.showFilters;
+        var filterControl = elem.find('.collapsible-control'),
+            filterBox = elem.find('.collapsible-filters');
+
+        $scope.toggleFilters = function() {
+          if (filterControl.hasClass('open')) {
+            filterControl.removeClass('open');
+            filterBox.removeClass('open');
+          } else {
+            $('.collapsible-control').removeClass('open');
+            $('.collapsible-filters').removeClass('open');
+            filterControl.addClass('open');
+            filterBox.addClass('open');
+          }
         }
+
         // Toggles active filter match
         $scope.checkActiveFilter = function(results, termID) {
           return $scope.activeFilter = _.findWhere(results, {id: termID});
@@ -3994,34 +2902,10 @@ console, $location, $ */
     };
 
   }
-  nyplAutofill.$inject = ["$state", "$analytics"];
-
-  angular
-    .module('nypl_locations')
-    .directive('loadingWidget', loadingWidget)
-    // .directive('nyplTranslate', nyplTranslate)
-    .directive('todayshours', todayshours)
-    .directive('emailusbutton', emailusbutton)
-    .directive('librarianchatbutton', librarianchatbutton)
-    .directive('scrolltop', scrolltop)
-    .directive('eventRegistration', eventRegistration)
-    .directive('nyplSiteAlerts', nyplSiteAlerts)
-    .directive('nyplLibraryAlert', nyplLibraryAlert)
-    .directive('nyplFundraising', nyplFundraising)
-    .directive('nyplSidebar', nyplSidebar)
-    .directive('nyplAutofill', nyplAutofill)
-    .directive('collapse', collapse)
-    .directive('nyplFooter', nyplFooter);
-
-  angular
-    .module('nypl_widget')
-    .directive('todayshours', todayshours)
-    .directive('nyplFundraising', nyplFundraising)
-    .directive('librarianchatbutton', librarianchatbutton)
-    .directive('emailusbutton', emailusbutton);
 
   angular
     .module('nypl_research_collections')
+    .directive('collapse', collapse)
     .directive('collapsibleFilters', collapsibleFilters)
     .directive('nyplFooter', nyplFooter)
     .directive('loadingWidget', loadingWidget);
@@ -4259,322 +3143,20 @@ console, $location, $ */
         };
     }
 
-    angular
-        .module('nypl_locations')
-        .filter('timeFormat', timeFormat)
-        .filter('dateToISO', dateToISO)
-        .filter('capitalize', capitalize)
-        .filter('hoursTodayFormat', hoursTodayFormat)
-        .filter('truncate', truncate);
-
-    angular
-        .module('nypl_widget')
-        .filter('hoursTodayFormat', hoursTodayFormat);
+    function slugify() {
+        return function (text) {
+            return text.replace(/\s+/g, '-').toLowerCase();
+        };
+    }
 
      angular
         .module('nypl_research_collections')
         .filter('timeFormat', timeFormat)
         .filter('dateToISO', dateToISO)
         .filter('capitalize', capitalize)
-        .filter('hoursTodayFormat', hoursTodayFormat);
+        .filter('hoursTodayFormat', hoursTodayFormat)
+        .filter('slugify', slugify);
 })();
-
-/*jslint nomen: true, indent: 2, maxlen: 80, browser: true */
-/*globals nypl_locations, angular, console, $window, _ */
-
-(function () {
-  'use strict';
-
-  /**
-   * @ngdoc service
-   * @name nypl_locations.service:nyplAmenities
-   * @description
-   * AngularJS service that deals with all amenity related configuration.
-   * Sets amenities categories, icons for each amenity, and highlighted
-   * amenities for each branch.
-   */
-  function nyplAmenities() {
-
-    var amenities = {},
-      sortAmenitiesList = function (list, sortBy) {
-        if (!(list instanceof Array)) {
-          return;
-        }
-
-        return _.sortBy(list, function (item) {
-          if (!item.amenity) {
-            return;
-          }
-          if (!item.amenity[sortBy]) {
-            return item.amenity[sortBy];
-          }
-          return item[sortBy];
-        });
-      };
-
-    /**
-     * @ngdoc function
-     * @name addAmenitiesIcon
-     * @methodOf nypl_locations.service:nyplAmenities
-     * @param {object} amenity An amenity object.
-     * @returns {object} The amenity with an added icon property.
-     * @description
-     * Adds the appropriate icon to an amenity. First it checks the amenity's
-     * category and adds the icon to match the category. Then it check's its
-     * id to see if it's an amenity with a special icon. If so, it adds it.
-     */
-    amenities.addAmenitiesIcon = function (amenity) {
-      if (!amenity || !amenity.category) {
-        return;
-      }
-
-      amenity.icon = this.getCategoryIcon(amenity.category);
-      amenity.icon = this.getAmenityIcon(amenity.id, amenity.icon);
-
-      return amenity;
-    };
-
-    /**
-     * @ngdoc function
-     * @name getCategoryIcon
-     * @methodOf nypl_locations.service:nyplAmenities
-     * @param {string} category The category for the amenity.
-     * @param {string} [default_icon] The default icon class.
-     * @returns {string} The icon class for the amenity category. 
-     * @description
-     * Returns a class for the correct icon class for an amenity category.
-     */
-    amenities.getCategoryIcon = function (category, default_icon) {
-      var icon = default_icon || '';
-
-      switch (category) {
-      case 'Computer Services':
-        icon = 'icon-screen2';
-        break;
-      case 'Circulation':
-        icon = 'icon-book';
-        break;
-      case 'Printing and Copy Services':
-        icon = 'icon-copy';
-        break;
-      case 'Facilities':
-        icon = 'icon-library';
-        break;
-      case 'Assistive Technologies':
-        icon = 'icon-accessibility2';
-        break;
-      }
-
-      return icon;
-    };
-
-    /**
-     * @ngdoc function
-     * @name getAmenityIcon
-     * @methodOf nypl_locations.service:nyplAmenities
-     * @param {number} id The amenity's id.
-     * @param {string} [default_icon] The default icon class.
-     * @returns {string} The icon class for the amenity. 
-     * @description
-     * Returns the icon for a few special amenities.
-     */
-    amenities.getAmenityIcon = function (id, default_icon) {
-      var icon = default_icon || '';
-
-      switch (id) {
-      case 7967: // Wireless
-        icon = 'icon-connection';
-        break;
-      case 7965: // Laptop
-        icon = 'icon-laptop';
-        break;
-      case 7966: // Printing
-        icon = 'icon-print';
-        break;
-      case 7968: // Electrical oulets
-        icon = 'icon-power-cord';
-        break;
-      case 7971: // Book drop
-      case 7972:
-        icon = 'icon-box-add';
-        break;
-      default:
-        break;
-      }
-
-      return icon;
-    };
-
-    /**
-     * @ngdoc function
-     * @name allAmenitiesArray
-     * @methodOf nypl_locations.service:nyplAmenities
-     * @param {array} amenities Array with amenities categories, each
-     *  category with it's own amenities property which is an array of
-     *  amenities under that category.
-     * @returns {array} An array with all the amenities plucked from every
-     *  category at a single top level, without any categories involved.
-     * @description
-     * Deprecated. Creates an flat array of all the amenities from a nested
-     * array of amenity categories.
-     */
-    amenities.allAmenitiesArray = function (amenities) {
-      if (!amenities) {
-        return;
-      }
-
-      return _.chain(amenities)
-              // Get the 'amenities' property from every amenity category
-              .pluck('amenity')
-              // Flatten every array of amenities from each category into
-              // a single array.
-              .flatten(true)
-              // Return the result.
-              .value();
-    };
-
-    /**
-     * @ngdoc function
-     * @name getAmenityCategories
-     * @methodOf nypl_locations.service:nyplAmenities
-     * @param {array} amenities An array with amenity objects.
-     * @returns {array} Returns an array created with objects extracted from
-     *  every amenity's category property.
-     * @description
-     * Used to get the categories from the flat array of amenity objects.
-     */
-    amenities.getAmenityCategories = function (amenities) {
-      if (!amenities) {
-        return;
-      }
-
-      return _.chain(amenities)
-              .pluck('category')
-              .flatten(true)
-              .unique()
-              .value();
-    };
-
-    /**
-     * @ngdoc function
-     * @name createAmenitiesCategories
-     * @methodOf nypl_locations.service:nyplAmenities
-     * @param {array} amenities ...
-     * @returns {array} Returns ...
-     * @description
-     * ...
-     */
-    amenities.createAmenitiesCategories = function (amenities) {
-      var default_order = ['Computer Services', 'Circulation',
-          'Printing and Copy Services', 'Facilities', 'Assistive Technologies'],
-        categoryNames,
-        categories = [],
-        categoryObj,
-        self = this;
-
-      if (!amenities) {
-        return;
-      }
-
-      categoryNames = this.getAmenityCategories(amenities);
-
-      _.each(categoryNames, function (category) {
-        categoryObj = {};
-        categoryObj.amenities = _.where(amenities, {'category': category});
-        categoryObj.name = category;
-        categoryObj.icon = self.getCategoryIcon(category);
-
-        if (categoryObj.amenities.length) {
-          categories[_.indexOf(default_order, category)] = categoryObj;
-        }
-      });
-
-      return categories;
-    };
-
-    /**
-     * @ngdoc function
-     * @name getHighlightedAmenities
-     * @methodOf nypl_locations.service:nyplAmenities
-     * @param {array} amenities Array with amenities categories, each category
-     *  with it's own amenities property which is an array of amenities
-     *  under that category.
-     * @param {number} rank How many institution ranked amenities should be
-     *  returned in the beginning of the array.
-     * @param {number} loc_rank How many location ranked amenities should be
-     *  returned at the end of the array.
-     * @returns {array} An array containing a specific number of institution
-     *  and location ranked amenities, with institution amenities listed first.
-     * @description
-     * ...
-     * @example
-     * <pre>
-     *  // Get three institution and two location ranked amenities.
-     *  var highlightedAmenities =
-     *    nyplAmenities
-     *      .getHighlightedAmenities(location._embedded.amenities, 3, 2);
-     * </pre>
-     */
-    amenities.getHighlightedAmenities = function (amenities, rank, loc_rank) {
-      var initial_list = amenities,
-        amenities_list = [];
-
-      if (!(amenities && amenities.length && rank && loc_rank)) {
-        return;
-      }
-
-      // Sort the list of all amenities by institution rank.
-      initial_list = sortAmenitiesList(initial_list, 'rank');
-      // Retrieve the first n institution ranked amentities.
-      amenities_list = initial_list.splice(0, rank);
-      // The institution ranked array that we retrieved are no longer in the
-      // array. Sort the remaining list of amenities by location rank.
-      initial_list = sortAmenitiesList(initial_list, 'location_rank');
-      // Retrieve the first n location ranked amenities and add
-      initial_list = initial_list.splice(0, loc_rank);
-      // Combine the two arrays, listing the institution ranked amenities first.
-      amenities_list = _.union(amenities_list, initial_list);
-
-      return amenities_list;
-    };
-
-    /**
-     * @ngdoc function
-     * @name getAmenityConfig
-     * @methodOf nypl_locations.service:nyplAmenities
-     * @param {object} config Config object from Sinatra.
-     * @param {number} globalDefault How many institution wide amenities.
-     * @param {number} localDefault How many local amenities to show.
-     * @returns {object} Object with how many global and local amenities to
-     * display.
-     * @description
-     * ...
-     */
-    amenities.getAmenityConfig =
-      function (config, globalDefault, localDefault) {
-        var obj = {},
-          global = globalDefault || 3,
-          local  = localDefault || 2;
-
-        if (config && config.featured_amenities) {
-          obj.global = config.featured_amenities.global || global;
-          obj.local  = config.featured_amenities.local || local;
-        } else {
-          obj.global = global;
-          obj.local  = local;
-        }
-        return obj;
-      };
-
-    return amenities;
-  }
-
-  angular
-    .module('nypl_locations')
-    .factory('nyplAmenities', nyplAmenities);
-
-})();
-
 
 /*jslint indent: 2, maxlen: 80, nomen: true, todo: true */
 /*globals nypl_locations, google, document, _, angular */
@@ -5071,11 +3653,7 @@ console, $location, $ */
 
     return geocoderService;
   }
-  nyplGeocoderService.$inject = ["$q"];
 
-  angular
-    .module('nypl_locations')
-    .factory('nyplGeocoderService', nyplGeocoderService);
 
 })();
 
@@ -5142,155 +3720,6 @@ console, $location, $ */
   angular
     .module('nypl_research_collections')
     .factory('researchCollectionService', researchCollectionService);
-
-})();
-
-/*jslint nomen: true, indent: 2, maxlen: 80, browser: true */
-/*globals nypl_locations, angular, console, $window, _ */
-
-(function () {
-  'use strict';
-
-  /**
-   * @ngdoc service
-   * @name nypl_locations.service:nyplSearch
-   * @description
-   * AngularJS service that deals preserving data across the app, specifically
-   * used for saving the home state.
-   */
-  function nyplSearch($filter) {
-    var search = {},
-      searchValues = {};
-
-    /**
-     * @ngdoc function
-     * @name setSearchValue
-     * @methodOf nypl_locations.service:nyplSearch
-     * @param {string} prop ...  
-     * @param {string} val ...
-     * @returns {object} ...
-     * @description
-     * ...
-     */
-    search.setSearchValue = function (prop, val) {
-      searchValues[prop] = val;
-      return this;
-    };
-
-    /**
-     * @ngdoc function
-     * @name getSearchValues
-     * @methodOf nypl_locations.service:nyplSearch
-     * @returns {object} ...
-     * @description
-     * ...
-     */
-    search.getSearchValues = function () {
-      return searchValues;
-    };
-
-    /**
-     * @ngdoc function
-     * @name resetSearchValues
-     * @methodOf nypl_locations.service:nyplSearch
-     * @returns {object} ...
-     * @description
-     * ...
-     */
-    search.resetSearchValues = function () {
-      searchValues = {};
-      return this;
-    };
-
-    /**
-     * @ngdoc function
-     * @name idLocationSearch
-     * @methodOf nypl_locations.service:nyplSearch
-     * @param {array} locations Array containing a list of all the
-     *  locations objects.
-     * @param {string} searchTerm The id to search for in all the locations.
-     * @returns {array} An array containing the location object with the
-     *  searched id. An empty array if there is no match.
-     * @description All the locations are being searched with a specific ID in
-     *  mind. If there is a location object where the 'id' property matches the
-     *  id that was being searched, then it is returned in an array.
-     */
-    search.idLocationSearch = function (locations, searchTerm) {
-      var IDFilter = [];
-
-      if (!locations || !searchTerm) {
-        return;
-      }
-
-      if (searchTerm.length >= 2 && searchTerm.length <= 4) {
-        IDFilter = _.where(locations, { 'id' : searchTerm.toUpperCase() });
-      }
-
-      return IDFilter;
-    };
-
-    /**
-     * @ngdoc function
-     * @name locationSearch
-     * @methodOf nypl_locations.service:nyplSearch
-     * @param {array} locations An array with all the location objects.
-     * @param {string} searchTerm The search word or phrased to look for in the
-     *  locations objects.
-     * @returns {array} An array that returns filtered locations based on what
-     *  was queried and what AngularJS' filter returns.
-     * @description Using the native AngularJS filter, we do a lazy and strict
-     *  filter through the locations array. The strict filter has a higher
-     *  priority since it's a better match. The 'lazy' filter matches anything,
-     *  even part of a word. For example, 'sibl' would match with 'accesSIBLe'
-     *  which is undesirable.
-     */
-    search.locationSearch = function (locations, searchTerm) {
-      // how to search the object?
-      // name, address, zipcode, locality, synonyms (amenities and divisions?)
-
-      var lazyFilter, strictFilter;
-
-      if (!locations || !searchTerm || searchTerm.length < 3) {
-        return;
-      }
-
-      lazyFilter = $filter('filter')(locations, searchTerm);
-      strictFilter = $filter('filter')(locations, searchTerm, true);
-
-      return lazyFilter;
-    };
-
-    /**
-     * @ngdoc function
-     * @name searchWordFilter
-     * @methodOf nypl_locations.service:nyplSearch
-     * @param {string} query The search word or phrase.
-     * @returns {string} The same search phrase but with stop words removed.
-     * @description Some words should be removed from a user's search query.
-     *  Those words are removed before doing any filtering or searching using 
-     *  Google's service.
-     */
-    search.searchWordFilter = function (query) {
-      var words = ['branch'];
-
-      if (!query) {
-        return;
-      }
-
-      _.each(words, function (word) {
-        query = query.replace(word, '');
-      });
-
-      return query;
-    };
-
-    return search;
-  }
-  nyplSearch.$inject = ["$filter"];
-
-  angular
-    .module('nypl_locations')
-    .factory('nyplSearch', nyplSearch);
 
 })();
 
@@ -5801,6 +4230,38 @@ console, $location, $ */
 
     /**
      * @ngdoc function
+     * @name isMobile
+     * @methodOf nypl_locations.service:nyplUtility
+     * @description Offers a variety of helper methods that
+     * assist in determining if the current device is mobile.
+     */
+    utility.isMobile = function () {
+      var isMobile = {
+        android: function () {
+          return navigator.userAgent.match(/(android|bb\d+|meego).+mobile/i);
+        },
+        blackberry: function () {
+          return navigator.userAgent.match(/BlackBerry/i);
+        },
+        ios: function () {
+          return navigator.userAgent.match(/iPhone|iPod/i);
+        },
+        opera: function () {
+          return navigator.userAgent.match(/Opera Mini/i);
+        },
+        windows: function () {
+          return navigator.userAgent.match(/IEMobile/i);
+        },
+        any: function () {
+          return (this.android() || this.blackberry() ||
+            this.ios() || this.opera() || this.windows());
+        }
+      };
+      return isMobile;
+    };
+
+    /**
+     * @ngdoc function
      * @name calcDistance
      * @methodOf nypl_locations.service:nyplUtility
      * @param {object} locations ...
@@ -5905,16 +4366,6 @@ console, $location, $ */
     return utility;
   }
   nyplUtility.$inject = ["$sce", "$window", "nyplCoordinatesService"];
-
-  angular
-    .module('nypl_locations')
-    .factory('nyplUtility', nyplUtility)
-    .factory('requestNotificationChannel', requestNotificationChannel);
-
-  angular
-    .module('nypl_widget')
-    .factory('nyplUtility', nyplUtility)
-    .factory('requestNotificationChannel', requestNotificationChannel);
 
    angular
     .module('nypl_research_collections')
