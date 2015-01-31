@@ -6,8 +6,8 @@ preload_app true
 # The following options are NYPL-specific
 if ENV["EC2_PLATFORM"]
   user("git")
-  pid "/var/www/rack/loc_app/tmp/pids/unicorn.pid"
-  listen "/tmp/loc_app.sock", :backlog => 2048
+  pid "/var/www/rack/collections_app/tmp/pids/unicorn.pid"
+  listen "/tmp/collections_app.sock", :backlog => 2048
 end
 
 before_fork do |server, worker|
