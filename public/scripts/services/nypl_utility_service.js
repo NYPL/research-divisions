@@ -640,6 +640,16 @@
     return utility;
   }
 
+  angular
+    .module('nypl_locations')
+    .factory('nyplUtility', nyplUtility)
+    .factory('requestNotificationChannel', requestNotificationChannel);
+
+  angular
+    .module('nypl_widget')
+    .factory('nyplUtility', nyplUtility)
+    .factory('requestNotificationChannel', requestNotificationChannel);
+
    angular
     .module('nypl_research_collections')
     .factory('nyplUtility', nyplUtility)

@@ -3,16 +3,16 @@
 **
 **/
 footer {
-	position: relative;
+  position: relative;
   clear: both;
   margin-top: 20px;
   padding: 30px 20px 100px;
   background: #7d7972;
     
   .footerlinks {
-  	ul {
-	    list-style: none;
-	    margin: 0px;
+    ul {
+      list-style: none;
+      margin: 0px;
 
       @include breakpoint($min, $post-mobile-phone) {
         margin: 0 20px;
@@ -36,19 +36,19 @@ footer {
         }
       }
 
-			@include breakpoint($min, 730px) {
-				float: left;
-				width: 18% !important;
+      @include breakpoint($min, 730px) {
+        float: left;
+        width: 18% !important;
 
         &:nth-of-type(3) {
           margin-left: 20px;
           clear: none;
         }
-			}
+      }
 
-	    li {
+      li {
 
-	    	margin: 0px 0px 12px;
+        margin: 0px 0px 12px;
         display: none;
 
         @include breakpoint($min, $post-mobile-phone) {
@@ -59,73 +59,73 @@ footer {
           display: list-item;
         }
 
-	    	a {
-	    		font-weight: 300;
-	    		font-size: 15px;
-	    		color: #FFF;
-	    		text-decoration: none;
+        a {
+          font-weight: 300;
+          font-size: 15px;
+          color: #FFF;
+          text-decoration: none;
 
-	    		&:hover {
-	    			text-decoration: underline;
-	    		}
-	    	}
-	    }
+          &:hover {
+            text-decoration: underline;
+          }
+        }
+      }
 
-	    &.last {
-	    	
-	    }
-	  }
+      &.last {
+        
+      }
+    }
   }
 
   .socialmedia {
-  	position: absolute;
-  	right: 0px;
-  	list-style-type: none;
-  	text-align: right;
-  	margin: 0 20px 0 0;
+    position: absolute;
+    right: 0px;
+    list-style-type: none;
+    text-align: right;
+    margin: 0 20px 0 0;
 
-  	li {
-  		display: inline-block;
+    li {
+      display: inline-block;
 
-  		a {
-  			display: block;
-  			color: #FFF;
-  			font-size: 24px;
+      a {
+        display: block;
+        color: #FFF;
+        font-size: 24px;
         text-decoration: none;
 
         @include breakpoint($min, $post-mobile-phone) {
-    			opacity: .5;
-    			@include transition(all .1s ease);
+          opacity: .5;
+          @include transition(all .1s ease);
         }
 
-  			&:hover {
-  				opacity: 1;
-  			}
+        &:hover {
+          opacity: 1;
+        }
 
-			  .replaced-text {
-					//h5bp technique
-			    border: 0;
-			    clip: rect(0 0 0 0);
-			    height: 1px;
-			    margin: -1px;
-			    overflow: hidden;
-			    padding: 0;
-			    position: absolute;
-			    width: 1px;
-		    }
-  		}
+        .replaced-text {
+          //h5bp technique
+          border: 0;
+          clip: rect(0 0 0 0);
+          height: 1px;
+          margin: -1px;
+          overflow: hidden;
+          padding: 0;
+          position: absolute;
+          width: 1px;
+        }
+      }
 
-  		[class^="icon-"], 
-  		[class*=" icon-"] {
-  			padding: 0;
-  		}
-  		
-  		[data-icon]:before, 
-  		[class^="icon-"]:before, 
-  		[class*=" icon-"]:before {
-  			margin: 0 5px 0 0 !important;
-  		}
-  	} 
+      [class^="icon-"], 
+      [class*=" icon-"] {
+        padding: 0;
+      }
+      
+      [data-icon]:before, 
+      [class^="icon-"]:before, 
+      [class*=" icon-"]:before {
+        margin: 0 5px 0 0 !important;
+      }
+    } 
   }
     
   .copyright {
@@ -136,14 +136,14 @@ footer {
     background-position: 50%;
     
     p {
-    	max-width: none;
-			padding-top: 30px;
+      max-width: none;
+      padding-top: 30px;
       padding-bottom: 140px;
       color: #FFF;
-	    font-size: 14px;
-	    font-weight: 300;
-	    letter-spacing: .07em;
-	    line-height: 2em;
+      font-size: 14px;
+      font-weight: 300;
+      letter-spacing: .07em;
+      line-height: 2em;
     }
   }
 }

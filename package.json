@@ -1,5 +1,5 @@
 {
-  "name": "Locations",
+  "name": "Research Collections",
   "version": "0.0.1",
   "dependencies": {
     "protractor": "^1.4.0",
