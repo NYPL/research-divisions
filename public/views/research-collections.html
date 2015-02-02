@@ -9,8 +9,13 @@
       Current filters:
       <div>
         <span data-ng-repeat='activeFilter in filter_results | filter:{active: true}'>
-          {{activeFilter.label}}: <a data-ng-click="removeFilter(activeFilter)" class="active-filter active-filter-{{activeFilter.label}}">{{activeFilter.name}}
-            <span class="icon-cancel-circle"></span></a>
+          {{activeFilter.label}}: 
+          <a data-ng-click="removeFilter(activeFilter)" class="active-filter active-filter-{{activeFilter.label}}"
+            analytics-on="click" analytics-category="Research Collections"
+            analytics-event="Click" analytics-label="Remove {{activeFilter.label}}: {{activeFilter.name}}">
+            {{activeFilter.name}}
+            <span class="icon-cancel-circle"></span>
+          </a>
         </span>
       </div>
     </div>
@@ -40,7 +45,7 @@
                 analytics-event="Click" analytics-label="{{terms[0].name}}: {{term.name}}">
                 {{term.name}}
               </a>
-              <collapsible-filters data="term.terms" data-ng-if="term.terms" filter-item="filterDivisionsBy($index,term)" filtered-results="filter_results"></collapsible-filters>
+              <collapsible-filters data="term.terms" parent-term-name="term.name" data-ng-if="term.terms" filter-item="filterDivisionsBy($index,term)" filtered-results="filter_results"></collapsible-filters>
             </li>
             <li class="term {{term.name | slugify}} mediaSubterms" data-ng-repeat="term in terms[1].terms" data-ng-show="activeCategory == 'Media'">
               <a href="" data-ng-click="filterDivisionsBy($index, term)"
@@ -54,7 +59,7 @@
               <a href="" data-ng-click="filterDivisionsBy($index, term)"
                 data-ng-model="term.name" data-ng-class="{active: $index == selectedLocationsSubterm}"
                 analytics-on="click" analytics-category="Research Collections"
-                analytics-event="Click" analytics-label="{{terms[2].name}}: {{term.name}}">
+                analytics-event="Click" analytics-label="{{terms[2].name}}: {{term.short_name}}">
                 {{term.name}}
               </a>
             </li>

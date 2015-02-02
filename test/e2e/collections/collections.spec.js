@@ -11,7 +11,7 @@ describe('Research Collections', function () {
     locationFilter;
 
   beforeEach(function () {
-    browser.get('/research-collections');
+    browser.get('/');
     browser.waitForAngular();
     
     subjectsFilter = element(by.buttonText('Subjects'));
@@ -171,10 +171,10 @@ describe('Research Collections', function () {
 
       it('should display that Stephen A. Schwarzman Building was clicked',
         function () {
-          element(by.linkText('Schwarzman Building')).click();
+          element(by.linkText('Stephen A. Schwarzman Building')).click();
 
           expect(collectionsPage.currentLocationsFilter.getText())
-            .toEqual('Schwarzman');
+            .toEqual('Schwarzman Building');
         });
 
       it('should display that New York Public Library for Performing Arts, ' +
@@ -188,16 +188,16 @@ describe('Research Collections', function () {
 
       it('should display that Schomburg Center for Research in Black ' +
         'Culture was clicked', function () {
-          element(by.linkText('Schomburg Center'))
+          element(by.linkText('Schomburg Center for Research in Black Culture'))
             .click();
 
           expect(collectionsPage.currentLocationsFilter.getText())
-            .toEqual('Schomburg');
+            .toEqual('Schomburg Center');
         });
 
       it('should display that Science, Industry and Business Library (SIBL) ' +
         'was clicked', function () {
-          element(by.linkText('Science, Industry and Business Library'))
+          element(by.linkText('Science, Industry and Business Library (SIBL)'))
             .click();
 
           expect(collectionsPage.currentLocationsFilter.getText())
