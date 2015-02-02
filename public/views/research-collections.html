@@ -5,7 +5,7 @@
 
   <h2 class="title">Research Collections</h2>
   <div class='collection-filters'>
-    <div class="active-filters" data-ng-if="showActiveFilters">
+    <div class="active-filters show-hide-animate" data-ng-show="showActiveFilters">
       Current filters:
       <div>
         <span data-ng-repeat='activeFilter in filter_results | filter:{active: true}'>
@@ -31,7 +31,7 @@
           </button>
         </span>
 
-        <div class='sub-filters show-hide-animate'>
+        <div class='sub-filters'>
           <ul class='three-columns' data-ng-class="{'two-columns': activeCategory == 'Locations', 'three-columns': activeCategory != 'Locations'}">
             <li class="term {{term.name | slugify}} subjectSubterms" data-ng-repeat="term in terms[0].terms" data-ng-show="activeCategory == 'Subjects'">
               <a href="" data-ng-click="filterDivisionsBy($index, term)"

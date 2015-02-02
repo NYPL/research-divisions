@@ -341,8 +341,8 @@ console, $location, $ */
       activeSubterm(selectedTerm);
 
       // Hides wrapper on mobile only after selection of filter
-      if (nyplUtility.isMobile().any()) {
-        $timeout( function(){
+      if (nyplUtility.isMobile()) {
+        $timeout( function() {
           $scope.categorySelected = undefined;
           $scope.activeCategory = undefined;
         }, 700);
