@@ -581,17 +581,21 @@ angular.module('nypl_research_collections', [
     'nyplSearch'
 ])
 .config([
+    '$analyticsProvider',
     '$locationProvider',
     '$stateProvider',
     '$urlRouterProvider',
     '$crumbProvider',
     function (
+        $analyticsProvider,
         $locationProvider,
         $stateProvider,
         $urlRouterProvider,
         $crumbProvider
     ) {
         'use strict';
+
+        $analyticsProvider.virtualPageviews(false);
 
         function LoadDivisions(config, nyplLocationsService) {
             return nyplLocationsService
@@ -627,7 +631,7 @@ angular.module('nypl_research_collections', [
         });
 
         // var home_url = window.rq_forwarded ? '/' : '/research-collections';
-        // $urlRouterProvider.otherwise('/');
+        $urlRouterProvider.otherwise('/');
         $stateProvider
             .state('division', {
                 url: '/',
@@ -644,7 +648,12 @@ angular.module('nypl_research_collections', [
             });
     }
 ])
-.config(httpInterceptor);
+.config(httpInterceptor)
+.run(["$analytics", "$rootScope", function ($analytics, $rootScope) {
+    $rootScope.$on('$viewContentLoaded', function () {
+        $analytics.pageTrack('/research-collections');
+    });
+}]);
 
 
 /*jslint indent: 4, maxlen: 80, nomen: true */
@@ -729,12 +738,12 @@ angular.module('nypl_research_collections', [
      * @ngdoc filter
      * @name nypl_locations.filter:hoursTodayFormat
      * @param {object} elem ...
-     * @param {string} type ...
      * @returns {string} ...
      * @description
      * ...
      */
     function hoursTodayFormat() {
+        'use strict';
         function getHoursObject(time) {
             time = time.split(':');
             return _.object(
@@ -742,12 +751,12 @@ angular.module('nypl_research_collections', [
                 [((parseInt(time[0], 10) + 11) % 12 + 1),
                     time[1],
                     (time[0] >= 12 ? 'pm' : 'am'),
-                    time[0]]
+                    parseInt(time[0], 10)]
             );
         }
 
-        return function (elem, type) {
-            var open_time, closed_time, formatted_time,
+        return function (elem) {
+            var open_time, closed_time,
                 now = new Date(),
                 today, tomorrow,
                 tomorrow_open_time, tomorrow_close_time,
@@ -758,88 +767,61 @@ angular.module('nypl_research_collections', [
                 today = elem.today;
                 tomorrow = elem.tomorrow;
 
+                // If there are no open or closed times for today's object
+                // Then default to return 'Closed Today' with proper error log
+                if (!today.open || !today.close) {
+                    console.log("Obj is undefined for open/close properties");
+                    return 'Closed today';
+                }
+
                 // Assign open time obj
                 if (today.open) {
                     open_time = getHoursObject(today.open);
                 }
+
                 // Assign closed time obj
                 if (today.close) {
                     closed_time = getHoursObject(today.close);
                 }
 
-                // If there are no open or close times, then it's closed today
-                if (!today.open || !today.close) {
-                    console.log(
-                        "Returned object is undefined for open/closed elems"
-                    );
-                    return 'Closed today';
-                }
-
+                // Assign tomorrow's open time object
                 if (tomorrow.open !== null) {
                     tomorrow_open_time = getHoursObject(tomorrow.open);
                 }
+
+                // Assign tomorrow's closed time object
                 if (tomorrow.close !== null) {
                     tomorrow_close_time = getHoursObject(tomorrow.close);
                 }
 
+                // If the current time is past today's closing time but
+                // before midnight, display that it will be open 'tomorrow',
+                // if there is data for tomorrow's time.
                 if (hour_now_military >= closed_time.military) {
-                    // If the current time is past today's closing time but
-                    // before midnight, display that it will be open 'tomorrow',
-                    // if there is data for tomorrow's time.
-                    if (tomorrow_open_time || tomorrow_close_time) {
+                    if (tomorrow_open_time && tomorrow_close_time) {
                         return 'Open tomorrow ' + tomorrow_open_time.hours +
-                            (parseInt(tomorrow_open_time.mins, 10) !== 0 ?
-                                    ':' + tomorrow_open_time.mins : '') +
-                            tomorrow_open_time.meridian +
-                            '-' + tomorrow_close_time.hours +
-                            (parseInt(tomorrow_close_time.mins, 10) !== 0 ?
-                                    ':' + tomorrow_close_time.mins : '') +
-                            tomorrow_close_time.meridian;
+                            (parseInt(tomorrow_open_time.mins, 10) !== 0 ? ':' + tomorrow_open_time.mins : '')
+                            + tomorrow_open_time.meridian + '-' + tomorrow_close_time.hours +
+                            (parseInt(tomorrow_close_time.mins, 10) !== 0 ? ':' + tomorrow_close_time.mins : '')
+                            + tomorrow_close_time.meridian;
                     }
-                    return "Closed today";
+                    return 'Closed today';
                 }
 
-                // If the current time is after midnight but before
-                // the library's open time, display both the start and
-                // end time for today
-                if (tomorrow_open_time &&
-                        hour_now_military >= 0 &&
-                        hour_now_military < tomorrow_open_time.military) {
-                    type = 'long';
-                }
-
-                // The default is checking when the library is currently open.
-                // It will display 'Open today until ...'
-
-                // Multiple cases for args w/ default
-                switch (type) {
-                case 'short':
-                    formatted_time = 'Open today until ' + closed_time.hours +
-                        (parseInt(closed_time.mins, 10) !== 0 ?
-                                ':' + closed_time.mins : '')
+                // Display a time range if the library has not opened yet
+                if (hour_now_military < open_time.military) {
+                    return 'Open today ' + open_time.hours +
+                        (parseInt(open_time.mins, 10) !== 0 ? ':' + open_time.mins : '')
+                        + open_time.meridian + '-' + closed_time.hours +
+                        (parseInt(closed_time.mins, 10) !== 0 ? ':' + closed_time.mins : '')
                         + closed_time.meridian;
-                    break;
-
-                case 'long':
-                    formatted_time = 'Open today ' + open_time.hours +
-                        (parseInt(open_time.mins, 10) !== 0 ?
-                                ':' + open_time.mins : '') +
-                        open_time.meridian + '-' + closed_time.hours +
-                        (parseInt(closed_time.mins, 10) !== 0 ?
-                                ':' + closed_time.mins : '')
-                        + closed_time.meridian;
-                    break;
-
-                default:
-                    formatted_time = open_time.hours + ':' + open_time.mins +
-                        open_time.meridian + '-' + closed_time.hours +
-                        ':' + closed_time.mins + closed_time.meridian;
-                    break;
                 }
-
-                return formatted_time;
+                // Displays as default once the library has opened
+                return 'Open today until ' + closed_time.hours +
+                        (parseInt(closed_time.mins, 10) !== 0 ? ':'
+                        + closed_time.mins : '')
+                        + closed_time.meridian;
             }
-
             return 'Not available';
         };
     }
@@ -1947,17 +1929,13 @@ angular.module('nypl_research_collections', [
           today = date || new Date(),
           holidays = [
             {
-              day: new Date(2014, 11, 31),
-              title: "The Library will close at 3 p.m. today"
+              day: new Date(2015, 0, 26),
+              title: "Closing at 5 pm due to severe weather" // Winter storm early closing
             },
             {
-              day: new Date(2015, 0, 1),
-              title: "Closed for New Year's Day"
-            },
-            {
-              day: new Date(2015, 0, 19),
-              title: "Closed for Martin Luther King, Jr. Day"
-            },
+              day: new Date(2015, 0, 27),
+              title: "Closed due to severe weather" // Winter storm early closing
+            },           
             {
               day: new Date(2015, 1, 16),
               title: "Closed for Presidents' Day"
