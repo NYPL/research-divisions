@@ -436,6 +436,7 @@
       replace: false,
       scope: {
         items: '=data',
+        parentTermName: '=',
         filterItem: '&',
         filteredResults: '='
       },
