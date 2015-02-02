@@ -106,7 +106,7 @@ describe('Research Collections', function () {
           element(by.linkText('Music')).click();
 
           expect(collectionsPage.currentSubjectFilter.getText())
-            .toEqual('Music');
+            .toEqual('Performing Arts - Music');
         });
 
       it('should display that Global Studies and then Latin American Studies was clicked',
@@ -116,7 +116,7 @@ describe('Research Collections', function () {
           element(by.linkText('Latin American Studies')).click();
 
           expect(collectionsPage.currentSubjectFilter.getText())
-            .toEqual('Latin American Studies');
+            .toEqual('Global Studies - Latin American Studies');
         });
 
       it('should display that Humanities and then Classics was clicked',
@@ -126,7 +126,7 @@ describe('Research Collections', function () {
           element(by.linkText('Classics')).click();
 
           expect(collectionsPage.currentSubjectFilter.getText())
-            .toEqual('Classics');
+            .toEqual('Humanities - Classics');
         });
     });
 
@@ -171,7 +171,7 @@ describe('Research Collections', function () {
 
       it('should display that Stephen A. Schwarzman Building was clicked',
         function () {
-          element(by.linkText('Stephen A. Schwarzman Building')).click();
+          element(by.linkText('Schwarzman Building')).click();
 
           expect(collectionsPage.currentLocationsFilter.getText())
             .toEqual('Schwarzman');
@@ -183,12 +183,12 @@ describe('Research Collections', function () {
             'Arts, Dorothy and Lewis B. Cullman Center')).click();
 
           expect(collectionsPage.currentLocationsFilter.getText())
-            .toEqual('LPA');
+            .toEqual('Library for the Performing Arts');
         });
 
       it('should display that Schomburg Center for Research in Black ' +
         'Culture was clicked', function () {
-          element(by.linkText('Schomburg Center for Research in Black Culture'))
+          element(by.linkText('Schomburg Center'))
             .click();
 
           expect(collectionsPage.currentLocationsFilter.getText())
@@ -197,7 +197,7 @@ describe('Research Collections', function () {
 
       it('should display that Science, Industry and Business Library (SIBL) ' +
         'was clicked', function () {
-          element(by.linkText('Science, Industry and Business Library (SIBL)'))
+          element(by.linkText('Science, Industry and Business Library'))
             .click();
 
           expect(collectionsPage.currentLocationsFilter.getText())
@@ -228,7 +228,7 @@ describe('Research Collections', function () {
         element(by.linkText('Prints')).click();
 
         expect(collectionsPage.currentSubjectFilter.getText())
-          .toEqual('Genealogy');
+          .toEqual('History - Genealogy');
         expect(collectionsPage.currentMediaFilter.getText())
           .toEqual('Prints');
       });
@@ -256,7 +256,7 @@ describe('Research Collections', function () {
         expect(collectionsPage.currentMediaFilter.getText())
           .toEqual('Photographs');
         expect(collectionsPage.currentLocationsFilter.getText())
-          .toEqual('Schomburg');
+          .toEqual('Schomburg Center');
       });
 
       it('should display all three filters', function () {
@@ -272,7 +272,7 @@ describe('Research Collections', function () {
         expect(collectionsPage.currentMediaFilter.getText())
           .toEqual('Newspapers');
         expect(collectionsPage.currentLocationsFilter.getText())
-          .toEqual('Schwarzman');
+          .toEqual('Schwarzman Building');
       });
 
       it('should display all three filters', function () {
@@ -288,7 +288,7 @@ describe('Research Collections', function () {
         expect(collectionsPage.currentMediaFilter.getText())
           .toEqual('Scores');
         expect(collectionsPage.currentLocationsFilter.getText())
-          .toEqual('Schwarzman');
+          .toEqual('Schwarzman Building');
       });
     });
   });

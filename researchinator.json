@@ -4,7 +4,7 @@
     "production": {
       "url": "http://locations.nypl.org",
       "api": "http://locations.api.nypl.org/api",
-      "api_version": "v0.5",
+      "api_version": "v0.6",
       "nyplbase": "http://ux-static.nypl.org/nyplbase/0.1.1/css/nyplbase.min.css",
       "optimizely": "//cdn.optimizely.com/js/284748925.js",
       "google_analytics": "UA-1420324-3",
@@ -13,7 +13,7 @@
       "app_src": "minified",
       "closed_img": "http://ux-static.nypl.org/images/branch_closed.jpg",
       "research_shortnames": {
-        "SASB": "Schwarzman",
+        "SASB": "Schwarzman Building",
         "SC": "Schomburg Center",
         "LPA": "Library for the Performing Arts",
         "SIBL": "SIBL"
@@ -22,7 +22,7 @@
     "qa": {
       "url": "http://qa.locations.nypl.org",
       "api": "http://qa.locations.api.nypl.org/api",
-      "api_version": "v0.5",
+      "api_version": "v0.6",
       "nyplbase": "http://staging.ux-static.nypl.org.s3-website-us-east-1.amazonaws.com/nyplbase/0.1.1/css/nyplbase.min.css",
       "optimizely": null,
       "google_analytics": "UA-1420324-123",
@@ -31,7 +31,7 @@
       "app_src": "minified",
       "closed_img": "http://staging.ux-static.nypl.org.s3-website-us-east-1.amazonaws.com/images/branch_closed.jpg",
       "research_shortnames": {
-        "SASB": "Schwarzman",
+        "SASB": "Schwarzman Building",
         "SC": "Schomburg Center",
         "LPA": "Library for the Performing Arts",
         "SIBL": "SIBL"
@@ -49,7 +49,7 @@
       "app_src": "full",
       "closed_img": "http://staging.ux-static.nypl.org.s3-website-us-east-1.amazonaws.com/images/branch_closed.jpg",
       "research_shortnames": {
-        "SASB": "Schwarzman",
+        "SASB": "Schwarzman Building",
         "SC": "Schomburg Center",
         "LPA": "Library for the Performing Arts",
         "SIBL": "SIBL"
@@ -65,7 +65,13 @@
       "google_maps": "AIzaSyCeqpIM6ylCguHdJq0Mp9WpaSrLJ3xrBWM",
       "angular_src": "bower",
       "app_src": "full",
-      "closed_img": "http://staging.ux-static.nypl.org.s3-website-us-east-1.amazonaws.com/images/branch_closed.jpg"
+      "closed_img": "http://staging.ux-static.nypl.org.s3-website-us-east-1.amazonaws.com/images/branch_closed.jpg",
+      "research_shortnames": {
+        "SASB": "Schwarzman Building",
+        "SC": "Schomburg Center",
+        "LPA": "Library for the Performing Arts",
+        "SIBL": "SIBL"
+      }
     }
   },
   "divisions_with_appointments": ["ARN", "RBK", "MSS", "BRG", "PRN", "PHG", "SPN", "CPS", "SCF", "SCM", "SCG", "SCP"],
