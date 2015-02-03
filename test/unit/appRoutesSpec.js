@@ -64,117 +64,7 @@ describe('Locinator State Routing', function () {
         expect($injector.invoke(stateConfig.resolve.config)).toEqual(configObj);
       });
 
-      it('should return the list state', function () {
-        state = 'home.list';
-        stateConfig = $state.get(state);
-        expectedConfig = {
-          url: 'list',
-          abstract: undefined,
-          templateUrl: 'views/location-list-view.html',
-          controller: undefined,
-          label: 'Locations'
-        };
-
-        testStateConfig(stateConfig, expectedConfig);
-      });
-
-      it('should return the map state', function () {
-        state = 'home.map';
-        stateConfig = $state.get(state);
-        expectedConfig = {
-          url: 'map',
-          abstract: undefined,
-          templateUrl: 'views/location-map-view.html',
-          controller: 'MapCtrl',
-          label: 'Locations'
-        };
-
-        testStateConfig(stateConfig, expectedConfig);
-      });
-
-      it('should return the subdivision state', function () {
-        state = 'subdivision';
-        stateConfig = $state.get(state);
-        expectedConfig = {
-          url: '/divisions/:division/:subdivision',
-          abstract: undefined,
-          templateUrl: 'views/division.html',
-          controller: 'DivisionCtrl',
-          label: 'Division'
-        };
-
-        testStateConfig(stateConfig, expectedConfig);
-        expect($injector.invoke(stateConfig.resolve.config)).toEqual(configObj);
-        expect($injector.invoke(stateConfig.resolve.division).then)
-          .toBeDefined();
-      });
-
-      it('should return the division state', function () {
-        state = 'division';
-        stateConfig = $state.get(state);
-        expectedConfig = {
-          url: '/divisions/:division',
-          abstract: undefined,
-          templateUrl: 'views/division.html',
-          controller: 'DivisionCtrl',
-          label: 'Division'
-        };
-
-        testStateConfig(stateConfig, expectedConfig);
-        expect($injector.invoke(stateConfig.resolve.config)).toEqual(configObj);
-        // expect($injector.invoke(stateConfig.resolve.division).then)
-        //  .toBeDefined();
-      });
-
-      it('should return amenities state', function () {
-        state = 'amenities';
-        stateConfig = $state.get(state);
-        expectedConfig = {
-          url: '/amenities',
-          abstract: undefined,
-          templateUrl: 'views/amenities.html',
-          controller: 'AmenitiesCtrl',
-          label: 'Amenities'
-        };
-
-        testStateConfig(stateConfig, expectedConfig);
-        expect($injector.invoke(stateConfig.resolve.config)).toEqual(configObj);
-        // expect($injector.invoke(stateConfig.resolve.amenities))
-        //   .toBeDefined();
-      });
-
-      it('should return amenity state', function () {
-        state = 'amenity';
-        stateConfig = $state.get(state);
-        expectedConfig = {
-          url: '/amenities/id/:amenity',
-          abstract: undefined,
-          templateUrl: 'views/amenities.html',
-          controller: 'AmenityCtrl',
-          label: 'Amenities'
-        };
-
-        testStateConfig(stateConfig, expectedConfig);
-        expect($injector.invoke(stateConfig.resolve.config)).toEqual(configObj);
-
-      });
-
-      it('should return the amenities at a location state', function () {
-        state = 'amenities-at-location';
-        stateConfig = $state.get(state);
-        expectedConfig = {
-          url: '/amenities/loc/:location',
-          abstract: undefined,
-          templateUrl: 'views/amenitiesAtLibrary.html',
-          controller: 'AmenitiesAtLibraryCtrl',
-          label: undefined
-        };
-
-        testStateConfig(stateConfig, expectedConfig);
-        expect($injector.invoke(stateConfig.resolve.config)).toEqual(configObj);
-
-      });
-
+      
       it('should return the 404 state', function () {
         state = '404';
         stateConfig = $state.get(state);
@@ -190,25 +80,11 @@ describe('Locinator State Routing', function () {
         expect(stateConfig.resolve).not.toBeDefined();
       });
 
-      it('should return the locations state', function () {
-        state = 'location';
-        stateConfig = $state.get(state);
-        expectedConfig = {
-          url: '/:location',
-          abstract: undefined,
-          templateUrl: 'views/location.html',
-          controller: 'LocationCtrl',
-          label: undefined
-        };
-
-        testStateConfig(stateConfig, expectedConfig);
-        expect($injector.invoke(stateConfig.resolve.config)).toEqual(configObj);
-      });
     });
 
     describe('Router URLs', function () {
       it('should go to the home page', function () {
-        expect($state.href('home.index')).toEqual('/');
+        expect($state.href('home')).toEqual('/');
       });
 
       it('should go to the list page', function () {
@@ -258,98 +134,4 @@ describe('Locinator State Routing', function () {
     });
   });
 
-  describe('Widget', function () {
-    beforeEach(function () {
-      module('nypl_widget', function ($provide) {
-        $provide.value('config', config = {});
-        $provide.value('nyplLocationsService', nyplLocationsService = {});
-        nyplLocationsService.getConfig = jasmine.createSpy('getConfig')
-          .and.returnValue(configObj);
-        nyplLocationsService.singleDivision =
-          jasmine.createSpy('singleDivision')
-          .and.returnValue({division: 'Map Division'});
-        nyplLocationsService.amenities = jasmine.createSpy('amenities')
-          .and.returnValue({amenities: 'amenities'});
-      });
-
-      inject(function (_$rootScope_, _$state_, _$injector_, _$httpBackend_) {
-        $state = _$state_;
-        $rootScope = _$rootScope_.$new();
-        $injector = _$injector_;
-        $httpBackend = _$httpBackend_;
-      });
-    });
-
-    describe('Router configuration', function () {
-      var state, stateConfig, expectedConfig;
-
-      it('should return the subdivision state', function () {
-        state = 'subdivision';
-        stateConfig = $state.get(state);
-        expectedConfig = {
-          url: '/widget/divisions/:division/:subdivision',
-          abstract: undefined,
-          templateUrl: 'views/widget.html',
-          controller: 'WidgetCtrl',
-          label: undefined
-        };
-
-        testStateConfig(stateConfig, expectedConfig);
-        expect($injector.invoke(stateConfig.resolve.config)).toEqual(configObj);
-        expect($injector.invoke(stateConfig.resolve.data)).toBeDefined();
-      });
-
-      it('should return the division state', function () {
-        state = 'division';
-        stateConfig = $state.get(state);
-        expectedConfig = {
-          url: '/widget/divisions/:division',
-          abstract: undefined,
-          templateUrl: 'views/widget.html',
-          controller: 'WidgetCtrl',
-          label: 'Division'
-        };
-
-        testStateConfig(stateConfig, expectedConfig);
-        expect($injector.invoke(stateConfig.resolve.config)).toEqual(configObj);
-        // expect($injector.invoke(stateConfig.resolve.data)).toBeDefined();
-      });
-
-      it('should return the locations state', function () {
-        state = 'widget';
-        stateConfig = $state.get(state);
-        expectedConfig = {
-          url: '/widget/:location',
-          abstract: undefined,
-          templateUrl: 'views/widget.html',
-          controller: 'WidgetCtrl',
-          label: undefined
-        };
-
-        testStateConfig(stateConfig, expectedConfig);
-        expect($injector.invoke(stateConfig.resolve.config)).toEqual(configObj);
-        // expect($injector.invoke(stateConfig.resolve.data)).toBeDefined();
-      });
-    });
-
-    describe('Router URLs', function () {
-      it('should go to a subdivision page', function () {
-        expect($state.href('subdivision', {
-          division: 'general-research-division',
-          subdivision:'periodicals-room'
-        })).toEqual('/widget/divisions/general-research-division/' +
-          'periodicals-room');
-      });
-
-      it('should go to a division page', function () {
-        expect($state.href('division', {division: 'map-division'}))
-          .toEqual('/widget/divisions/map-division');
-      });
-
-      it('should go to a location page', function () {
-        expect($state.href('widget', {location: 'schwarzman'}))
-          .toEqual('/widget/schwarzman');
-      });
-    });
-  });
 });

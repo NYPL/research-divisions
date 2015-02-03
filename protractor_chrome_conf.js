@@ -29,9 +29,9 @@ exports.config = {
 
     // This will generate a screenshot for every test, a json file,
     // and an html page with all the results:
-    jasmine.getEnv().addReporter(new HtmlReporter({
-      baseDirectory: 'test/results/e2e_html_screenshots'
-    }));
+    // jasmine.getEnv().addReporter(new HtmlReporter({
+    //   baseDirectory: 'test/results/e2e_html_screenshots'
+    // }));
 
     // Generates an xml file
     require('jasmine-reporters');
