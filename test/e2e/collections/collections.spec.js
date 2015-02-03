@@ -171,7 +171,7 @@ describe('Research Collections', function () {
 
       it('should display that Stephen A. Schwarzman Building was clicked',
         function () {
-          element(by.linkText('Stephen A. Schwarzman Building')).click();
+          element(by.linkText('Schwarzman Building')).click();
 
           expect(collectionsPage.currentLocationsFilter.getText())
             .toEqual('Schwarzman Building');
@@ -179,8 +179,7 @@ describe('Research Collections', function () {
 
       it('should display that New York Public Library for Performing Arts, ' +
         'Dorothy and Lewis B. Cullman Center was clicked', function () {
-          element(by.linkText('New York Public Library for the Performing ' +
-            'Arts, Dorothy and Lewis B. Cullman Center')).click();
+          element(by.linkText('Library for the Performing Arts')).click();
 
           expect(collectionsPage.currentLocationsFilter.getText())
             .toEqual('Library for the Performing Arts');
@@ -188,7 +187,7 @@ describe('Research Collections', function () {
 
       it('should display that Schomburg Center for Research in Black ' +
         'Culture was clicked', function () {
-          element(by.linkText('Schomburg Center for Research in Black Culture'))
+          element(by.linkText('Schomburg Center'))
             .click();
 
           expect(collectionsPage.currentLocationsFilter.getText())
@@ -197,11 +196,11 @@ describe('Research Collections', function () {
 
       it('should display that Science, Industry and Business Library (SIBL) ' +
         'was clicked', function () {
-          element(by.linkText('Science, Industry and Business Library (SIBL)'))
+          element(by.linkText('Science, Industry and Business Library'))
             .click();
 
           expect(collectionsPage.currentLocationsFilter.getText())
-            .toEqual('SIBL');
+            .toEqual('Science, Industry and Business Library');
         });
     });
 
@@ -235,7 +234,7 @@ describe('Research Collections', function () {
 
       it('should display a Subjects and Locations filter', function () {
         locationFilter.click();
-        element(by.linkText('Science, Industry and Business Library (SIBL)'))
+        element(by.linkText('Science, Industry and Business Library'))
           .click();
         subjectsFilter.click();
         element(by.linkText('Literature')).click();
@@ -243,12 +242,12 @@ describe('Research Collections', function () {
         expect(collectionsPage.currentSubjectFilter.getText())
           .toEqual('Literature');
         expect(collectionsPage.currentLocationsFilter.getText())
-          .toEqual('SIBL');
+          .toEqual('Science, Industry and Business Library');
       });
 
       it('should display a Media and Locations filter', function () {
         locationFilter.click();
-        element(by.linkText('Schomburg Center for Research in Black Culture'))
+        element(by.linkText('Schomburg Center'))
           .click();
         mediaFilter.click();
         element(by.linkText('Photographs')).click();
@@ -263,7 +262,7 @@ describe('Research Collections', function () {
         subjectsFilter.click();
         element(by.linkText('Fine Arts')).click();
         locationFilter.click();
-        element(by.linkText('Stephen A. Schwarzman Building')).click();
+        element(by.linkText('Schwarzman Building')).click();
         mediaFilter.click();
         element(by.linkText('Newspapers')).click();
 
@@ -279,7 +278,7 @@ describe('Research Collections', function () {
         subjectsFilter.click();
         element(by.linkText('Black Studies')).click();
         locationFilter.click();
-        element(by.linkText('Stephen A. Schwarzman Building')).click();
+        element(by.linkText('Schwarzman Building')).click();
         mediaFilter.click();
         element(by.linkText('Scores')).click();
 
@@ -373,7 +372,7 @@ describe('Research Collections', function () {
     describe('Locations filter', function () {
       it('should have 5 divisions when Schomburg is selected', function () {
         locationFilter.click();
-        element(by.linkText('Schomburg Center for Research in Black Culture'))
+        element(by.linkText('Schomburg Center'))
           .click();
 
         expect(collectionsPage.filteredDivisions.count()).toBe(5);
@@ -382,10 +381,10 @@ describe('Research Collections', function () {
       it('should display all divisions when filter is selected again', function () {
         locationFilter.click();
         
-        element(by.linkText('Stephen A. Schwarzman Building')).click();
+        element(by.linkText('Schwarzman Building')).click();
         expect(collectionsPage.filteredDivisions.count()).toBe(15);
 
-        element(by.linkText('Stephen A. Schwarzman Building')).click();
+        element(by.linkText('Schwarzman Building')).click();
         expect(collectionsPage.filteredDivisions.count()).toBe(26);
       });
     });
@@ -450,7 +449,7 @@ describe('Research Collections', function () {
           element(by.linkText("Women's Studies")).click();
 
           locationFilter.click();
-          element(by.linkText('Science, Industry and Business Library (SIBL)')).click();
+          element(by.linkText('Science, Industry and Business Library')).click();
           expect(collectionsPage.filteredDivisions.count()).toBe(1);
 
           subjectsFilter.click();
@@ -467,7 +466,7 @@ describe('Research Collections', function () {
           expect(collectionsPage.filteredDivisions.count()).toBe(4);
 
           locationFilter.click();
-          element(by.linkText('Schomburg Center for Research in Black Culture')).click();
+          element(by.linkText('Schomburg Center')).click();
 
           expect(collectionsPage.filteredDivisions.count()).toBe(1);
         });
@@ -479,7 +478,7 @@ describe('Research Collections', function () {
           element(by.linkText("Artists' Books")).click();
 
           locationFilter.click();
-          element(by.linkText('New York Public Library for the Performing Arts, Dorothy and Lewis B. Cullman Center')).click();
+          element(by.linkText('Library for the Performing Arts')).click();
           expect(collectionsPage.filteredDivisions.count()).toBe(5);
 
           mediaFilter.click();

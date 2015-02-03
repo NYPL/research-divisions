@@ -1315,6 +1315,7 @@ angular.module('nypl_research_collections', [
       replace: false,
       scope: {
         items: '=data',
+        parentTermName: '=',
         filterItem: '&',
         filteredResults: '='
       },
@@ -2129,32 +2130,12 @@ angular.module('nypl_research_collections', [
      * @ngdoc function
      * @name isMobile
      * @methodOf nypl_locations.service:nyplUtility
-     * @description Offers a variety of helper methods that
-     * assist in determining if the current device is mobile.
+     * @description Helper function that checks browser viewport
+     * based off 480px to determine if it is a mobile device.
      */
     utility.isMobile = function () {
-      var isMobile = {
-        android: function () {
-          return navigator.userAgent.match(/(android|bb\d+|meego).+mobile/i);
-        },
-        blackberry: function () {
-          return navigator.userAgent.match(/BlackBerry/i);
-        },
-        ios: function () {
-          return navigator.userAgent.match(/iPhone|iPod/i);
-        },
-        opera: function () {
-          return navigator.userAgent.match(/Opera Mini/i);
-        },
-        windows: function () {
-          return navigator.userAgent.match(/IEMobile/i);
-        },
-        any: function () {
-          return (this.android() || this.blackberry() ||
-            this.ios() || this.opera() || this.windows());
-        }
-      };
-      return isMobile;
+      var mobileView = $window.matchMedia("(min-width: 480px)");
+      return (mobileView.matches) ? false : true;
     };
 
     /**

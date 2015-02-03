@@ -6,14 +6,12 @@ module.exports = function (grunt) {
 
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
-    locinator: 
-"__                                            __    \n" +
-"/\\ \\                      __                  /\\ \\__\n" +
-"\\ \\ \\        ___     ___ /\\_\\    ___      __  \\ \\ ,_\\   ___   _ __\n" +
-" \\ \\ \\  __  / __`\\  /'___\\/\\ \\ /' _ `\\  /'__`\\ \\ \\ \\/  / __`\\/\\`'__\\\n" +
-"  \\ \\ \\_\\ \\/\\ \\_\\ \\/\\ \\__/\\ \\ \\/\\ \\/\\ \\/\\ \\_\\.\\_\\ \\ \\_/\\ \\_\\ \\ \\ \\/ \n" +
-"   \\ \\____/\\ \\____/\\ \\____\\\\ \\_\\ \\_\\ \\_\\ \\__/.\\_\\\\ \\__\\ \\____/\\ \\_\\ \n" +
-"    \\/___/  \\/___/  \\/____/ \\/_/\\/_/\\/_/\\/__/\\/_/ \\/__/\\/___/  \\/_/ \n",
+    researchinator: 
+" ____                               _     _             _\n" +
+" |  _ \\ ___  ___  ___  __ _ _ __ ___| |__ (_)_ __   __ _| |_ ___  _ __\n" +
+" | |_) / _ \\/ __|/ _ \\/ _` | '__/ __| '_ \\| | '_ \\ / _` | __/ _ \\| '__|\n" +
+" |  _ <  __/\\__ \\  __/ (_| | | | (__| | | | | | | | (_| | || (_) | |\n" +
+" |_| \\_\\___||___/\\___|\\__,_|_|  \\___|_| |_|_|_| |_|\\__,_|\\__\\___/|_|\n",
     jsdoc: {
       dist: {
         src: ['public/scripts/services/*.js',
@@ -24,29 +22,19 @@ module.exports = function (grunt) {
       }
     },
     ngAnnotate: {
-      locinator: {
+      researchinator: {
         files: {
-          'public/dist/locinator.annotate.js': ['public/scripts/**/*.js'],
-          'public/dist/widget.annotate.js': [
-            'public/scripts/components/nypl_coordinates.js',
-            'public/scripts/components/nypl_locations_api.js',
-            'public/scripts/app.js',
-            'public/scripts/filters/nypl_filters.js',
-            'public/scripts/controllers/widget.js',
-            'public/scripts/directives/nypl_directives.js',
-            'public/scripts/services/nypl_utility_service.js'
-          ]
+          'public/dist/researchinator.annotate.js': ['public/scripts/**/*.js']
         }
       }
     },
     uglify: {
       options: {
-        banner: "/*!\n <%= locinator %>*/\n"
+        banner: "/*!\n <%= researchinator %>*/\n"
       },
       dist: {
         files: {
-          'public/dist/locinator.min.js': ['public/dist/locinator.annotate.js'],
-          'public/dist/widget.min.js': ['public/dist/widget.annotate.js']
+          'public/dist/researchinator.min.js': ['public/dist/researchinator.annotate.js']
         }
       }
     },
@@ -83,10 +71,10 @@ module.exports = function (grunt) {
           'public/scripts/directives/nypl_directives.js'],
         html5Mode: true,
         startPage: '/',
-        title: 'Locinator ngDocs',
+        title: 'Researchinator ngDocs',
         image: 'public/images/nypl_logo.png',
-        imageLink: 'http://locations.nypl.org',
-        titleLink: 'http://locations.nypl.org',
+        imageLink: 'http://research-collections.nypl.org',
+        titleLink: 'http://research-collections.nypl.org',
         bestMatch: true,
       },
       all: ['public/scripts/**/*.js']
