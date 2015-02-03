@@ -507,7 +507,7 @@ time {
 	> li {
 			@include breakpoint($min, $post-palm) {
 				width: 50%;
-				display:inline-table;
+				display:inline-block;
 			}
 	}
 }
@@ -516,7 +516,7 @@ time {
 	> li {
 		@include breakpoint($min, 481px) {
 			width: 50%;
-			display:inline-table;
+			display:inline-block;
 		}
 		@include breakpoint($min, $post-palm) {
 			width: 33.333%;
@@ -597,7 +597,7 @@ time {
 	vertical-align: -2px;
 	border: 1px solid #CCC;
 	position: relative;
-	left: 0px;
+	left: -3px;
 	&.open {
     background: #fff;
     border: 1px solid #0090c4;
