@@ -38,11 +38,12 @@ module.exports = function (config) {
 
     autoWatch : true,
 
-    frameworks: ['jasmine'],
+    frameworks: ['jasmine-jquery', 'jasmine'],
 
     browsers : ['Chrome'],
 
     plugins : [
+      'karma-jasmine-jquery',
       'karma-junit-reporter',
       'karma-chrome-launcher',
       'karma-firefox-launcher',
