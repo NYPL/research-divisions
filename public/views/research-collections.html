@@ -78,14 +78,14 @@
           <div class="grid__item one-whole tablet-and-up-one-half lap-and-up-one-third repeat-animation"
             data-ng-repeat='division in filteredDivisions track by $index'>
             <div class="division-wrapper" data-ng-if="division.slug != 'sibl'">
-              <a data-ng-href="http://nypl.org/locations/divisions/{{division.slug}}"
+              <a data-ng-href="/locations/divisions/{{division.slug}}"
                 analytics-on="click" analytics-category="Research Collections"
                 analytics-event="Division Image" analytics-label="{{division.name}}">
                 <img class="img--outline division-image" data-ng-src="{{division.images.collection_item}}"
                   alt="Image for {{division.name}}" title="Image for {{division.name}}" style="max-height: 235px;" />
               </a>
               <h4 class="division-name">
-                <a data-ng-href="http://nypl.org/locations/divisions/{{division.slug}}"
+                <a data-ng-href="/locations/divisions/{{division.slug}}"
                   analytics-on="click" analytics-category="Research Collections"
                   analytics-event="Division Title" analytics-label="{{division.name}}">
                   {{division.name}}
@@ -97,14 +97,14 @@
 
             <!-- SIBL  -->
             <div class="division-wrapper" data-ng-if="division.slug == 'sibl'">
-              <a data-ng-href="http://nypl.org/locations/{{division.slug}}"
+              <a data-ng-href="/locations/{{division.slug}}"
                 analytics-on="click" analytics-category="Research Collections"
                 analytics-event="Division Image" analytics-label="{{division.name}}">
                 <img class="img--outline division-image" data-ng-src="{{division.images.interior}}"
                   alt="Image for {{division.name}}" title="Image for {{division.name}}" style="max-height: 235px;" />
               </a>
               <h4 class="division-name">
-                <a data-ng-href="http://nypl.org/locations/{{division.slug}}"
+                <a data-ng-href="/locations/{{division.slug}}"
                   analytics-on="click" analytics-category="Research Collections"
                   analytics-event="Division Title" analytics-label="{{division.name}}">
                   {{division.name}}
