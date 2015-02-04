@@ -40,6 +40,7 @@ Updates were made to the following bower components:
     - The API has been changed.
 
 ~~~~
+// Before
 function httpInterceptor($httpProvider) {
     ...
     var interceptor = ... function ($q, $injector, $location) {
@@ -48,7 +49,7 @@ function httpInterceptor($httpProvider) {
         };
     }
 }
-// Instead of returning a function with a promise,
+// Now. Instead of returning a function with a promise,
 // the new layout returns an object with request, reponse, and other properties.
 function nyplInterceptor($q, $injector) {
     ...
@@ -64,7 +65,7 @@ function nyplInterceptor($q, $injector) {
         ...
     }
 }
-~~~~~
+~~~~
 
     - The $httpProvider now adds interceptors through the `interceptors` property.
 
