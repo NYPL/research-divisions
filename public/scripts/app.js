@@ -4,7 +4,7 @@
 // Declare an http interceptor that will signal
 // the start and end of each request
 // Credit: Jim Lasvin -- https://github.com/lavinjj/angularjs-spinner
-function nyplInterceptor ($q, $injector) {
+function nyplInterceptor($q, $injector) {
     var $http, notificationChannel;
 
     return {
