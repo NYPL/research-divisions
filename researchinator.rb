@@ -55,36 +55,6 @@ class Researchinator < Sinatra::Base
     end
   end
 
-  get %r{/amenities/loc/(.+)$}, :spider => true do
-    api = Lionactor::Client.new
-    @loc = api.location(params['captures'].first)
-    erb :seo_amenities_one_location
-  end
-
-  get %r{/amenities/id/(\d+)$}, :spider => true do
-    api = Lionactor::Client.new
-    @amenity = api.amenity(params['captures'].first)
-    erb :seo_one_amenity
-  end
-
-  get %r{/amenities$}, :spider => true do
-    api = Lionactor::Client.new
-    @amenities = api.amenities.group_by{|a| a.category}
-    erb :seo_amenities
-  end
-  
-  get %r{/divisions/(.+/)?(.+)$}, :spider => true do
-    api = Lionactor::Client.new
-    @div = api.division(params['captures'][1])
-    erb :seo_division
-  end
-
-  get %r{/(.+)$}, :spider => true do
-    api = Lionactor::Client.new
-    @location = api.location(params['captures'].first)
-    erb :seo_location
-  end
-
   get '/', :spider => true do
     api = Lionactor::Client.new
     @divisions = api.divisions
