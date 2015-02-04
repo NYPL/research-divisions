@@ -30,6 +30,7 @@
         <span class='filterable-by'>
           <button data-ng-repeat="term in terms" class="categoryTerm"
             data-ng-click="selectCategory($index, term)" data-ng-class="{active: categorySelected == $index}"
+            data-ng-keyup="selectCategory($index, term)"
             analytics-on="click" analytics-category="Research Collections"
             analytics-event="Main Filter" analytics-label="{{term.name}}">
             {{::term.name}}

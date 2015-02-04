@@ -74,7 +74,8 @@ angular.module('nypl_research_collections', [
     'nyplNavigation',
     'nyplSSO',
     'nyplBreadcrumbs',
-    'nyplSearch'
+    'nyplSearch',
+    'ngAria'
 ])
 .config([
     '$analyticsProvider',
