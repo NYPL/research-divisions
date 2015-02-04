@@ -29,19 +29,19 @@ describe('Research Collections: Google Analytics', function () {
 
   // Structure of pageview array for angularitics plugin
   // ['send', 'pageview', 'URL']
-  describe('Page view tracking', function () {
-    it('should track a page view', function () {
-      browser.get('/');
-      browser.waitForAngular();
-      browser.executeScript(mockGA());
+  // describe('Page view tracking', function () {
+  //   it('should track a page view', function () {
+  //     browser.get('/');
+  //     browser.waitForAngular();
+  //     browser.executeScript(mockGA());
 
-      browser.executeScript('return window.ga_msg;').then(function (ga) {
-        console.log(ga);
-        expect(ga[0][1]).toEqual('pageview');
-        expect(ga[0][2]).toEqual('/research-collections');
-      });
-    });
-  });
+  //     browser.executeScript('return window.ga_msg;').then(function (ga) {
+  //       console.log(ga);
+  //       expect(ga[0][1]).toEqual('pageview');
+  //       expect(ga[0][2]).toEqual('/research-collections');
+  //     });
+  //   });
+  // });
 
   // Structure of event array for angularitics plugin
   // ['send', 'event', {eventLabel: '', eventAction: '', eventCategory: ''}]
@@ -166,7 +166,6 @@ describe('Research Collections: Google Analytics', function () {
           element(by.linkText('Psychology')).click();
 
           browser.executeScript('return window.ga_msg;').then(function (ga) {
-            console.log(ga);
             expect(ga[3][2].eventCategory).toEqual('Research Collections');
             expect(ga[3][2].eventAction).toEqual('Click');
             expect(ga[3][2].eventLabel).toEqual('Subjects: Social Sciences - Psychology');
@@ -269,7 +268,7 @@ describe('Research Collections: Google Analytics', function () {
       });
 
       it('should track a click on Schwazman Building', function () {
-        element(by.linkText('Stephen A. Schwarzman Building')).click();
+        element(by.linkText('Schwarzman Building')).click();
 
         browser.executeScript('return window.ga_msg;').then(function (ga) {
           expect(ga[1][2].eventCategory).toEqual('Research Collections');
@@ -279,7 +278,7 @@ describe('Research Collections: Google Analytics', function () {
       });
 
       it('should track a click on Schomburg Center', function () {
-        element(by.linkText('Schomburg Center for Research in Black Culture')).click();
+        element(by.linkText('Schomburg Center')).click();
 
         browser.executeScript('return window.ga_msg;').then(function (ga) {
           expect(ga[1][2].eventCategory).toEqual('Research Collections');
@@ -289,7 +288,7 @@ describe('Research Collections: Google Analytics', function () {
       });
 
       it('should track a click on Library for the Performing Arts', function () {
-        element(by.linkText('New York Public Library for the Performing Arts, Dorothy and Lewis B. Cullman Center')).click();
+        element(by.linkText('Library for the Performing Arts')).click();
 
         browser.executeScript('return window.ga_msg;').then(function (ga) {
           expect(ga[1][2].eventCategory).toEqual('Research Collections');
@@ -299,7 +298,7 @@ describe('Research Collections: Google Analytics', function () {
       });
 
       it('should track a click on Science, Industry and Business Library', function () {
-        element(by.linkText('Science, Industry and Business Library (SIBL)')).click();
+        element(by.linkText('Science, Industry and Business Library')).click();
 
         browser.executeScript('return window.ga_msg;').then(function (ga) {
           expect(ga[1][2].eventCategory).toEqual('Research Collections');
@@ -415,7 +414,7 @@ describe('Research Collections: Google Analytics', function () {
       describe('Locations Filters', function () {
         it('should add and remove the Schomburg Center location', function () {
           locationFilter.click();
-          element(by.linkText('Schomburg Center for Research in Black Culture')).click();
+          element(by.linkText('Schomburg Center')).click();
 
           expect(collectionsPage.currentLocationsFilter.getText())
             .toEqual('Schomburg Center');
@@ -431,7 +430,7 @@ describe('Research Collections: Google Analytics', function () {
 
         it('should add and remove the Schwarzman Building location', function () {
           locationFilter.click();
-          element(by.linkText('Stephen A. Schwarzman Building')).click();
+          element(by.linkText('Schwarzman Building')).click();
 
           expect(collectionsPage.currentLocationsFilter.getText())
             .toEqual('Schwarzman Building');

@@ -91,8 +91,8 @@
                   {{division.name}}
                 </a>
               </h4>
-              <span>{{division._embedded.location.short_name}}</span>
-              <p data-ng-if="division.hours">Hours Today: {{division.hoursToday | timeFormat}}</p>
+              <span class="icon-location">{{division._embedded.location.short_name}}</span>
+              <p class="icon-clock" data-ng-if="division.hours">Hours Today: {{division.hoursToday | timeFormat}}</p>
             </div>
 
             <!-- SIBL  -->
@@ -110,7 +110,7 @@
                   {{division.name}}
                 </a>
               </h4>
-              <p data-ng-if="division.hours">Hours Today: {{division.hoursToday | timeFormat}}</p>
+              <p class="icon-clock" data-ng-if="division.hours">Hours Today: {{division.hoursToday | timeFormat}}</p>
             </div>
             <!-- SIBL END -->
           </div>

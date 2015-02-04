@@ -20,20 +20,20 @@ exports.config = {
   // Spec patterns are relative to the current working directly when
   // protractor is called.
   suites: {
-    collections: ['test/e2e/collections/collections.spec.js'],
-    collections_ga: ['test/e2e/collections/collections-ga.spec.js']
+    collections: ['test/e2e/collections/collections.spec.js',
+      'test/e2e/collections/collections-ga.spec.js']
   },
 
   onPrepare: function () {
     'use strict';
 
-  //   // This will generate a screenshot for every test, a json file,
-  //   // and an html page with all the results:
-  //   jasmine.getEnv().addReporter(new HtmlReporter({
-  //     baseDirectory: 'test/results/e2e_html_screenshots'
-  //   }));
+    // This will generate a screenshot for every test, a json file,
+    // and an html page with all the results:
+    // jasmine.getEnv().addReporter(new HtmlReporter({
+    //   baseDirectory: 'test/results/e2e_html_screenshots'
+    // }));
 
-  //   // Generates an xml file
+    // Generates an xml file
     require('jasmine-reporters');
     jasmine.getEnv()
       .addReporter(
