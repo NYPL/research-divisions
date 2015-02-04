@@ -67,10 +67,9 @@ function httpInterceptor($httpProvider) {
             }
         ];
 
-    $httpProvider.responseInterceptors.push(interceptor);
+    $httpProvider.interceptors.push(interceptor);
 }
 httpInterceptor.$inject = ["$httpProvider"];
-
 
 /**
  * @ngdoc overview
@@ -152,7 +151,7 @@ angular.module('nypl_research_collections', [
         // var home_url = window.rq_forwarded ? '/' : '/research-collections';
         $urlRouterProvider.otherwise('/');
         $stateProvider
-            .state('division', {
+            .state('home', {
                 url: '/',
                 templateUrl: 'views/research-collections.html',
                 controller: 'CollectionsCtrl',
@@ -164,6 +163,10 @@ angular.module('nypl_research_collections', [
                 data: {
                     crumbName: 'Research Collections'
                 }
+            })
+            .state('lost', {
+                url: '/404',
+                templateUrl: 'views/404.html'
             });
     }
 ])
@@ -3145,6 +3148,7 @@ console, $location, $ */
         .filter('dateToISO', dateToISO)
         .filter('capitalize', capitalize)
         .filter('hoursTodayFormat', hoursTodayFormat)
+        .filter('truncate', truncate)
         .filter('slugify', slugify);
 })();
 

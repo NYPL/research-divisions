@@ -32,7 +32,7 @@
             data-ng-click="selectCategory($index, term)" data-ng-class="{active: categorySelected == $index}"
             analytics-on="click" analytics-category="Research Collections"
             analytics-event="Main Filter" analytics-label="{{term.name}}">
-            {{term.name}}
+            {{::term.name}}
           </button>
         </span>
 
@@ -43,7 +43,7 @@
                 data-ng-model="term.name" data-ng-class="{active: $index == selectedSubjectsSubterm}"
                 analytics-on="click" analytics-category="Research Collections"
                 analytics-event="Click" analytics-label="{{terms[0].name}}: {{term.name}}">
-                {{term.name}}
+                {{::term.name}}
               </a>
               <collapsible-filters data="term.terms" parent-term-name="term.name" data-ng-if="term.terms" filter-item="filterDivisionsBy($index,term)" filtered-results="filter_results"></collapsible-filters>
             </li>
@@ -52,7 +52,7 @@
                 data-ng-model="term.name" data-ng-class="{active: $index == selectedMediaSubterm}"
                 analytics-on="click" analytics-category="Research Collections"
                 analytics-event="Click" analytics-label="{{terms[1].name}}: {{term.name}}">
-                {{term.name}}
+                {{::term.name}}
               </a>
             </li>
             <li class="term {{term.name}} locationSubterms" data-ng-repeat="term in terms[2].locations" data-ng-show="activeCategory == 'Locations'">
@@ -60,7 +60,7 @@
                 data-ng-model="term.name" data-ng-class="{active: $index == selectedLocationsSubterm}"
                 analytics-on="click" analytics-category="Research Collections"
                 analytics-event="Click" analytics-label="{{terms[2].name}}: {{term.short_name}}">
-                {{term.short_name}}
+                {{::term.short_name}}
               </a>
             </li>
           </ul>
@@ -88,10 +88,10 @@
                 <a data-ng-href="/locations/divisions/{{division.slug}}"
                   analytics-on="click" analytics-category="Research Collections"
                   analytics-event="Division Title" analytics-label="{{division.name}}">
-                  {{division.name}}
+                  {{::division.name}}
                 </a>
               </h4>
-              <span class="icon-location">{{division._embedded.location.short_name}}</span>
+              <span class="icon-location">{{::division._embedded.location.short_name}}</span>
               <p class="icon-clock" data-ng-if="division.hours">Hours Today: {{division.hoursToday | timeFormat}}</p>
             </div>
 
@@ -107,7 +107,7 @@
                 <a data-ng-href="/locations/{{division.slug}}"
                   analytics-on="click" analytics-category="Research Collections"
                   analytics-event="Division Title" analytics-label="{{division.name}}">
-                  {{division.name}}
+                  {{::division.name}}
                 </a>
               </h4>
               <p class="icon-clock" data-ng-if="division.hours">Hours Today: {{division.hoursToday | timeFormat}}</p>
