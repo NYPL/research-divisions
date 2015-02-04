@@ -65,11 +65,9 @@ function nyplInterceptor($q, $injector) {
         ...
     }
 }
-~~~~
 
-    - The $httpProvider now adds interceptors through the `interceptors` property.
+// The $httpProvider now adds interceptors through the `interceptors` property.
 
-~~~~
 // Before
 $httpProvider.responseInterceptors.push(interceptor);
 // Now
