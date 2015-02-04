@@ -214,5 +214,6 @@
         .filter('dateToISO', dateToISO)
         .filter('capitalize', capitalize)
         .filter('hoursTodayFormat', hoursTodayFormat)
+        .filter('truncate', truncate)
         .filter('slugify', slugify);
 })();

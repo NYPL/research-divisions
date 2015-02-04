@@ -2,7 +2,7 @@
 /*globals element, by, module, module, window, jasmine,
 describe, expect, beforeEach, inject, it, angular, spyOn */
 
-describe('Locinator State Routing', function () {
+describe('Researchinator State Routing', function () {
   'use strict';
 
   var $rootScope, $injector, $state, $httpBackend, nyplLocationsService,
@@ -12,6 +12,7 @@ describe('Locinator State Routing', function () {
     };
 
   function testStateConfig(stateConfig, expectedConfig) {
+    console.log(expectedConfig);
     expect(stateConfig.url).toEqual(expectedConfig.url);
     expect(stateConfig.abstract).toBe(expectedConfig.abstract);
     expect(stateConfig.templateUrl).toEqual(expectedConfig.templateUrl);
@@ -19,18 +20,13 @@ describe('Locinator State Routing', function () {
     expect(stateConfig.label).toEqual(expectedConfig.label);
   }
 
-  describe('Locinator', function () {
+  describe('Researchinator', function () {
     beforeEach(function () {
       module('nypl_research_collections', function ($provide) {
-        $provide.value('config', config = {});
+        // $provide.value('config', config = {});
         $provide.value('nyplLocationsService', nyplLocationsService = {});
         nyplLocationsService.getConfig = jasmine.createSpy('getConfig')
           .and.returnValue(configObj);
-        nyplLocationsService.singleDivision =
-          jasmine.createSpy('singleDivision')
-          .and.returnValue({division: 'Map Division'});
-        nyplLocationsService.amenities = jasmine.createSpy('amenities')
-          .and.returnValue({amenities: 'amenities'});
       });
 
       inject(function (_$rootScope_, _$state_, _$injector_, _$httpBackend_) {
@@ -54,10 +50,10 @@ describe('Locinator State Routing', function () {
         stateConfig = $state.get(state);
         expectedConfig = {
           url: '/',
-          abstract: true,
-          templateUrl: 'views/locations.html',
-          controller: 'LocationsCtrl',
-          label: 'Locations'
+          abstract: undefined,
+          templateUrl: 'views/research-collections.html',
+          controller: 'CollectionsCtrl',
+          label: 'Research Collections'
         };
 
         testStateConfig(stateConfig, expectedConfig);
@@ -66,7 +62,7 @@ describe('Locinator State Routing', function () {
 
       
       it('should return the 404 state', function () {
-        state = '404';
+        state = 'lost';
         stateConfig = $state.get(state);
         expectedConfig = {
           url: '/404',
@@ -85,51 +81,6 @@ describe('Locinator State Routing', function () {
     describe('Router URLs', function () {
       it('should go to the home page', function () {
         expect($state.href('home')).toEqual('/');
-      });
-
-      it('should go to the list page', function () {
-        expect($state.href('home.list')).toEqual('/list');
-      });
-
-      it('should go to the map page', function () {
-        expect($state.href('home.map')).toEqual('/map');
-      });
-
-      it('should go to a subdivision page', function () {
-        expect($state.href('subdivision', {
-          division: 'general-research-division',
-          subdivision: 'periodicals-room'
-        })).toEqual('/divisions/general-research-division/periodicals-room');
-      });
-
-      it('should go to a division page', function () {
-        expect($state.href('division', {division: 'map-division'}))
-          .toEqual('/divisions/map-division');
-      });
-
-      it('should go to the all amenities page', function () {
-        expect($state.href('amenities')).toEqual('/amenities');
-      });
-
-      it('should go to an amenity page', function () {
-        expect($state.href('amenity', {amenity: '7950'}))
-          .toEqual('/amenities/id/7950');
-      });
-
-      it('should go to an amenities at location page', function () {
-        expect($state.href(
-          'amenities-at-location',
-          {location: 'grand-central'}
-        )).toEqual('/amenities/loc/grand-central');
-      });
-
-      it('should go to a 404 page', function () {
-        expect($state.href('404')).toEqual('/404');
-      });
-
-      it('should go to a location page', function () {
-        expect($state.href('location', {location: 'schwarzman'}))
-          .toEqual('/schwarzman');
       });
     });
   });
