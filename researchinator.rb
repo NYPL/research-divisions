@@ -87,9 +87,10 @@ class Researchinator < Sinatra::Base
 
   get '/', :spider => true do
     api = Lionactor::Client.new
-    @locations = api.locations
-    erb :seo_index
+    @divisions = api.divisions
+    erb :seo_rc
   end
+
 
   get %r{/} do
     @rq = request
