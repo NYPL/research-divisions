@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+  <head>
+    <title>NYPL | Research Collections</title>
+    <meta name="twitter:card" content="summary" />
+    <meta property="og:title" content="Research Collections" />
+    <meta property="og:site_name" content="The New York Public Library" />
+    <meta property="og:url" content="http://nypl.org/locations" />
+    <meta property="og:description" content="Research Collections" />
+    <meta property="og:type" content="website" />
+
+    <meta name="keywords" content="NYPL, The New York Public Library, Research Collections %>" />
+
+  <% if settings.researchinator_env == "local" %>
+    <base href="/">
+  <% else %>
+    <base href="<%= settings.baseurl %>">
+  <% end %>
+
+  </head>
+  <body>
+    <h1>Research Collections</h1>
+
+    <ul>
+    <% @divisions.each do |d| %>
+      <li>  
+        <div><a href="/locations/divisions/<%= d.slug %>"><%= d.name %></a></div>
+	<div><%= d.embedded['location']['name'] %></div>
+	<% if !d.terms.nil? %>
+	  <ul>
+          <% d.terms.each do |t| %>
+	    <li>
+	      <%= t.name %>:
+              <%= t.terms.map{ |tt| tt.name }.join(", ") %>
+            </li>
+          <% end %>
+	</ul>
+	<% end %>
+      </li>
+    <% end %>
+    </ul>
+    
+  </body>
+</html>
