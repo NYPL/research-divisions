@@ -152,7 +152,7 @@ angular.module('nypl_research_collections', [
         // var home_url = window.rq_forwarded ? '/' : '/research-collections';
         $urlRouterProvider.otherwise('/');
         $stateProvider
-            .state('division', {
+            .state('home', {
                 url: '/',
                 templateUrl: 'views/research-collections.html',
                 controller: 'CollectionsCtrl',
@@ -164,6 +164,10 @@ angular.module('nypl_research_collections', [
                 data: {
                     crumbName: 'Research Collections'
                 }
+            })
+            .state('lost', {
+                url: '/404',
+                templateUrl: 'views/404.html'
             });
     }
 ])
@@ -2649,6 +2653,29 @@ console, $location, $ */
 
   /**
    * @ngdoc directive
+   * @name nypl_locations.directive:closeSubMenu
+   * @restrict A
+   * @description
+   *  Closes modal menus for children if they are open. Related to
+   *  the collapsibleFilters directive.
+   * @example
+   *  <a href="#" closeSubMenu>...</a>
+   */
+  function closeSubMenu() {
+    return {
+      restrict: 'A',
+      scope: false,
+      link: function ($scope, elem, attrs) {
+        elem.click(function () {
+          $('.collapsible-control').removeClass('open');
+          $('.collapsible-filters').removeClass('open');
+        });
+      }
+    };
+  }
+
+  /**
+   * @ngdoc directive
    * @name nypl_locations.directive:nyplAutofill
    * @restrict AEC
    * @scope
@@ -2923,6 +2950,7 @@ console, $location, $ */
   angular
     .module('nypl_research_collections')
     .directive('collapse', collapse)
+    .directive('closeSubMenu', closeSubMenu)
     .directive('collapsibleFilters', collapsibleFilters)
     .directive('nyplFooter', nyplFooter)
     .directive('loadingWidget', loadingWidget);
@@ -3145,6 +3173,7 @@ console, $location, $ */
         .filter('dateToISO', dateToISO)
         .filter('capitalize', capitalize)
         .filter('hoursTodayFormat', hoursTodayFormat)
+        .filter('truncate', truncate)
         .filter('slugify', slugify);
 })();
 
