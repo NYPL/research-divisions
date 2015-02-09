@@ -10,7 +10,8 @@
       <div>
         <span data-ng-repeat='activeFilter in filter_results | filter:{active: true}'>
           {{activeFilter.label}}: 
-          <a data-ng-click="removeFilter(activeFilter)" class="active-filter active-filter-{{activeFilter.label}}"
+          <a data-ng-click="removeFilter(activeFilter)" close-sub-menu
+            class="active-filter active-filter-{{activeFilter.label}}"
             analytics-on="click" analytics-category="Research Collections"
             analytics-event="Click" analytics-label="Remove {{activeFilter.label}}: {{activeFilter.name}}">
             {{activeFilter.name}}
