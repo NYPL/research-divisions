@@ -7,6 +7,7 @@
     <li data-ng-repeat='filter in items'>
       <a href="" data-ng-click="filterItem({term:filter}); checkActiveFilter(filteredResults, filter.id)"
         data-ng-class="{'active': activeFilter.id == filter.id}"
+        close-sub-menu
         analytics-on="click" analytics-category="Research Collections"
         analytics-event="Click" analytics-label="Subjects: {{parentTermName}} - {{filter.name}}">
         {{filter.name}}
