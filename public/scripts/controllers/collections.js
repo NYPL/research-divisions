@@ -92,7 +92,7 @@ console, $location, $ */
           });
       };
 
-    $rootScope.title = "Research Collections";
+    $rootScope.title = "Research Divisions";
     $scope.filter_results = [
       {label: 'Subjects', name: '', id: undefined, active: false, subterms: undefined},
       {label: 'Media', name: '', id: undefined, active: false},

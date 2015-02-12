@@ -159,7 +159,7 @@ angular.module('nypl_research_collections', [
                     divisions: LoadDivisions
                 },
                 data: {
-                    crumbName: 'Research Collections'
+                    crumbName: 'Research Divisions'
                 }
             })
             .state('lost', {
