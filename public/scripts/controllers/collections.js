@@ -7,6 +7,7 @@ console, $location, $ */
   function CollectionsCtrl(
     $scope,
     $rootScope,
+    $timeout,
     config,
     divisions,
     nyplLocationsService,
@@ -91,7 +92,7 @@ console, $location, $ */
           });
       };
 
-    $rootScope.title = "Research Collections";
+    $rootScope.title = "Research Divisions";
     $scope.filter_results = [
       {label: 'Subjects', name: '', id: undefined, active: false, subterms: undefined},
       {label: 'Media', name: '', id: undefined, active: false},
@@ -100,6 +101,13 @@ console, $location, $ */
     
     // Assign Today's hours
     getHoursToday(divisions);
+    // Assign short name to every location in every division
+    _.each(divisions, function (division) {
+      var location = division._embedded.location;
+      location.short_name =
+        config.research_shortnames[location.id];
+    });
+
     $scope.divisions = divisions;
     $scope.terms = [];
 
@@ -331,6 +339,14 @@ console, $location, $ */
 
       // Highlight the current selected subterm
       activeSubterm(selectedTerm);
+
+      // Hides wrapper on mobile only after selection of filter
+      if (nyplUtility.isMobile()) {
+        $timeout( function() {
+          $scope.categorySelected = undefined;
+          $scope.activeCategory = undefined;
+        }, 700);
+      }
 
       // // Save the filtered divisions for later.
       // researchCollectionService

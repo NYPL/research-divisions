@@ -1,9 +1,9 @@
 GIT
   remote: https://bitbucket.org/rdmond/lionactor
-  revision: 4e77a2924579d43e95e60f0078c4c836bc117b01
-  tag: 0.0.10
+  revision: 9bd3b122ffbd2c2dde1f0e04ce22305303279767
+  tag: 0.0.12
   specs:
-    lionactor (0.0.10)
+    lionactor (0.0.12)
       faraday
 
 GEM
@@ -18,7 +18,7 @@ GEM
     kgio (2.9.3)
     multi_json (1.10.1)
     multipart-post (2.0.0)
-    rack (1.6.0)
+    rack (1.5.2)
     rack-protection (1.5.3)
       rack
     rack-test (0.6.3)
@@ -60,6 +60,7 @@ DEPENDENCIES
   json
   kgio
   lionactor!
+  rack (~> 1.5.0)
   rack-test
   rspec
   sinatra

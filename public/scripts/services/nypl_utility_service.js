@@ -302,17 +302,13 @@
           today = date || new Date(),
           holidays = [
             {
-              day: new Date(2014, 11, 31),
-              title: "The Library will close at 3 p.m. today"
+              day: new Date(2015, 0, 26),
+              title: "Closing at 5 pm due to severe weather" // Winter storm early closing
             },
             {
-              day: new Date(2015, 0, 1),
-              title: "Closed for New Year's Day"
-            },
-            {
-              day: new Date(2015, 0, 19),
-              title: "Closed for Martin Luther King, Jr. Day"
-            },
+              day: new Date(2015, 0, 27),
+              title: "Closed due to severe weather" // Winter storm early closing
+            },           
             {
               day: new Date(2015, 1, 16),
               title: "Closed for Presidents' Day"
@@ -500,6 +496,18 @@
 
       $window.open(icalLink);
       return icalLink;
+    };
+
+    /**
+     * @ngdoc function
+     * @name isMobile
+     * @methodOf nypl_locations.service:nyplUtility
+     * @description Helper function that checks browser viewport
+     * based off 480px to determine if it is a mobile device.
+     */
+    utility.isMobile = function () {
+      var mobileView = $window.matchMedia("(min-width: 480px)");
+      return (mobileView.matches) ? false : true;
     };
 
     /**

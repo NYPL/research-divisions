@@ -436,6 +436,7 @@
       replace: false,
       scope: {
         items: '=data',
+        parentTermName: '=',
         filterItem: '&',
         filteredResults: '='
       },
@@ -459,6 +460,29 @@
         $scope.checkActiveFilter = function(results, termID) {
           return $scope.activeFilter = _.findWhere(results, {id: termID});
         }
+      }
+    };
+  }
+
+  /**
+   * @ngdoc directive
+   * @name nypl_locations.directive:closeSubMenu
+   * @restrict A
+   * @description
+   *  Closes modal menus for children if they are open. Related to
+   *  the collapsibleFilters directive.
+   * @example
+   *  <a href="#" closeSubMenu>...</a>
+   */
+  function closeSubMenu() {
+    return {
+      restrict: 'A',
+      scope: false,
+      link: function ($scope, elem, attrs) {
+        elem.click(function () {
+          $('.collapsible-control').removeClass('open');
+          $('.collapsible-filters').removeClass('open');
+        });
       }
     };
   }
@@ -739,6 +763,7 @@
   angular
     .module('nypl_research_collections')
     .directive('collapse', collapse)
+    .directive('closeSubMenu', closeSubMenu)
     .directive('collapsibleFilters', collapsibleFilters)
     .directive('nyplFooter', nyplFooter)
     .directive('loadingWidget', loadingWidget);

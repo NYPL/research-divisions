@@ -99,17 +99,21 @@ angular.module('nypl_research_collections', [
     'nyplSearch'
 ])
 .config([
+    '$analyticsProvider',
     '$locationProvider',
     '$stateProvider',
     '$urlRouterProvider',
     '$crumbProvider',
     function (
+        $analyticsProvider,
         $locationProvider,
         $stateProvider,
         $urlRouterProvider,
         $crumbProvider
     ) {
         'use strict';
+
+        $analyticsProvider.virtualPageviews(false);
 
         function LoadDivisions(config, nyplLocationsService) {
             return nyplLocationsService
@@ -143,9 +147,9 @@ angular.module('nypl_research_collections', [
         });
 
         // var home_url = window.rq_forwarded ? '/' : '/research-collections';
-        // $urlRouterProvider.otherwise('/');
+        $urlRouterProvider.otherwise('/');
         $stateProvider
-            .state('division', {
+            .state('home', {
                 url: '/',
                 templateUrl: 'views/research-collections.html',
                 controller: 'CollectionsCtrl',
@@ -155,10 +159,19 @@ angular.module('nypl_research_collections', [
                     divisions: LoadDivisions
                 },
                 data: {
-                    crumbName: 'Research Collections'
+                    crumbName: 'Research Divisions'
                 }
+            })
+            .state('lost', {
+                url: '/404',
+                templateUrl: 'views/404.html'
             });
     }
 ])
-.config(httpInterceptor);
+.config(httpInterceptor)
+.run(function ($analytics, $rootScope) {
+    $rootScope.$on('$viewContentLoaded', function () {
+        $analytics.pageTrack('/research-collections');
+    });
+});
 

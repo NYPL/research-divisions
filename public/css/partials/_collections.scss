@@ -2,143 +2,164 @@
 .research-collections {
 
   button {
-  	&.active {
-	    background: #fff;
-	    border: 1px solid #0090c4;
-	    color: #0090c4;
-  	}
+    &.active {
+      background: #fff;
+      border: 1px solid #0090c4;
+      color: #0090c4;
+    }
+  }
+
+  .rc-intro {
+    margin: 10px 0;
   }
 }
 
 .collection-filters {
-	background-color: #ebe8e6;
-	border-width: 1px;
-	border-style: solid;
-	border-color: #c5c2bb;
-	border-radius: 2px;
-	padding: 12px;
-	margin: 0px 0px 24px 0px;
+  background-color: #ebe8e6;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #c5c2bb;
+  border-radius: 2px;
+  padding: 12px;
+  margin: 0px 0px 24px 0px;
 
-	.active-filters {
-		margin-bottom: 15px;
+  .active-filters {
+    margin-bottom: 15px;
 
-		div {
-			display: inline;
+    div {
+      display: inline;
 
-			> span {
-				margin-left: 5px;
-				display: block;
+      > span {
+        margin-left: 5px;
+        display: block;
 
-				@include breakpoint($min, $mobile-phone) {
-					display: inline-block;
-				}
-			}
-		}
+        @include breakpoint($min, $mobile-phone) {
+          display: inline-block;
+        }
+      }
+    }
 
-		a.active-filter {
-			cursor: pointer;
-		}
+    a.active-filter {
+      cursor: pointer;
+    }
 
-		.icon-cancel-circle {
-			margin-left: -5px;
-		}
-	}
+    .icon-cancel-circle {
+      margin-left: -5px;
+    }
+  }
 
-	.main-filters {
-		.heading {
-			display: block;
-			position: relative;
+  .main-filters {
+    .heading {
+      display: block;
+      position: relative;
 
-			@include breakpoint($min, $mobile-phone) {
-				display: inline;
-			}
+      @include breakpoint($min, $mobile-phone) {
+        display: inline;
+      }
 
-			.main-filter-toggle {
-				display: inline;
-				position: absolute;
-				width: 88px;
-				left: 0px;
-				top: 5px;
-				text-align: right;
+      .main-filter-toggle {
+        display: inline;
+        position: absolute;
+        width: 88px;
+        left: 0px;
+        top: 5px;
+        text-align: right;
 
-				&:hover {
-					cursor: pointer;
-				}
+        @include breakpoint($min, 480px) {
+          top: 2.5px;
+        }
 
-				@include breakpoint($min, $post-palm) {
-					display: none;
-				}
-			}
-		}
+        &:hover {
+          cursor: pointer;
+        }
 
-		.filters-wrapper {
-			display: block;
-			@include breakpoint($min, $post-palm) {
-				display: inline !important;
-			}
-		}
+        @include breakpoint($min, $post-palm) {
+          display: none;
+        }
+      }
+    }
 
-		.filterable-by {
-			button {
-				display: block;
-				margin: 10px auto;
-				width: 100%;
-				@include breakpoint($min, $post-palm) {
-					display: inline;
-					width: auto;
-					margin: 6px;
-				}
-			}
-		}
-	}
+    .filters-wrapper {
+      display: block;
+      @include breakpoint($min, $post-palm) {
+        display: inline !important;
+      }
+    }
 
-	.sub-filters {
-		margin: 5px 0px;
+    .filterable-by {
+      button {
+        display: block;
+        margin: 10px auto;
+        width: 100%;
+        @include breakpoint($min, $post-palm) {
+          display: inline;
+          width: auto;
+          margin: 6px;
+        }
+      }
+    }
+  }
 
-		@include breakpoint($min, $post-palm) {
-			margin: 0 0 0 73px;
-		}
+  .sub-filters {
+    margin: 5px 0px;
 
-		> ul {
-			margin: 0;
-			padding: 0;
-			list-style-type: none;
+    @include breakpoint($min, $post-palm) {
+      margin: 0 0 0 73px;
+    }
 
-			> li {
-				margin: 6px 10px 8px;
-				padding: 2px 0px;
+    > ul {
+      margin: 0;
+      padding: 0;
+      list-style-type: none;
 
-				@include breakpoint($min, 481px) {
-					margin: 8px 0px;
-				}
+      > li {
+        margin: 6px 10px 8px;
+        padding: 2px 0px;
 
-				> a {
-					margin: 0px;
-					padding: 5px;
-					display: inline-block;
-					text-decoration: none;
-					border: 1px solid #CCC;
-					width: 82%;
-					@include breakpoint($min, 360px) {
-						width: 85%;
-					}
+        @include breakpoint($min, 481px) {
+          margin: 8px 0px;
+        }
 
-					@include breakpoint($min, 481px) {
-						width: auto;
-						padding: 5px 10px;
-					}
-					&.active {
-				    background: #fff;
-				    border: 1px solid #0090c4;
-				    color: #0090c4;
-				    border-radius: 2px;
-			 		}
-				}
-			}
-		}
-	}
+        > a {
+          margin: 0px;
+          padding: 5px;
+          display: inline-block;
+          text-decoration: none;
+          border: 1px solid #CCC;
+          width: 82%;
+          @include breakpoint($min, 360px) {
+            width: 85%;
+          }
+
+          @include breakpoint($min, 481px) {
+            width: auto;
+            padding: 5px 10px;
+          }
+          &.active {
+            background: #fff;
+            border: 1px solid #0090c4;
+            color: #0090c4;
+            border-radius: 2px;
+          }
+        }
+      }
+    }
+  }
 }
 
+// ng-show/ng-hide animations
+.show-hide-animate.ng-hide-add {
+  display: block !important; // Needed to animate out
+  -webkit-animation: fadeOut 0.2s;
+  animation: fadeOut 0.2s;
+}
+
+.show-hide-animate.ng-hide-remove {
+  -webkit-animation: fadeIn 0.5s;
+  animation: fadeIn 0.5s;
+}
+
+// ng-repeat animations
 .repeat-animation.ng-enter, 
 .repeat-animation.ng-leave, 
 .repeat-animation.ng-move {

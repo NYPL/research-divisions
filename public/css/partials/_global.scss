@@ -37,7 +37,7 @@
 		width: 55px;
 		height: 40px;
 		margin-top: -27.5px;
-		margin-left: -20px;
+		margin-left: -26px;
 		font-size: 2.5em;
 		left: 50%;
 		top: 40%;
@@ -507,8 +507,7 @@ time {
 	> li {
 			@include breakpoint($min, $post-palm) {
 				width: 50%;
-				float:left;
-				display:inline;
+				display:inline-block;
 			}
 	}
 }
@@ -517,8 +516,7 @@ time {
 	> li {
 		@include breakpoint($min, 481px) {
 			width: 50%;
-			float:left;
-			display:inline;			
+			display:inline-block;
 		}
 		@include breakpoint($min, $post-palm) {
 			width: 33.333%;
@@ -529,7 +527,7 @@ time {
 // Collapsible Filters Directive (Research Collections)
 .collapsible-filters {
 	position: absolute;
-	z-index: 2;
+	z-index: 1;
 	color: black;
 	background-color: white;
 	margin-top: 2px;
