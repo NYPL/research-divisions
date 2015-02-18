@@ -91,10 +91,10 @@
                 <a data-ng-href="/locations/divisions/{{division.slug}}"
                   analytics-on="click" analytics-category="Research Collections"
                   analytics-event="Division Title" analytics-label="{{division.name}}">
-                  {{::division.name}}
+                  {{division.name}}
                 </a>
               </h4>
-              <span class="icon-location">{{::division._embedded.location.short_name}}</span>
+              <span class="icon-location">{{division._embedded.location.short_name}}</span>
               <p class="icon-clock" data-ng-if="division.hours">Hours Today: {{division.hoursToday | timeFormat}}</p>
             </div>
 
@@ -110,7 +110,7 @@
                 <a data-ng-href="/locations/{{division.slug}}"
                   analytics-on="click" analytics-category="Research Collections"
                   analytics-event="Division Title" analytics-label="{{division.name}}">
-                  {{::division.name}}
+                  {{division.name}}
                 </a>
               </h4>
               <p class="icon-clock" data-ng-if="division.hours">Hours Today: {{division.hoursToday | timeFormat}}</p>
