@@ -275,7 +275,7 @@
           }
         });
 
-        if (!angular.isUndefined(todaysAlert)) {
+        if (!angular.isUndefined(todaysAlert) && todaysAlert.length) {
           return _.uniq(todaysAlert);
         }
       }
