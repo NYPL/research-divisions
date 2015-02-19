@@ -4,70 +4,48 @@
 // Declare an http interceptor that will signal
 // the start and end of each request
 // Credit: Jim Lasvin -- https://github.com/lavinjj/angularjs-spinner
-function httpInterceptor($httpProvider) {
-    'use strict';
+function nyplInterceptor($q, $injector) {
+    var $http, notificationChannel;
 
-    var $http,
-        interceptor = [
-            '$q',
-            '$injector',
-            '$location',
-            function ($q, $injector, $location) {
-                var notificationChannel;
-
-                function success(response) {
-                    // get $http via $injector because
-                    // of circular dependency problem
-                    $http = $http || $injector.get('$http');
-                    // don't send notification until all requests are complete
-                    if ($http.pendingRequests.length < 1) {
-                        // get requestNotificationChannel via $injector
-                        // because of circular dependency problem
-                        notificationChannel = notificationChannel ||
-                            $injector.get('requestNotificationChannel');
-                        // send a notification requests are complete
-                        notificationChannel.requestEnded();
-                    }
-                    return response;
-                }
-
-                function error(response) {
-                    var status = response.status;
-
-                    // get $http via $injector because
-                    // of circular dependency problem
-                    $http = $http || $injector.get('$http');
-                    // don't send notification until all requests are complete
-                    if ($http.pendingRequests.length < 1) {
-                        // get requestNotificationChannel via $injector
-                        // because of circular dependency problem
-                        notificationChannel = notificationChannel ||
-                            $injector.get('requestNotificationChannel');
-                        // send a notification requests are complete
-                        notificationChannel.requestEnded();
-                    }
-                    // Intercept 404 error code from server
-                    if (status === 404) {
-                        $location.path('/404');
-                        return $q.reject(response);
-                    }
-
-                    return $q.reject(response);
-                }
-
-                return function (promise) {
-                    // get requestNotificationChannel via $injector
-                    // because of circular dependency problem
-                    notificationChannel = notificationChannel ||
-                        $injector.get('requestNotificationChannel');
-                    // send a notification requests are complete
-                    notificationChannel.requestStarted();
-                    return promise.then(success, error);
-                };
+    return {
+        request: function (config) {
+            // get $http via $injector because of circular dependency problem
+            $http = $http || $injector.get('$http');
+            // don't send notification until all requests are complete
+            if ($http.pendingRequests.length < 1) {
+                // get requestNotificationChannel via $injector
+                // because of circular dependency problem
+                notificationChannel = notificationChannel ||
+                    $injector.get('requestNotificationChannel');
+                // send a notification requests are complete
+                notificationChannel.requestStarted();
             }
-        ];
+            return config;
+        },
+        response: function (response) {
+            $http = $http || $injector.get('$http');
+            // don't send notification until all requests are complete
+            if ($http.pendingRequests.length < 1) {
+                notificationChannel = notificationChannel ||
+                    $injector.get('requestNotificationChannel');
+                // send a notification requests are complete
+                notificationChannel.requestEnded();
+            }
+                return response;
 
-    $httpProvider.responseInterceptors.push(interceptor);
+        },
+        responseError: function (rejection) {
+            $http = $http || $injector.get('$http');
+            // don't send notification until all requests are complete
+            if ($http.pendingRequests.length < 1) {
+                notificationChannel = notificationChannel ||
+                    $injector.get('requestNotificationChannel');
+                // send a notification requests are complete
+                notificationChannel.requestEnded();
+            }
+            return $q.reject(rejection);
+        }
+    };
 }
 
 
@@ -96,58 +74,38 @@ angular.module('nypl_research_collections', [
     'nyplNavigation',
     'nyplSSO',
     'nyplBreadcrumbs',
-    'nyplSearch'
+    'nyplSearch',
+    'ngAria'
 ])
 .config([
     '$analyticsProvider',
+    '$crumbProvider',
+    '$httpProvider',
     '$locationProvider',
     '$stateProvider',
     '$urlRouterProvider',
-    '$crumbProvider',
     function (
         $analyticsProvider,
+        $crumbProvider,
+        $httpProvider,
         $locationProvider,
         $stateProvider,
-        $urlRouterProvider,
-        $crumbProvider
+        $urlRouterProvider
     ) {
         'use strict';
 
         $analyticsProvider.virtualPageviews(false);
-
-        function LoadDivisions(config, nyplLocationsService) {
-            return nyplLocationsService
-                .allDivisions()
-                .then(function (data) {
-                    return data.divisions;
-                })
-                .catch(function (err) {
-                    throw err;
-                });
-        }
-
-        function getConfig(nyplLocationsService) {
-            return nyplLocationsService.getConfig();
-        }
-
-        // uses the HTML5 History API
-        $locationProvider.html5Mode(true);
-        $urlRouterProvider.rule(function ($injector, $location) {
-            var path = $location.url();
-
-            // Remove trailing slash if found
-            if (path[path.length - 1] === '/') {
-                return path.slice(0, -1);
-            }
-        });
 
         // Assign proper Breadcrumb name/paths
         $crumbProvider.setOptions({
             primaryState: {name:'Home', customUrl: 'http://nypl.org' }
         });
 
-        // var home_url = window.rq_forwarded ? '/' : '/research-collections';
-        $urlRouterProvider.otherwise('/');
+        $httpProvider.interceptors.push(nyplInterceptor);
+
+        // uses the HTML5 History API
+        $locationProvider.html5Mode(true);
+
         $stateProvider
             .state('home', {
                 url: '/',
@@ -166,12 +124,38 @@ angular.module('nypl_research_collections', [
                 url: '/404',
                 templateUrl: 'views/404.html'
             });
+
+        $urlRouterProvider.otherwise('/');
+        $urlRouterProvider.rule(function ($injector, $location) {
+            var path = $location.url();
+
+            // Remove trailing slash if found
+            if (path[path.length - 1] === '/') {
+                return path.slice(0, -1);
+            }
+        });
+
+         function LoadDivisions(config, nyplLocationsService) {
+            return nyplLocationsService
+                .allDivisions()
+                .then(function (data) {
+                    return data.divisions;
+                })
+                .catch(function (err) {
+                    throw err;
+                });
+        }
+
+        function getConfig(nyplLocationsService) {
+            return nyplLocationsService.getConfig();
+        }
+
     }
 ])
-.config(httpInterceptor)
-.run(function ($analytics, $rootScope) {
+.run(function ($analytics, $rootScope, $location) {
     $rootScope.$on('$viewContentLoaded', function () {
-        $analytics.pageTrack('/research-collections');
+        $analytics.pageTrack('/research-divisions');
+        $rootScope.current_url = $location.absUrl();
     });
 });
 

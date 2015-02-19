@@ -4,72 +4,50 @@
 // Declare an http interceptor that will signal
 // the start and end of each request
 // Credit: Jim Lasvin -- https://github.com/lavinjj/angularjs-spinner
-function httpInterceptor($httpProvider) {
-    'use strict';
+function nyplInterceptor($q, $injector) {
+    var $http, notificationChannel;
 
-    var $http,
-        interceptor = [
-            '$q',
-            '$injector',
-            '$location',
-            function ($q, $injector, $location) {
-                var notificationChannel;
-
-                function success(response) {
-                    // get $http via $injector because
-                    // of circular dependency problem
-                    $http = $http || $injector.get('$http');
-                    // don't send notification until all requests are complete
-                    if ($http.pendingRequests.length < 1) {
-                        // get requestNotificationChannel via $injector
-                        // because of circular dependency problem
-                        notificationChannel = notificationChannel ||
-                            $injector.get('requestNotificationChannel');
-                        // send a notification requests are complete
-                        notificationChannel.requestEnded();
-                    }
-                    return response;
-                }
-
-                function error(response) {
-                    var status = response.status;
-
-                    // get $http via $injector because
-                    // of circular dependency problem
-                    $http = $http || $injector.get('$http');
-                    // don't send notification until all requests are complete
-                    if ($http.pendingRequests.length < 1) {
-                        // get requestNotificationChannel via $injector
-                        // because of circular dependency problem
-                        notificationChannel = notificationChannel ||
-                            $injector.get('requestNotificationChannel');
-                        // send a notification requests are complete
-                        notificationChannel.requestEnded();
-                    }
-                    // Intercept 404 error code from server
-                    if (status === 404) {
-                        $location.path('/404');
-                        return $q.reject(response);
-                    }
-
-                    return $q.reject(response);
-                }
-
-                return function (promise) {
-                    // get requestNotificationChannel via $injector
-                    // because of circular dependency problem
-                    notificationChannel = notificationChannel ||
-                        $injector.get('requestNotificationChannel');
-                    // send a notification requests are complete
-                    notificationChannel.requestStarted();
-                    return promise.then(success, error);
-                };
+    return {
+        request: function (config) {
+            // get $http via $injector because of circular dependency problem
+            $http = $http || $injector.get('$http');
+            // don't send notification until all requests are complete
+            if ($http.pendingRequests.length < 1) {
+                // get requestNotificationChannel via $injector
+                // because of circular dependency problem
+                notificationChannel = notificationChannel ||
+                    $injector.get('requestNotificationChannel');
+                // send a notification requests are complete
+                notificationChannel.requestStarted();
             }
-        ];
+            return config;
+        },
+        response: function (response) {
+            $http = $http || $injector.get('$http');
+            // don't send notification until all requests are complete
+            if ($http.pendingRequests.length < 1) {
+                notificationChannel = notificationChannel ||
+                    $injector.get('requestNotificationChannel');
+                // send a notification requests are complete
+                notificationChannel.requestEnded();
+            }
+                return response;
 
-    $httpProvider.responseInterceptors.push(interceptor);
+        },
+        responseError: function (rejection) {
+            $http = $http || $injector.get('$http');
+            // don't send notification until all requests are complete
+            if ($http.pendingRequests.length < 1) {
+                notificationChannel = notificationChannel ||
+                    $injector.get('requestNotificationChannel');
+                // send a notification requests are complete
+                notificationChannel.requestEnded();
+            }
+            return $q.reject(rejection);
+        }
+    };
 }
-httpInterceptor.$inject = ["$httpProvider"];
+nyplInterceptor.$inject = ["$q", "$injector"];
 
 
 /**
@@ -97,60 +75,38 @@ angular.module('nypl_research_collections', [
     'nyplNavigation',
     'nyplSSO',
     'nyplBreadcrumbs',
-    'nyplSearch'
+    'nyplSearch',
+    'ngAria'
 ])
 .config([
     '$analyticsProvider',
+    '$crumbProvider',
+    '$httpProvider',
     '$locationProvider',
     '$stateProvider',
     '$urlRouterProvider',
-    '$crumbProvider',
     function (
         $analyticsProvider,
+        $crumbProvider,
+        $httpProvider,
         $locationProvider,
         $stateProvider,
-        $urlRouterProvider,
-        $crumbProvider
+        $urlRouterProvider
     ) {
         'use strict';
 
         $analyticsProvider.virtualPageviews(false);
-
-        function LoadDivisions(config, nyplLocationsService) {
-            return nyplLocationsService
-                .allDivisions()
-                .then(function (data) {
-                    return data.divisions;
-                })
-                .catch(function (err) {
-                    throw err;
-                });
-        }
-        LoadDivisions.$inject = ["config", "nyplLocationsService"];
-
-        function getConfig(nyplLocationsService) {
-            return nyplLocationsService.getConfig();
-        }
-        getConfig.$inject = ["nyplLocationsService"];
-
-        // uses the HTML5 History API
-        $locationProvider.html5Mode(true);
-        $urlRouterProvider.rule(function ($injector, $location) {
-            var path = $location.url();
-
-            // Remove trailing slash if found
-            if (path[path.length - 1] === '/') {
-                return path.slice(0, -1);
-            }
-        });
 
         // Assign proper Breadcrumb name/paths
         $crumbProvider.setOptions({
             primaryState: {name:'Home', customUrl: 'http://nypl.org' }
         });
 
-        // var home_url = window.rq_forwarded ? '/' : '/research-collections';
-        $urlRouterProvider.otherwise('/');
+        $httpProvider.interceptors.push(nyplInterceptor);
+
+        // uses the HTML5 History API
+        $locationProvider.html5Mode(true);
+
         $stateProvider
             .state('home', {
                 url: '/',
@@ -169,12 +125,40 @@ angular.module('nypl_research_collections', [
                 url: '/404',
                 templateUrl: 'views/404.html'
             });
+
+        $urlRouterProvider.otherwise('/');
+        $urlRouterProvider.rule(function ($injector, $location) {
+            var path = $location.url();
+
+            // Remove trailing slash if found
+            if (path[path.length - 1] === '/') {
+                return path.slice(0, -1);
+            }
+        });
+
+         function LoadDivisions(config, nyplLocationsService) {
+            return nyplLocationsService
+                .allDivisions()
+                .then(function (data) {
+                    return data.divisions;
+                })
+                .catch(function (err) {
+                    throw err;
+                });
+        }
+        LoadDivisions.$inject = ["config", "nyplLocationsService"];
+
+        function getConfig(nyplLocationsService) {
+            return nyplLocationsService.getConfig();
+        }
+        getConfig.$inject = ["nyplLocationsService"];
+
     }
 ])
-.config(httpInterceptor)
-.run(["$analytics", "$rootScope", function ($analytics, $rootScope) {
+.run(["$analytics", "$rootScope", "$location", function ($analytics, $rootScope, $location) {
     $rootScope.$on('$viewContentLoaded', function () {
-        $analytics.pageTrack('/research-collections');
+        $analytics.pageTrack('/research-divisions');
+        $rootScope.current_url = $location.absUrl();
     });
 }]);
 
@@ -1612,7 +1596,7 @@ angular.module('nypl_research_collections', [
       link: function (scope, element, attrs) {
         var ssoLoginElement = $('.sso-login'),
           ssoUserButton = $('.login-button'),
-          enews_email = $('#header-news_signup input[type=email]'),
+          enews_email = $('.email-input-field'),
           enews_submit = $('#header-news_signup input[type=submit]'),
           enews_container = $('.header-newsletter-signup');
 
@@ -1820,11 +1804,9 @@ console, $location, $ */
     config,
     divisions,
     nyplLocationsService,
-    nyplUtility,
-    researchCollectionService
+    nyplUtility
   ) {
-    var rcValues = researchCollectionService.getResearchValues(),
-      sibl,
+    var sibl,
       research_order = config.research_order || ['SASB', 'LPA', 'SC', 'SIBL'],
       getHoursToday = function (obj) {
         _.each(obj, function (elem) {
@@ -1920,7 +1902,7 @@ console, $location, $ */
     $scope.divisions = divisions;
     $scope.terms = [];
 
-    $scope.filteredDivisions = rcValues.filteredDivisions || _.chain(divisions)
+    $scope.filteredDivisions = _.chain(divisions)
       .sortBy(function (elem) {
         return elem.name;
       })
@@ -1952,9 +1934,6 @@ console, $location, $ */
       }
 
       $scope.activeCategory = term.name;
-
-      // Save the filter. Need to add one for the the parent term.
-      // researchCollectionService.setResearchValue('subterms', subterms);
 
       // For the data-ng-class for the active buttons.
       // Reset the subterm button.
@@ -2157,10 +2136,6 @@ console, $location, $ */
         }, 700);
       }
 
-      // // Save the filtered divisions for later.
-      // researchCollectionService
-      //   .setResearchValue('filteredDivisions', $scope.filteredDivisions);
-
       return filterDivisions();
     };
 
@@ -2175,7 +2150,7 @@ console, $location, $ */
     };
 
   }
-  CollectionsCtrl.$inject = ["$scope", "$rootScope", "$timeout", "config", "divisions", "nyplLocationsService", "nyplUtility", "researchCollectionService"];
+  CollectionsCtrl.$inject = ["$scope", "$rootScope", "$timeout", "config", "divisions", "nyplLocationsService", "nyplUtility"];
 
   angular
     .module('nypl_research_collections')
@@ -2272,58 +2247,6 @@ console, $location, $ */
 
   /**
    * @ngdoc directive
-   * @name nypl_locations.directive:emailusbutton
-   * @restrict E
-   * @scope
-   * @description
-   * ...
-   */
-  function emailusbutton() {
-    return {
-      restrict: 'E',
-      templateUrl: 'scripts/directives/templates/emailus.html',
-      replace: true,
-      scope: {
-        link: '@'
-      }
-    };
-  }
-
-  /**
-   * @ngdoc directive
-   * @name nypl_locations.directive:librarianchatbutton
-   * @restrict E
-   * @requires nyplUtility
-   * @description
-   * ....
-   */
-  function librarianchatbutton(nyplUtility) {
-    return {
-      restrict: 'E',
-      templateUrl: 'scripts/directives/templates/librarianchat.html',
-      replace: true,
-      link: function (scope, element, attrs, $window) {
-        scope.openChat = function () {
-          // Utilize service in directive to fire off the new window.
-          // Arguments: 
-          // link (req),
-          // title (optional), width (optional), height (optional)
-          nyplUtility.popupWindow(
-            'http://www.nypl.org/ask-librarian',
-            'NYPL Chat',
-            210,
-            450
-          );
-          if (!element.hasClass('active')) {
-            element.addClass('active');
-          }
-        };
-      }
-    };
-  }
-
-  /**
-   * @ngdoc directive
    * @name nypl_locations.directive:scrolltop
    * @requires $window
    * @description
@@ -2334,52 +2257,6 @@ console, $location, $ */
       scope.$on('$stateChangeStart', function () {
         $window.scrollTo(0, 0);
       });
-    };
-  }
-
-  /**
-   * @ngdoc directive
-   * @name nypl_locations.directive:eventRegistration
-   * @restrict E
-   * @requires $filter
-   * @scope
-   * @description
-   * ...
-   */
-  function eventRegistration($filter) {
-    function eventStarted(startDate) {
-        var sDate = new Date(startDate),
-          today   = new Date();
-        return (sDate.getTime() > today.getTime()) ? true : false;
-    }
-
-    return {
-      restrict: 'E',
-      templateUrl: 'scripts/directives/templates/registration.html',
-      replace: true,
-      scope: {
-        registration: '=',
-        status: '=',
-        link: '='
-      },
-      link: function (scope, element, attrs) {
-        scope.online = false;
-
-        if (scope.registration) {
-          // Check if the event has already started
-          scope.eventRegStarted = eventStarted(scope.registration.start);
-
-          if (scope.registration.type == 'Online') {
-            scope.online = true;
-            scope.reg_msg = (scope.eventRegStarted) ? 
-                            'Online, opens ' + $filter('date')(scope.registration.start, 'MM/dd') :
-                            'Online';
-          }
-          else {
-            scope.reg_msg = scope.registration.type;
-          }
-        }
-      }
     };
   }
 
@@ -2411,6 +2288,7 @@ console, $location, $ */
       }
     };
   }
+  nyplSiteAlerts.$inject = ["$timeout", "nyplLocationsService", "nyplUtility"];
 
   /**
    * @ngdoc directive
@@ -2500,74 +2378,6 @@ console, $location, $ */
       link: link,
       restrict: "A" // Attribute only
     });
-  }
-
-  /**
-   * @ngdoc directive
-   * @name nypl_locations.directive:nyplFundraising
-   * @restrict E
-   * @scope
-   * @description
-   * ...
-   */
-  function nyplFundraising($timeout, nyplLocationsService) {
-    return {
-      restrict: 'E',
-      templateUrl: 'scripts/directives/templates/fundraising.html',
-      replace: true,
-      scope: {
-        fundraising: '=fundraising',
-        // Category is for GA events
-        category: '@'
-      },
-      link: function (scope, elem, attrs) {
-        if (!scope.fundraising) {
-          $timeout(function () {
-            nyplLocationsService.getConfig().then(function (data) {
-              var fundraising = data.fundraising;
-              scope.fundraising = {
-                appeal: fundraising.appeal,
-                statement: fundraising.statement,
-                button_label: fundraising.button_label,
-                link:  fundraising.link
-              };
-            });
-          }, 200);
-        }
-      }
-    };
-  }
-
-  /**
-   * @ngdoc directive
-   * @name nypl_locations.directive:nyplSidebar
-   * @restrict E
-   * @scope
-   * @description
-   * Inserts optional Donate button/nyplAsk widget when 'true' is
-   * passed to donate-button="" or nypl-ask="". A custom donate url
-   * can be passed for the donate-button, otherwise a default is set
-   * @example
-   * <pre>
-   *  <nypl-sidebar donate-button="" nypl-ask="" donateurl="">
-   * </pre>
-   */
-  function nyplSidebar() {
-    return {
-      restrict: 'E',
-      templateUrl: 'scripts/directives/templates/sidebar-widgets.html',
-      replace: true,
-      scope: {
-        donateButton: '@',
-        nyplAsk: '@'
-      },
-      link: function (scope, elem, attrs) {
-        var url = "https://secure3.convio.net/nypl/site/SPageServer?page" +
-          "name=donation_form&JServSessionIdr003=dwcz55yj27.app304a&s_" +
-          "src=FRQ14ZZ_SWBN";      
-        scope.donateUrl = (attrs.donateurl || url);      
-      }
-    };
   }
 
   /**
@@ -2953,6 +2763,7 @@ console, $location, $ */
     .directive('closeSubMenu', closeSubMenu)
     .directive('collapsibleFilters', collapsibleFilters)
     .directive('nyplFooter', nyplFooter)
+    .directive('nyplSiteAlerts', nyplSiteAlerts)
     .directive('loadingWidget', loadingWidget);
 
 })();
@@ -3521,7 +3332,7 @@ console, $location, $ */
           }
         });
 
-        if (!angular.isUndefined(todaysAlert)) {
+        if (!angular.isUndefined(todaysAlert) && todaysAlert.length) {
           return _.uniq(todaysAlert);
         }
       }

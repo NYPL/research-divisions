@@ -86,58 +86,6 @@
 
   /**
    * @ngdoc directive
-   * @name nypl_locations.directive:emailusbutton
-   * @restrict E
-   * @scope
-   * @description
-   * ...
-   */
-  function emailusbutton() {
-    return {
-      restrict: 'E',
-      templateUrl: 'scripts/directives/templates/emailus.html',
-      replace: true,
-      scope: {
-        link: '@'
-      }
-    };
-  }
-
-  /**
-   * @ngdoc directive
-   * @name nypl_locations.directive:librarianchatbutton
-   * @restrict E
-   * @requires nyplUtility
-   * @description
-   * ....
-   */
-  function librarianchatbutton(nyplUtility) {
-    return {
-      restrict: 'E',
-      templateUrl: 'scripts/directives/templates/librarianchat.html',
-      replace: true,
-      link: function (scope, element, attrs, $window) {
-        scope.openChat = function () {
-          // Utilize service in directive to fire off the new window.
-          // Arguments: 
-          // link (req),
-          // title (optional), width (optional), height (optional)
-          nyplUtility.popupWindow(
-            'http://www.nypl.org/ask-librarian',
-            'NYPL Chat',
-            210,
-            450
-          );
-          if (!element.hasClass('active')) {
-            element.addClass('active');
-          }
-        };
-      }
-    };
-  }
-
-  /**
-   * @ngdoc directive
    * @name nypl_locations.directive:scrolltop
    * @requires $window
    * @description
@@ -148,52 +96,6 @@
       scope.$on('$stateChangeStart', function () {
         $window.scrollTo(0, 0);
       });
-    };
-  }
-
-  /**
-   * @ngdoc directive
-   * @name nypl_locations.directive:eventRegistration
-   * @restrict E
-   * @requires $filter
-   * @scope
-   * @description
-   * ...
-   */
-  function eventRegistration($filter) {
-    function eventStarted(startDate) {
-        var sDate = new Date(startDate),
-          today   = new Date();
-        return (sDate.getTime() > today.getTime()) ? true : false;
-    }
-
-    return {
-      restrict: 'E',
-      templateUrl: 'scripts/directives/templates/registration.html',
-      replace: true,
-      scope: {
-        registration: '=',
-        status: '=',
-        link: '='
-      },
-      link: function (scope, element, attrs) {
-        scope.online = false;
-
-        if (scope.registration) {
-          // Check if the event has already started
-          scope.eventRegStarted = eventStarted(scope.registration.start);
-
-          if (scope.registration.type == 'Online') {
-            scope.online = true;
-            scope.reg_msg = (scope.eventRegStarted) ? 
-                            'Online, opens ' + $filter('date')(scope.registration.start, 'MM/dd') :
-                            'Online';
-          }
-          else {
-            scope.reg_msg = scope.registration.type;
-          }
-        }
-      }
     };
   }
 
@@ -314,74 +216,6 @@
       link: link,
       restrict: "A" // Attribute only
     });
-  }
-
-  /**
-   * @ngdoc directive
-   * @name nypl_locations.directive:nyplFundraising
-   * @restrict E
-   * @scope
-   * @description
-   * ...
-   */
-  function nyplFundraising($timeout, nyplLocationsService) {
-    return {
-      restrict: 'E',
-      templateUrl: 'scripts/directives/templates/fundraising.html',
-      replace: true,
-      scope: {
-        fundraising: '=fundraising',
-        // Category is for GA events
-        category: '@'
-      },
-      link: function (scope, elem, attrs) {
-        if (!scope.fundraising) {
-          $timeout(function () {
-            nyplLocationsService.getConfig().then(function (data) {
-              var fundraising = data.fundraising;
-              scope.fundraising = {
-                appeal: fundraising.appeal,
-                statement: fundraising.statement,
-                button_label: fundraising.button_label,
-                link:  fundraising.link
-              };
-            });
-          }, 200);
-        }
-      }
-    };
-  }
-
-  /**
-   * @ngdoc directive
-   * @name nypl_locations.directive:nyplSidebar
-   * @restrict E
-   * @scope
-   * @description
-   * Inserts optional Donate button/nyplAsk widget when 'true' is
-   * passed to donate-button="" or nypl-ask="". A custom donate url
-   * can be passed for the donate-button, otherwise a default is set
-   * @example
-   * <pre>
-   *  <nypl-sidebar donate-button="" nypl-ask="" donateurl="">
-   * </pre>
-   */
-  function nyplSidebar() {
-    return {
-      restrict: 'E',
-      templateUrl: 'scripts/directives/templates/sidebar-widgets.html',
-      replace: true,
-      scope: {
-        donateButton: '@',
-        nyplAsk: '@'
-      },
-      link: function (scope, elem, attrs) {
-        var url = "https://secure3.convio.net/nypl/site/SPageServer?page" +
-          "name=donation_form&JServSessionIdr003=dwcz55yj27.app304a&s_" +
-          "src=FRQ14ZZ_SWBN";      
-        scope.donateUrl = (attrs.donateurl || url);      
-      }
-    };
   }
 
   /**
@@ -766,6 +600,7 @@
     .directive('closeSubMenu', closeSubMenu)
     .directive('collapsibleFilters', collapsibleFilters)
     .directive('nyplFooter', nyplFooter)
+    .directive('nyplSiteAlerts', nyplSiteAlerts)
     .directive('loadingWidget', loadingWidget);
 
 })();

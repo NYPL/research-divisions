@@ -1,7 +1,7 @@
 {
-  "name": "angular-animate",
+  "name": "angular-aria",
   "version": "1.3.12",
-  "main": "./angular-animate.js",
+  "main": "./angular-aria.js",
   "ignore": [],
   "dependencies": {
     "angular": "1.3.12"

@@ -11,11 +11,9 @@ console, $location, $ */
     config,
     divisions,
     nyplLocationsService,
-    nyplUtility,
-    researchCollectionService
+    nyplUtility
   ) {
-    var rcValues = researchCollectionService.getResearchValues(),
-      sibl,
+    var sibl,
       research_order = config.research_order || ['SASB', 'LPA', 'SC', 'SIBL'],
       getHoursToday = function (obj) {
         _.each(obj, function (elem) {
@@ -111,7 +109,7 @@ console, $location, $ */
     $scope.divisions = divisions;
     $scope.terms = [];
 
-    $scope.filteredDivisions = rcValues.filteredDivisions || _.chain(divisions)
+    $scope.filteredDivisions = _.chain(divisions)
       .sortBy(function (elem) {
         return elem.name;
       })
@@ -143,9 +141,6 @@ console, $location, $ */
       }
 
       $scope.activeCategory = term.name;
-
-      // Save the filter. Need to add one for the the parent term.
-      // researchCollectionService.setResearchValue('subterms', subterms);
 
       // For the data-ng-class for the active buttons.
       // Reset the subterm button.
@@ -347,10 +342,6 @@ console, $location, $ */
           $scope.activeCategory = undefined;
         }, 700);
       }
-
-      // // Save the filtered divisions for later.
-      // researchCollectionService
-      //   .setResearchValue('filteredDivisions', $scope.filteredDivisions);
 
       return filterDivisions();
     };
