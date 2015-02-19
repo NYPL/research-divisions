@@ -73,8 +73,8 @@ module.exports = function (grunt) {
         startPage: '/',
         title: 'Researchinator ngDocs',
         image: 'public/images/nypl_logo.png',
-        imageLink: 'http://research-collections.nypl.org',
-        titleLink: 'http://research-collections.nypl.org',
+        imageLink: 'http://research-divisions.nypl.org',
+        titleLink: 'http://research-divisions.nypl.org',
         bestMatch: true,
       },
       all: ['public/scripts/**/*.js']

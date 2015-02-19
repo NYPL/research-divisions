@@ -152,9 +152,10 @@ angular.module('nypl_research_collections', [
 
     }
 ])
-.run(function ($analytics, $rootScope) {
+.run(function ($analytics, $rootScope, $location) {
     $rootScope.$on('$viewContentLoaded', function () {
-        $analytics.pageTrack('/research-collections');
+        $analytics.pageTrack('/research-divisions');
+        $rootScope.current_url = $location.absUrl();
     });
 });
 

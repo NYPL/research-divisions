@@ -1,5 +1,5 @@
 {
-  "name": "research_collections",
+  "name": "research_divisions",
   "version": "0.0.1",
   "dependencies": {
     "protractor": "^1.4.0",
