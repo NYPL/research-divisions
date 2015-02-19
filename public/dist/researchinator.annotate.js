@@ -1595,7 +1595,7 @@ angular.module('nypl_research_collections', [
       link: function (scope, element, attrs) {
         var ssoLoginElement = $('.sso-login'),
           ssoUserButton = $('.login-button'),
-          enews_email = $('#header-news_signup input[type=email]'),
+          enews_email = $('.email-input-field'),
           enews_submit = $('#header-news_signup input[type=submit]'),
           enews_container = $('.header-newsletter-signup');
 
