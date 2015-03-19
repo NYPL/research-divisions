@@ -61,6 +61,7 @@ nyplInterceptor.$inject = ["$q", "$injector"];
  * @requires angulartics
  * @requires angulartics.google.analytics
  * @requires nyplBreadcrumbs
+ * @requires nyplAlerts
  * @description
  * Research collections.
  */
@@ -76,7 +77,8 @@ angular.module('nypl_research_collections', [
     'nyplSSO',
     'nyplBreadcrumbs',
     'nyplSearch',
-    'ngAria'
+    'ngAria',
+    'nyplAlerts'
 ])
 .config([
     '$analyticsProvider',
@@ -85,13 +87,15 @@ angular.module('nypl_research_collections', [
     '$locationProvider',
     '$stateProvider',
     '$urlRouterProvider',
+    '$nyplAlertsProvider',
     function (
         $analyticsProvider,
         $crumbProvider,
         $httpProvider,
         $locationProvider,
         $stateProvider,
-        $urlRouterProvider
+        $urlRouterProvider,
+        $nyplAlertsProvider
     ) {
         'use strict';
 
@@ -100,6 +104,12 @@ angular.module('nypl_research_collections', [
         // Assign proper Breadcrumb name/paths
         $crumbProvider.setOptions({
             primaryState: {name:'Home', customUrl: 'http://nypl.org' }
+        });
+
+        // nyplAlerts required config settings
+        $nyplAlertsProvider.setOptions({
+            api_root: locations_cfg.config.api_root,
+            api_version: locations_cfg.config.api_version
         });
 
         $httpProvider.interceptors.push(nyplInterceptor);
@@ -162,6 +172,509 @@ angular.module('nypl_research_collections', [
     });
 }]);
 
+
+/*jslint indent: 2, maxlen: 80, nomen: true */
+/*globals $, window, console, jQuery, angular, _, moment */
+
+(function (window, angular, undefined) {
+  'use strict';
+
+  /** @namespace $nyplAlertsProvider */
+  function $nyplAlertsProvider() {
+    var errors = {
+        url_undefined: '$nyplAlerts: API URL could not be defined',
+        api: '$nyplAlerts: Alerts API could not retrieve data'
+      },
+      options = {
+        api_root: null,
+        api_version: null
+      };
+
+    // Sets Provider options for use
+    this.setOptions = function (opts) {
+      angular.extend(options, opts);
+    };
+
+    this.$get = ['$http', '$q',
+      function ($http, $q) {
+        var provider = {};
+
+        // Generates a correct Alerts API URL
+        provider.generateApiUrl = function (host, version) {
+          if (!host || !version) { return undefined; }
+
+          var jsonCb = '?callback=JSON_CALLBACK',
+            url = host + '/' + version + '/alerts' + jsonCb;
+
+          return (host.indexOf("http://") === 0 ||
+            host.indexOf("https://") === 0) ?
+              url : 'http://' + url;
+        };
+
+        // Fetches API response for Alerts
+        provider.getGlobalAlerts = function () {
+          var defer = $q.defer(),
+            url = this.generateApiUrl(options.api_root, options.api_version);
+
+          if (!url) {
+            defer.reject(errors.url_undefined);
+          } else {
+            $http.jsonp(url, {cache: true})
+              .success(function (data) {
+                defer.resolve(data.alerts);
+              })
+              .error(function (status) {
+                defer.reject(errors.api);
+              });
+          }
+          return defer.promise;
+        };
+
+        provider.alerts = null;
+        provider.api_url = options.api_root || null;
+        provider.api_version = options.api_version || null;
+
+        return provider;
+      }];
+  }
+
+  /**
+   * @ngdoc service
+   * @name nyplAlerts.service:nyplAlertsService
+   * @requires moment
+   * @description
+   * NYPL Alerts Service helper methods to assist with
+   * filtering, sorting, retrieving specific key->values
+   * from an Alerts array of objects.
+   */
+  function nyplAlertsService() {
+    var service = {};
+
+    /**
+     * @ngdoc function
+     * @name currentAlerts
+     * @methodOf nyplAlerts.service:nyplAlertsService
+     * @param {object} obj Alerts Array Objects
+     * @returns {object} An array of filtered alert objects
+     * @description
+     *  currentAlerts filters an array of alert objects that
+     *  are within the range of today's date based of the
+     *  display.start/display.end properties.
+     */
+    service.currentAlerts = function (obj) {
+      var today = moment(),
+        sDate,
+        eDate;
+
+      return _.filter(obj, function (elem) {
+        if (elem.display) {
+          if (elem.display.start && elem.display.end) {
+            sDate = moment(elem.display.start);
+            eDate = moment(elem.display.end);
+            if (sDate.valueOf() <= today.valueOf() &&
+                eDate.valueOf() >= today.valueOf()) {
+              return elem;
+            }
+          }
+        }
+      });
+    };
+
+    /**
+     * @ngdoc function
+     * @name currentClosingAlerts
+     * @methodOf nyplAlerts.service:nyplAlertsService
+     * @param {object} obj Alerts Array Objects
+     * @returns {object} An array of filtered alert objects
+     * @description
+     *  currentClosingAlerts filters an array of alert objects that
+     *  are within the range of today's date based of the
+     *  applies.start/applies.end properties (optional).
+     */
+    service.currentClosingAlerts = function (obj) {
+      var today = moment(),
+        sDate,
+        eDate;
+
+      return _.filter(obj, function (elem) {
+        if (elem.applies) {
+          if (elem.applies.start && elem.applies.end) {
+            sDate = moment(elem.applies.start);
+            eDate = moment(elem.applies.end);
+            // Covers alert within today
+            if (sDate.valueOf() <= today.valueOf() &&
+                eDate.valueOf() >= today.valueOf()) {
+              return elem;
+            }
+            // Covers early openings
+            else if (today.day() === sDate.day() &&
+                eDate.day() === today.day() && eDate.valueOf()
+                >= today.valueOf()) {
+              return elem;
+            }
+          } else if (elem.applies.start) {
+            sDate = moment(elem.applies.start);
+            if (sDate.valueOf() <= today.valueOf()) {
+              return elem;
+            }
+          }
+        }
+      });
+    };
+
+    /**
+     * @ngdoc function
+     * @name currentWeekClosingAlerts
+     * @methodOf nyplAlerts.service:nyplAlertsService
+     * @param {object} obj Alerts Array Objects
+     * @returns {object} An array of filtered alert objects
+     * @description
+     *  currentWeekClosingAlerts filters an array of alert objects
+     *  that include seven days from today's date based of the
+     *  applies.start property.
+     */
+    service.currentWeekClosingAlerts = function (obj) {
+      // Get the start of the day for today.
+      // If you're checking today at 12pm, but there's already an alert that
+      // started at 11am, the current time won't catch it.
+      // If you start from the start of the day, you'll catch it.
+      var today = moment().startOf('day'),
+        sevenDaysFromToday = moment().add(7, 'days').startOf('day'),
+        sDate;
+
+      return _.filter(obj, function (elem) {
+        if (elem.applies) {
+          if (elem.applies.start) {
+            sDate = moment(elem.applies.start);
+            if (sevenDaysFromToday.valueOf() >= sDate.valueOf() &&
+                today.valueOf() <= sDate.valueOf()) {
+              return elem;
+            } else if (today.valueOf() >= sDate.valueOf()) {
+              return elem;
+            }
+          }
+        }
+      });
+    };
+
+    /**
+     * @ngdoc function
+     * @name allClosingAlerts
+     * @methodOf nyplAlerts.service:nyplAlertsService
+     * @param {object} obj Alerts Array Objects
+     * @returns {object} An array of filtered alert objects
+     * @description
+     *  allClosingAlerts filters an array of alert objects
+     *  that have an applies.start property only. Date is 
+     *  not taken into consideration for this filter.
+     */
+    service.allClosingAlerts = function (obj) {
+      if (!obj) {
+        return;
+      }
+
+      return _.filter(obj, function (elem) {
+        if (elem.applies && elem.applies.start) {
+          return elem;
+        }
+      });
+    };
+
+    /**
+     * @ngdoc function
+     * @name sortAlertsByScope
+     * @methodOf nyplAlerts.service:nyplAlertsService
+     * @param {object} Alerts Array Objects
+     * @returns {object} An array of alert objects
+     * @description
+     *  sortAlertsByScope sorts an array of alert objects
+     *  by the following order 1) all 2) location 3) division.
+     */
+    service.sortAlertsByScope = function (obj) {
+      if (!obj) { return; }
+
+      return _.chain(obj)
+        .sortBy(function (elem) {
+          return elem.scope.toLowerCase() === 'all';
+        })
+        .sortBy(function (elem) {
+          return elem.scope.toLowerCase() === 'location';
+        })
+        .sortBy(function (elem) {
+          return elem.scope.toLowerCase() === 'division';
+        })
+        .value();
+    };
+
+    /**
+     * @ngdoc function
+     * @name removeDuplicates
+     * @methodOf nyplAlerts.service:nyplAlertsService
+     * @param {object} Alerts Array Objects
+     * @returns {object} An array of filtered alert objects
+     * @description
+     *  removeDuplicates filters an array of alert objects
+     *  to remove any duplicate alerts by checking for
+     *  unique alert id's and unique alert messages.
+     */
+    service.removeDuplicates = function (obj) {
+      if (!obj) {
+        return;
+      }
+
+      return _.chain(obj)
+        .indexBy('id')
+        .flatten()
+        .uniq(function (elem) {
+          if (elem.msg) {
+            return elem.msg.toLowerCase();
+          }
+        })
+        .value();
+    };
+
+    /**
+     * @ngdoc function
+     * @name isAlertExpired
+     * @methodOf nyplAlerts.service:nyplAlertsService
+     * @param {object} Alert Start Date
+     * @param {object} Alert End Date
+     * @returns {boolean} True or False
+     * @description
+     *  isAlertExpired checks whether an alert has expired
+     *  based on today's date and ensuring that it is within
+     *  the range of the start and end alert dates.
+     */
+    service.isAlertExpired = function (startDate, endDate) {
+      if (!startDate || !endDate) {
+        return;
+      }
+
+      var sDate = moment(startDate),
+        eDate   = moment(endDate),
+        today   = moment();
+
+      return (sDate.valueOf() <= today.valueOf() &&
+        eDate.valueOf() >= today.valueOf()) ? false : true;
+    };
+
+    /**
+     * @ngdoc function
+     * @name filterAlerts
+     * @methodOf nyplAlerts.service:nyplAlertsService
+     * @param {object} Alerts Array Objects
+     * @param {object} Multiple filtering parameters
+     * @returns {object} An array of filtered alert objects
+     * @description
+     *  filterAlerts filters an array of alert objects
+     *  primarily by uniqueness. The optional parameters
+     *  continue to filter the Alerts array based on the
+     *  desired result
+     */
+    service.filterAlerts = function (obj, opts) {
+      if (!obj) { return; }
+
+      var uniqueAlerts = this.removeDuplicates(obj),
+        defaults = {
+          scope: opts ? (opts.scope || null) : null,
+          current: opts ? (opts.current || false) : false,
+          only_closings: opts ? (opts.only_closings || false) : false
+        };
+
+      // Optional scope filter
+      if (defaults.scope) {
+        uniqueAlerts = _.where(uniqueAlerts, {scope: defaults.scope});
+      }
+
+      // Optional filter for filtering only closings by two
+      // factors 1) all 2) current
+      // If enabled, should return immediately, no need to
+      // filter by current
+      if (defaults.only_closings === 'all') {
+        uniqueAlerts = this.allClosingAlerts(uniqueAlerts);
+        return uniqueAlerts;
+      } else if (defaults.only_closings === 'current') {
+        uniqueAlerts = this.currentClosingAlerts(uniqueAlerts);
+        return uniqueAlerts;
+      } else if (defaults.only_closings === 'week') {
+        uniqueAlerts = this.currentWeekClosingAlerts(uniqueAlerts);
+        return uniqueAlerts;
+      }
+
+      // Optional filter for current alerts that are in range
+      if (defaults.current === true) {
+        uniqueAlerts = this.currentAlerts(uniqueAlerts);
+      }
+
+      return uniqueAlerts;
+    };
+
+    /**
+     * @ngdoc function
+     * @name getHoursOrMessage
+     * @methodOf nyplAlerts.service:nyplAlertsService
+     * @param {object} opts Options object
+     * @returns {string} String representation of hours/message
+     * @description
+     *  getHoursOrMessage Checks if a branch is open, then verifies
+     *  if an alert message exists. If it does, it returns the message.
+     *  If no alert message exists, it returns the hours as a string.
+     *  desired result
+     */
+    service.getHoursOrMessage = function (opts) {
+      if (!opts || !opts.closedFn) {
+        return;
+      }
+
+      var message = opts.message || '',
+        open = opts.open || false,
+        hours = opts.hours || undefined,
+        hoursFn = opts.hoursFn,
+        closedFn = opts.closedFn;
+
+      // Open or closed
+      if (open) {
+        // Now is there an alert message?
+        if (message) {
+          return message;
+        }
+
+        return hoursFn(hours);
+      }
+      return closedFn();
+    };
+
+    /**
+     * @ngdoc function
+     * @name activeClosings
+     * @methodOf nyplAlerts.service:nyplAlertsService
+     * @param {object} Alerts Array Object
+     * @returns {boolean} True/False dependent on any current alerts
+     * @description
+     *  activeClosings is a boolean check that returns true if any
+     *  current alerts are returned from the filter. If no alerts
+     *  are returned then, false is the return value.
+     */
+    service.activeClosings = function (alerts) {
+      var activeAlerts = this.filterAlerts(alerts, {only_closings: 'current'});
+      return (activeAlerts && activeAlerts.length) ?
+          true : false;
+    };
+
+    /**
+     * @ngdoc function
+     * @name getCurrentActiveMessage
+     * @methodOf nyplAlerts.service:nyplAlertsService
+     * @param {object} Alerts Array of objects
+     * @returns {string} Closed for message as String
+     * @description
+     *  getCurrentActiveMessage obtains the first closed_for key->value
+     *  of filtered current closing alerts. If no alerts are
+     *  found, an empty string is returned.
+     */
+    service.getCurrentActiveMessage = function (alertsArr) {
+      if (!alertsArr) {
+        return;
+      }
+
+      var alerts = this.filterAlerts(alertsArr, {only_closings: 'current'}),
+        message = _.chain(alerts)
+          .pluck('closed_for')
+          .first()
+          .value();
+
+      return message;
+    };
+
+    return service;
+  }
+
+  /**
+   * @ngdoc directive
+   * @name nyplAlerts.directive:nyplGlobalAlerts
+   * @restrict E
+   * @scope
+   * @description
+   * Global alert directive.
+   */
+  function nyplGlobalAlerts($rootScope) {
+    return {
+      restrict: 'E',
+      template: "<div class='nypl-global-alerts' data-ng-if='$root.alerts'>" +
+                  "<div data-ng-repeat='alert in $root.alerts'>" +
+                    "<p data-ng-bind-html='alert.msg'></p>" +
+                  "</div>" +
+                "</div>",
+      replace: true,
+      scope: false
+    };
+  }
+  nyplGlobalAlerts.$inject = ["$rootScope"];
+
+  /**
+   * @ngdoc directive
+   * @name nyplAlerts.directive:nyplLocationAlerts
+   * @restrict E
+   * @scope
+   * @description
+   * Alert directive for individual locations and divisions.
+   */
+  function nyplLocationAlerts(nyplAlertsService) {
+    return {
+      restrict: 'E',
+      template: "<div class='nypl-location-alerts'" +
+                    "data-ng-if='locationAlerts'>" +
+                  "<div data-ng-repeat='alert in locationAlerts'>" +
+                    "<p data-ng-bind-html='alert.msg'></p>" +
+                  "</div>" +
+                "</div>",
+      replace: true,
+      scope: {
+        alerts: '=alerts',
+        type: '@'
+      },
+      link: function (scope, element, attrs) {
+        if (scope.alerts && scope.type.length) {
+          scope.locationAlerts = nyplAlertsService.filterAlerts(
+            scope.alerts,
+            {scope: scope.type, current: true}
+          );
+        }
+      }
+    };
+  }
+  nyplLocationAlerts.$inject = ["nyplAlertsService"];
+
+  // Initialize Alerts data through Provider
+  function initAlerts($nyplAlerts, $rootScope, nyplAlertsService) {
+    $nyplAlerts.getGlobalAlerts().then(function (data) {
+      var alerts = $rootScope.alerts || data;
+      $rootScope.alerts =
+        nyplAlertsService.filterAlerts(alerts, {current: true});
+      $nyplAlerts.alerts = $rootScope.alerts || data;
+    }).catch(function (error) {
+      throw error;
+    });
+  }
+  initAlerts.$inject = ["$nyplAlerts", "$rootScope", "nyplAlertsService"];
+
+
+  /**
+   * @ngdoc overview
+   * @module nyplAlerts
+   * @name nyplAlerts
+   * @description
+   * NYPL Alerts module
+   */
+  angular
+    .module('nyplAlerts', ['ngSanitize'])
+    .provider('$nyplAlerts', $nyplAlertsProvider)
+    .service('nyplAlertsService', nyplAlertsService)
+    .run(initAlerts)
+    .directive('nyplLocationAlerts', nyplLocationAlerts)
+    .directive('nyplGlobalAlerts', nyplGlobalAlerts);
+
+})(window, window.angular);
 
 /*jslint indent: 2, maxlen: 80, nomen: true */
 /*globals $, window, console, jQuery, angular */
@@ -661,167 +1174,6 @@ angular.module('nypl_research_collections', [
     .directive('nyplBreadcrumbs', nyplBreadcrumbs);
 
 })(window, window.angular);
-/*jslint indent: 2, maxlen: 80 */
-/*globals nypl_locations, angular */
-
-(function () {
-  'use strict';
-
-  /**
-   * @ngdoc service
-   * @name coordinateService.service:nyplCoordinatesService
-   * @requires $q
-   * @requires $window
-   * @description
-   * AngularJS service to get a user's geolocation coordinates and calculate
-   * the distance between two points.
-   */
-  function nyplCoordinatesService($q, $window) {
-    var geoCoords = null,
-      coordinatesService = {};
-
-    /**
-     * @ngdoc function
-     * @name geolocationAvailable
-     * @methodOf coordinateService.service:nyplCoordinatesService
-     * @returns {boolean} True if navigator and navigator.geolocation are
-     *  available in the browser, false otherwise.
-     */
-    coordinatesService.geolocationAvailable = function () {
-      return (!$window.navigator && !$window.navigator.geolocation) ?
-          false :
-          true;
-    };
-
-    /**
-     * @ngdoc function
-     * @name getBrowserCoordinates
-     * @methodOf coordinateService.service:nyplCoordinatesService
-     * @returns {object} Deferred promise. If it resolves, it will return an
-     *  object with the user's current position as latitude and longitude
-     *  properties. If it is rejected, it will return an error message based
-     *  on what kind of error occurred.
-     * @example
-     * <pre>
-     *  nyplCoordinatesService.getBrowserCoordinates()
-     *    .then(function (position) {
-     *      var userCoords = _.pick(position, 'latitude', 'longitude');
-     *    })
-     *    .catch(function (error) {
-     *      throw error;
-     *    });
-     * </pre>
-     */
-    coordinatesService.getBrowserCoordinates = function () {
-      // Object containing success/failure conditions
-      var defer = $q.defer();
-
-      // Verify the browser supports Geolocation
-      if (!this.geolocationAvailable()) {
-        defer.reject(new Error("Your browser does not support Geolocation."));
-      } else {
-        // Use stored coords, FF bug fix
-        // if (geoCoords) {
-        //   defer.resolve(geoCoords);
-        // } else {
-        $window.navigator.geolocation.getCurrentPosition(
-          function (position) {
-            // Extract coordinates for geoPosition obj
-            geoCoords = position.coords;
-            defer.resolve(geoCoords);
-
-            // Testing a user's location that is more than 
-            // 25miles of any NYPL location
-            // var coords = {
-            //     'latitude': 42.3581,
-            //     'longitude': -71.0636
-            // }
-            // defer.resolve(coords);
-          },
-          function (error) {
-            switch (error.code) {
-            case error.PERMISSION_DENIED:
-              defer.reject(new Error("Permission denied."));
-              break;
-
-            case error.POSITION_UNAVAILABLE:
-              defer.reject(new Error("The position is currently unavailable."));
-              break;
-
-            case error.TIMEOUT:
-              defer.reject(new Error("The request timed out."));
-              break;
-
-            default:
-              defer.reject(new Error("Unknown error."));
-              break;
-            }
-          },
-          {
-            enableHighAccuracy: true,
-            timeout: 5000,
-            maximumAge: 600000
-          }
-        );
-        // }
-      }
-
-      return defer.promise; // Enables 'then' callback
-    };
-
-    /**
-     * @ngdoc function
-     * @name getDistance
-     * @methodOf coordinateService.service:nyplCoordinatesService
-     * @param {number} lat1 Latitude of first location.
-     * @param {number} lon1 Longitude of first location.
-     * @param {number} lat2 Latitude of second location.
-     * @param {number} lon2 Longitude of second location.
-     * @returns {number} Distance in miles between two different locations.
-     * @example
-     * <pre>
-     *  var distance =
-     *    nyplCoordinatesService.getDistance(40.1, -73.1, 41.1, -73.2);
-     * </pre>
-     */
-    coordinatesService.getDistance = function (lat1, lon1, lat2, lon2) {
-      if (!lat1 || !lon2 || !lat2 || !lon2) {
-        return undefined;
-      }
-
-      var radlat1 = Math.PI * lat1 / 180,
-        radlat2 = Math.PI * lat2 / 180,
-        theta = lon1 - lon2,
-        radtheta = Math.PI * theta / 180,
-        distance;
-
-      distance = Math.sin(radlat1) * Math.sin(radlat2) +
-        Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
-      distance = Math.acos(distance);
-      distance = distance * 180 / Math.PI;
-      distance = distance * 60 * 1.1515;
-      return Math.ceil(distance * 100) / 100;
-    };
-
-    return coordinatesService;
-  }
-  nyplCoordinatesService.$inject = ["$q", "$window"];
-
-  /**
-   * @ngdoc overview
-   * @module coordinateService
-   * @name coordinateService
-   * @description
-   * AngularJS module that provides a service to use a browser's geolocation
-   * coordinates and a function to calculate distance between two points.
-   */
-  angular
-    .module('coordinateService', [])
-    .factory('nyplCoordinatesService', nyplCoordinatesService);
-
-})();
-
-
 /*jslint indent: 2, maxlen: 80, nomen: true */
 /*globals $, window, console, jQuery, angular */
 
@@ -910,326 +1262,6 @@ angular.module('nypl_research_collections', [
     .directive('nyplFeedback', nyplFeedback);
 
 })();
-/*jslint indent: 4, maxlen: 80 */
-/*globals angular */
-
-(function () {
-    'use strict';
-
-    /**
-     * @ngdoc service
-     * @name locationService.service:nyplLocationsService
-     * @requires $http
-     * @requires $q
-     * @description
-     * AngularJS service to call different API endpoints.
-     */
-
-    function nyplLocationsService($http, $q) {
-        var api, config,
-            jsonp_cb = '?callback=JSON_CALLBACK',
-            apiError = 'Could not reach API',
-            locationsApi = {};
-
-        /**
-         * @ngdoc function
-         * @name getConfig
-         * @methodOf locationService.service:nyplLocationsService
-         * @returns {object} Deferred promise.
-         * @description
-         * Used to get Sinatra generated config variables.
-         */
-        locationsApi.getConfig = function () {
-            var defer = $q.defer();
-
-            if (config) {
-               defer.resolve(config);
-            } else {
-                config = window.locations_cfg.config;
-
-                if (config) {
-                    api = config.api_root + '/' + config.api_version;
-                    defer.resolve(config);
-                } else {
-                    defer.reject(apiError + ': config');
-                }
-            }
-
-            return defer.promise;
-        }
-
-        /**
-         * @ngdoc function
-         * @name allLocations
-         * @methodOf locationService.service:nyplLocationsService
-         * @returns {object} Deferred promise. If it resolves, JSON response
-         *  from the API of all NYPL locations. If it is rejected, an
-         *  error message is returned saying that it "Could not reach API".
-         * @description Get all locations
-         * @example
-         * <pre>
-         *  nyplLocationsService.allLocations()
-         *    .then(function (data) {
-         *      var locations = data.locations;
-         *    });
-         *    .catch(function (error) {
-         *      // error = "Could not reach API"
-         *    });
-         * </pre>
-         */
-        locationsApi.allLocations = function () {
-            var defer = $q.defer();
-
-            $http.jsonp(
-                    api + '/locations' + jsonp_cb,
-                    {cache: true}
-                )
-                .success(function (data) {
-                    defer.resolve(data);
-                })
-                .error(function (data, status) {
-                    defer.reject(apiError + ': locations');
-                });
-            return defer.promise;
-        };
-
-        /**
-         * @ngdoc function
-         * @name singleLocation
-         * @methodOf locationService.service:nyplLocationsService
-         * @param {string} location The slug of the location to look up.
-         * @returns {object} Deferred promise. If it resolves, JSON response
-         *  from the API of a specific NYPL locations. If it is rejected,
-         *  an error message is returned saying that it "Could not reach API".
-         * @description Get single location.
-         * @example
-         * <pre>
-         *  nyplLocationsService.singleLocation('schwarzman')
-         *    .then(function (data) {
-         *      var location = data.location;
-         *    });
-         *    .catch(function (error) {
-         *      // error = "Could not reach API"
-         *    });
-         * </pre>
-         */
-        locationsApi.singleLocation = function (location) {
-            var defer = $q.defer();
-
-            $http.jsonp(
-                    api + '/locations/' + location + jsonp_cb,
-                    {cache: true}
-                )
-                .success(function (data) {
-                    defer.resolve(data);
-                })
-                .error(function (data, status) {
-                    defer.reject(apiError + ': location');
-                });
-            return defer.promise;
-        };
-
-        locationsApi.allDivisions = function () {
-            var defer = $q.defer();
-
-            $http.jsonp(
-                api + '/divisions/?callback=JSON_CALLBACK', {cache: true}
-            )
-            .success(function (data) {
-                defer.resolve(data);
-            })
-            .error(function (data, status) {
-                defer.reject(apiError + ': division');
-            });
-            return defer.promise;
-        };
-
-        /**
-         * @ngdoc function
-         * @name singleDivision
-         * @methodOf locationService.service:nyplLocationsService
-         * @param {string} division The slug of the division to look up.
-         * @returns {object} Deferred promise. If it resolves, JSON response
-         *  from the API of an NYPL Division. If it is rejected, an error
-         *  message is returned saying that it "Could not reach API".
-         * @description Get single division.
-         * @example
-         * <pre>
-         *  nyplLocationsService.singleLocation('map-division')
-         *    .then(function (data) {
-         *      var division = data.division;
-         *    });
-         *    .catch(function (error) {
-         *      // error = "Could not reach API"
-         *    });
-         * </pre>
-         */
-        locationsApi.singleDivision = function (division) {
-            var defer = $q.defer();
-
-            $http.jsonp(
-                    api + '/divisions/' + division + jsonp_cb,
-                    {cache: true}
-                )
-                .success(function (data) {
-                    defer.resolve(data);
-                })
-                .error(function (data, status) {
-                    defer.reject(apiError + ': division');
-                });
-            return defer.promise;
-        };
-
-        /**
-         * @ngdoc function
-         * @name amenities
-         * @methodOf locationService.service:nyplLocationsService
-         * @param {string} [amenity] The id of the amenity to look up.
-         * @returns {object} Deferred promise. If it resolves, JSON response
-         *  from the API. If no param was passed, it will return all the
-         *  amenities at NYPL. If the param was passed, it will return a list
-         *  of all the NYPL locations where the amenity passed is available.
-         *  If it is rejected, an error message is returned saying that it
-         *  "Could not reach API".
-         * @description Get all amenities.
-         * @example
-         * <pre>
-         *  nyplLocationsService.amenities()
-         *    .then(function (data) {
-         *      var amenities = data;
-         *    });
-         *    .catch(function (error) {
-         *      // error = "Could not reach API"
-         *    });
-         *
-         *  nyplLocationsService.amenities('7950')
-         *    .then(function (data) {
-         *      var amenity = data;
-         *    });
-         *    .catch(function (error) {
-         *      // error = "Could not reach API"
-         *    });
-         * </pre>
-         */
-        locationsApi.amenities = function (amenity) {
-            var defer = $q.defer(),
-                url = !amenity ? '/amenities' : '/amenities/' + amenity;
-
-            $http.jsonp(api + url + jsonp_cb, {cache: true})
-                .success(function (data) {
-                    defer.resolve(data);
-                })
-                .error(function (data, status) {
-                    defer.reject(apiError + ': amenities');
-                });
-            return defer.promise;
-        };
-
-        /**
-         * @ngdoc function
-         * @name amenitiesAtLibrary
-         * @methodOf locationService.service:nyplLocationsService
-         * @param {string} location The slug of the location to look up
-         *  all amenities available at that location.
-         * @returns {object} Deferred promise. If it resolves, JSON response
-         *  from the API of all amenities available at the location. If it is
-         *  rejected, an error message is returned saying that it
-         *  "Could not reach API".
-         * @description Get amenities at a library.
-         * @example
-         * <pre>
-         *  nyplLocationsService.amenitiesAtLibrary('115th-street')
-         *    .then(function (data) {
-         *      var location = data.location;
-         *    });
-         *    .catch(function (error) {
-         *      // error = "Could not reach API"
-         *    });
-         * </pre>
-         */
-        locationsApi.amenitiesAtLibrary = function (location) {
-            var defer = $q.defer();
-
-            $http.jsonp(
-                    api + '/locations/' + location + '/amenities' + jsonp_cb,
-                    {cache: true}
-                )
-                .success(function (data) {
-                    defer.resolve(data);
-                })
-                .error(function (data, status) {
-                    defer.reject(apiError + ': library-amenity');
-                });
-            return defer.promise;
-        };
-
-        /**
-         * @ngdoc function
-         * @name alerts
-         * @methodOf locationService.service:nyplLocationsService
-         * @returns {object} Deferred promise. If it resolves, JSON response
-         *  from the API of alerts that display site-wide.
-         * @description Get all alerts.
-         * @example
-         * <pre>
-         *  nyplLocationsService.alerts()
-         *    .then(function (data) {
-         *      var amenities = data.alerts;
-         *    });
-         *    .catch(function (error) {
-         *      // error = "Could not reach API"
-         *    });
-         * </pre>
-         */
-        locationsApi.alerts = function () {
-            var defer = $q.defer();
-
-            $http.jsonp(
-                    api + '/alerts' + jsonp_cb,
-                    {cache: true}
-                )
-                .success(function (data) {
-                    defer.resolve(data);
-                })
-                .error(function (data, status) {
-                    defer.reject(apiError + ': site-wide alerts');
-                });
-            return defer.promise;
-        };
-
-        locationsApi.terms = function () {
-            var defer = $q.defer();
-
-            $http.jsonp(
-                    api + '/terms' + '?callback=JSON_CALLBACK',
-                    {cache: true}
-                )
-                .success(function (data) {
-                    defer.resolve(data);
-                })
-                .error(function (data, status) {
-                    defer.reject(apiError + ': terms');
-                });
-            return defer.promise;
-        };
-
-        return locationsApi;
-    }
-    nyplLocationsService.$inject = ["$http", "$q"];
-
-    /**
-     * @ngdoc overview
-     * @module locationService
-     * @name locationService
-     * @description
-     * AngularJS module that provides a service to call the API endpoints.
-     */
-    angular
-        .module('locationService', [])
-        .factory('nyplLocationsService', nyplLocationsService);
-
-})();
-
 /*jslint indent: 2, maxlen: 80, nomen: true */
 /*globals $, window, console, jQuery, angular */
 
@@ -1791,6 +1823,487 @@ angular.module('nypl_research_collections', [
 })();
 
 
+/*jslint indent: 2, maxlen: 80 */
+/*globals nypl_locations, angular */
+
+(function () {
+  'use strict';
+
+  /**
+   * @ngdoc service
+   * @name coordinateService.service:nyplCoordinatesService
+   * @requires $q
+   * @requires $window
+   * @description
+   * AngularJS service to get a user's geolocation coordinates and calculate
+   * the distance between two points.
+   */
+  function nyplCoordinatesService($q, $window) {
+    var geoCoords = null,
+      coordinatesService = {};
+
+    /**
+     * @ngdoc function
+     * @name geolocationAvailable
+     * @methodOf coordinateService.service:nyplCoordinatesService
+     * @returns {boolean} True if navigator and navigator.geolocation are
+     *  available in the browser, false otherwise.
+     */
+    coordinatesService.geolocationAvailable = function () {
+      return (!$window.navigator && !$window.navigator.geolocation) ?
+          false :
+          true;
+    };
+
+    /**
+     * @ngdoc function
+     * @name getBrowserCoordinates
+     * @methodOf coordinateService.service:nyplCoordinatesService
+     * @returns {object} Deferred promise. If it resolves, it will return an
+     *  object with the user's current position as latitude and longitude
+     *  properties. If it is rejected, it will return an error message based
+     *  on what kind of error occurred.
+     * @example
+     * <pre>
+     *  nyplCoordinatesService.getBrowserCoordinates()
+     *    .then(function (position) {
+     *      var userCoords = _.pick(position, 'latitude', 'longitude');
+     *    })
+     *    .catch(function (error) {
+     *      throw error;
+     *    });
+     * </pre>
+     */
+    coordinatesService.getBrowserCoordinates = function () {
+      // Object containing success/failure conditions
+      var defer = $q.defer();
+
+      // Verify the browser supports Geolocation
+      if (!this.geolocationAvailable()) {
+        defer.reject(new Error("Your browser does not support Geolocation."));
+      } else {
+        // Use stored coords, FF bug fix
+        // if (geoCoords) {
+        //   defer.resolve(geoCoords);
+        // } else {
+        $window.navigator.geolocation.getCurrentPosition(
+          function (position) {
+            // Extract coordinates for geoPosition obj
+            geoCoords = position.coords;
+            defer.resolve(geoCoords);
+
+            // Testing a user's location that is more than 
+            // 25miles of any NYPL location
+            // var coords = {
+            //     'latitude': 42.3581,
+            //     'longitude': -71.0636
+            // }
+            // defer.resolve(coords);
+          },
+          function (error) {
+            switch (error.code) {
+            case error.PERMISSION_DENIED:
+              defer.reject(new Error("Permission denied."));
+              break;
+
+            case error.POSITION_UNAVAILABLE:
+              defer.reject(new Error("The position is currently unavailable."));
+              break;
+
+            case error.TIMEOUT:
+              defer.reject(new Error("The request timed out."));
+              break;
+
+            default:
+              defer.reject(new Error("Unknown error."));
+              break;
+            }
+          },
+          {
+            enableHighAccuracy: true,
+            timeout: 5000,
+            maximumAge: 600000
+          }
+        );
+        // }
+      }
+
+      return defer.promise; // Enables 'then' callback
+    };
+
+    /**
+     * @ngdoc function
+     * @name getDistance
+     * @methodOf coordinateService.service:nyplCoordinatesService
+     * @param {number} lat1 Latitude of first location.
+     * @param {number} lon1 Longitude of first location.
+     * @param {number} lat2 Latitude of second location.
+     * @param {number} lon2 Longitude of second location.
+     * @returns {number} Distance in miles between two different locations.
+     * @example
+     * <pre>
+     *  var distance =
+     *    nyplCoordinatesService.getDistance(40.1, -73.1, 41.1, -73.2);
+     * </pre>
+     */
+    coordinatesService.getDistance = function (lat1, lon1, lat2, lon2) {
+      if (!lat1 || !lon2 || !lat2 || !lon2) {
+        return undefined;
+      }
+
+      var radlat1 = Math.PI * lat1 / 180,
+        radlat2 = Math.PI * lat2 / 180,
+        theta = lon1 - lon2,
+        radtheta = Math.PI * theta / 180,
+        distance;
+
+      distance = Math.sin(radlat1) * Math.sin(radlat2) +
+        Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
+      distance = Math.acos(distance);
+      distance = distance * 180 / Math.PI;
+      distance = distance * 60 * 1.1515;
+      return Math.ceil(distance * 100) / 100;
+    };
+
+    return coordinatesService;
+  }
+  nyplCoordinatesService.$inject = ["$q", "$window"];
+
+  /**
+   * @ngdoc overview
+   * @module coordinateService
+   * @name coordinateService
+   * @description
+   * AngularJS module that provides a service to use a browser's geolocation
+   * coordinates and a function to calculate distance between two points.
+   */
+  angular
+    .module('coordinateService', [])
+    .factory('nyplCoordinatesService', nyplCoordinatesService);
+
+})();
+
+
+/*jslint indent: 4, maxlen: 80 */
+/*globals angular */
+
+(function () {
+    'use strict';
+
+    /**
+     * @ngdoc service
+     * @name locationService.service:nyplLocationsService
+     * @requires $http
+     * @requires $q
+     * @description
+     * AngularJS service to call different API endpoints.
+     */
+
+    function nyplLocationsService($http, $q) {
+        var api, config,
+            jsonp_cb = '?callback=JSON_CALLBACK',
+            apiError = 'Could not reach API',
+            locationsApi = {};
+
+        /**
+         * @ngdoc function
+         * @name getConfig
+         * @methodOf locationService.service:nyplLocationsService
+         * @returns {object} Deferred promise.
+         * @description
+         * Used to get Sinatra generated config variables.
+         */
+        locationsApi.getConfig = function () {
+            var defer = $q.defer();
+
+            if (config) {
+               defer.resolve(config);
+            } else {
+                config = window.locations_cfg.config;
+
+                if (config) {
+                    api = config.api_root + '/' + config.api_version;
+                    defer.resolve(config);
+                } else {
+                    defer.reject(apiError + ': config');
+                }
+            }
+
+            return defer.promise;
+        }
+
+        /**
+         * @ngdoc function
+         * @name allLocations
+         * @methodOf locationService.service:nyplLocationsService
+         * @returns {object} Deferred promise. If it resolves, JSON response
+         *  from the API of all NYPL locations. If it is rejected, an
+         *  error message is returned saying that it "Could not reach API".
+         * @description Get all locations
+         * @example
+         * <pre>
+         *  nyplLocationsService.allLocations()
+         *    .then(function (data) {
+         *      var locations = data.locations;
+         *    });
+         *    .catch(function (error) {
+         *      // error = "Could not reach API"
+         *    });
+         * </pre>
+         */
+        locationsApi.allLocations = function () {
+            var defer = $q.defer();
+
+            $http.jsonp(
+                    api + '/locations' + jsonp_cb,
+                    {cache: true}
+                )
+                .success(function (data) {
+                    defer.resolve(data);
+                })
+                .error(function (data, status) {
+                    defer.reject(apiError + ': locations');
+                });
+            return defer.promise;
+        };
+
+        /**
+         * @ngdoc function
+         * @name singleLocation
+         * @methodOf locationService.service:nyplLocationsService
+         * @param {string} location The slug of the location to look up.
+         * @returns {object} Deferred promise. If it resolves, JSON response
+         *  from the API of a specific NYPL locations. If it is rejected,
+         *  an error message is returned saying that it "Could not reach API".
+         * @description Get single location.
+         * @example
+         * <pre>
+         *  nyplLocationsService.singleLocation('schwarzman')
+         *    .then(function (data) {
+         *      var location = data.location;
+         *    });
+         *    .catch(function (error) {
+         *      // error = "Could not reach API"
+         *    });
+         * </pre>
+         */
+        locationsApi.singleLocation = function (location) {
+            var defer = $q.defer();
+
+            $http.jsonp(
+                    api + '/locations/' + location + jsonp_cb,
+                    {cache: true}
+                )
+                .success(function (data) {
+                    defer.resolve(data);
+                })
+                .error(function (data, status) {
+                    defer.reject(apiError + ': location');
+                });
+            return defer.promise;
+        };
+
+        locationsApi.allDivisions = function () {
+            var defer = $q.defer();
+
+            $http.jsonp(
+                api + '/divisions/?callback=JSON_CALLBACK', {cache: true}
+            )
+            .success(function (data) {
+                defer.resolve(data);
+            })
+            .error(function (data, status) {
+                defer.reject(apiError + ': division');
+            });
+            return defer.promise;
+        };
+
+        /**
+         * @ngdoc function
+         * @name singleDivision
+         * @methodOf locationService.service:nyplLocationsService
+         * @param {string} division The slug of the division to look up.
+         * @returns {object} Deferred promise. If it resolves, JSON response
+         *  from the API of an NYPL Division. If it is rejected, an error
+         *  message is returned saying that it "Could not reach API".
+         * @description Get single division.
+         * @example
+         * <pre>
+         *  nyplLocationsService.singleLocation('map-division')
+         *    .then(function (data) {
+         *      var division = data.division;
+         *    });
+         *    .catch(function (error) {
+         *      // error = "Could not reach API"
+         *    });
+         * </pre>
+         */
+        locationsApi.singleDivision = function (division) {
+            var defer = $q.defer();
+
+            $http.jsonp(
+                    api + '/divisions/' + division + jsonp_cb,
+                    {cache: true}
+                )
+                .success(function (data) {
+                    defer.resolve(data);
+                })
+                .error(function (data, status) {
+                    defer.reject(apiError + ': division');
+                });
+            return defer.promise;
+        };
+
+        /**
+         * @ngdoc function
+         * @name amenities
+         * @methodOf locationService.service:nyplLocationsService
+         * @param {string} [amenity] The id of the amenity to look up.
+         * @returns {object} Deferred promise. If it resolves, JSON response
+         *  from the API. If no param was passed, it will return all the
+         *  amenities at NYPL. If the param was passed, it will return a list
+         *  of all the NYPL locations where the amenity passed is available.
+         *  If it is rejected, an error message is returned saying that it
+         *  "Could not reach API".
+         * @description Get all amenities.
+         * @example
+         * <pre>
+         *  nyplLocationsService.amenities()
+         *    .then(function (data) {
+         *      var amenities = data;
+         *    });
+         *    .catch(function (error) {
+         *      // error = "Could not reach API"
+         *    });
+         *
+         *  nyplLocationsService.amenities('7950')
+         *    .then(function (data) {
+         *      var amenity = data;
+         *    });
+         *    .catch(function (error) {
+         *      // error = "Could not reach API"
+         *    });
+         * </pre>
+         */
+        locationsApi.amenities = function (amenity) {
+            var defer = $q.defer(),
+                url = !amenity ? '/amenities' : '/amenities/' + amenity;
+
+            $http.jsonp(api + url + jsonp_cb, {cache: true})
+                .success(function (data) {
+                    defer.resolve(data);
+                })
+                .error(function (data, status) {
+                    defer.reject(apiError + ': amenities');
+                });
+            return defer.promise;
+        };
+
+        /**
+         * @ngdoc function
+         * @name amenitiesAtLibrary
+         * @methodOf locationService.service:nyplLocationsService
+         * @param {string} location The slug of the location to look up
+         *  all amenities available at that location.
+         * @returns {object} Deferred promise. If it resolves, JSON response
+         *  from the API of all amenities available at the location. If it is
+         *  rejected, an error message is returned saying that it
+         *  "Could not reach API".
+         * @description Get amenities at a library.
+         * @example
+         * <pre>
+         *  nyplLocationsService.amenitiesAtLibrary('115th-street')
+         *    .then(function (data) {
+         *      var location = data.location;
+         *    });
+         *    .catch(function (error) {
+         *      // error = "Could not reach API"
+         *    });
+         * </pre>
+         */
+        locationsApi.amenitiesAtLibrary = function (location) {
+            var defer = $q.defer();
+
+            $http.jsonp(
+                    api + '/locations/' + location + '/amenities' + jsonp_cb,
+                    {cache: true}
+                )
+                .success(function (data) {
+                    defer.resolve(data);
+                })
+                .error(function (data, status) {
+                    defer.reject(apiError + ': library-amenity');
+                });
+            return defer.promise;
+        };
+
+        /**
+         * @ngdoc function
+         * @name alerts
+         * @methodOf locationService.service:nyplLocationsService
+         * @returns {object} Deferred promise. If it resolves, JSON response
+         *  from the API of alerts that display site-wide.
+         * @description Get all alerts.
+         * @example
+         * <pre>
+         *  nyplLocationsService.alerts()
+         *    .then(function (data) {
+         *      var amenities = data.alerts;
+         *    });
+         *    .catch(function (error) {
+         *      // error = "Could not reach API"
+         *    });
+         * </pre>
+         */
+        locationsApi.alerts = function () {
+            var defer = $q.defer();
+
+            $http.jsonp(
+                    api + '/alerts' + jsonp_cb,
+                    {cache: true}
+                )
+                .success(function (data) {
+                    defer.resolve(data);
+                })
+                .error(function (data, status) {
+                    defer.reject(apiError + ': site-wide alerts');
+                });
+            return defer.promise;
+        };
+
+        locationsApi.terms = function () {
+            var defer = $q.defer();
+
+            $http.jsonp(
+                    api + '/terms' + '?callback=JSON_CALLBACK',
+                    {cache: true}
+                )
+                .success(function (data) {
+                    defer.resolve(data);
+                })
+                .error(function (data, status) {
+                    defer.reject(apiError + ': terms');
+                });
+            return defer.promise;
+        };
+
+        return locationsApi;
+    }
+    nyplLocationsService.$inject = ["$http", "$q"];
+
+    /**
+     * @ngdoc overview
+     * @module locationService
+     * @name locationService
+     * @description
+     * AngularJS module that provides a service to call the API endpoints.
+     */
+    angular
+        .module('locationService', [])
+        .factory('nyplLocationsService', nyplLocationsService);
+
+})();
+
 /*jslint indent: 2, maxlen: 80, nomen: true */
 /*globals nypl_locations, _, angular, jQuery,
 console, $location, $ */
@@ -1801,18 +2314,42 @@ console, $location, $ */
     $scope,
     $rootScope,
     $timeout,
+    $filter,
+    $nyplAlerts,
     config,
     divisions,
     nyplLocationsService,
+    nyplAlertsService,
     nyplUtility
   ) {
     var sibl,
       research_order = config.research_order || ['SASB', 'LPA', 'SC', 'SIBL'],
-      getHoursToday = function (obj) {
+      getHoursOrAlert = function (obj) {
+        var alerts,
+          alertMsg,
+          hoursMessageOpts;
+
         _.each(obj, function (elem) {
-          if (elem.hours) {
-            elem.hoursToday = nyplUtility.hoursToday(elem.hours);
+          if (elem._embedded.alerts) {
+            alerts = elem._embedded.alerts;
+            alertMsg = nyplAlertsService.getCurrentActiveMessage(alerts);
           }
+
+          hoursMessageOpts = {
+            message: alertMsg,
+            open: elem.open,
+            hours: elem.hours,
+            hoursFn: getlocationHours,
+            closedFn: branchClosedMessage
+          };
+          // CSS class for a closing
+          elem.closingMessageClass = closingMessageClass(alerts);
+          // Assign proper title for hours today or closing
+          elem.todaysHoursDisplay = alertMsg ? 'Today:' : 'Today\'s Hours:';
+          // Hours or closing message that will display
+          elem.hoursOrClosingMessage =
+            nyplAlertsService
+              .getHoursOrMessage(hoursMessageOpts);
         });
       },
       loadTerms = function () {
@@ -1825,49 +2362,25 @@ console, $location, $ */
               var newTerms = term.terms,
                 subjectsSubterms = [],
                 index = term.name === 'Subjects' ? 0 : 1;
-
-                // Get the parent term if there are no children terms.
-                // _.each(term.terms, function (subterm) {
-                //   if (!subterm.terms) {
-                //     subjectsSubterms.push({
-                //       name: subterm.name,
-                //       id: subterm.id
-                //     });
-                //   } else {
-                //     _.each(subterm.terms, function  (term) {
-                //       subjectsSubterms.push(term);
-                //     });
-                //   }
-                // });
-
               dataTerms[index] = {
                 id: term.id,
                 name: term.name,
                 terms: newTerms
               };
             });
-
             dataTerms.push({
               name: 'Locations',
               locations: $scope.divisionLocations
             });
             $scope.terms = dataTerms;
           });
-          // .finally(function (data) {
-          //   $scope.terms[2] = ({
-          //     name: 'Locations',
-          //     locations: $scope.divisionLocations
-          //   });
-          // });
-          // .catch(function (error) {
-          //     throw error;
-          // });
       },
       loadSIBL = function () {
         return nyplLocationsService
           .singleLocation('sibl')
           .then(function (data) {
-            getHoursToday([data.location]);
+            // Assign Today's hours or Alert Closing Msg
+            getHoursOrAlert([data.location]);
             sibl = data.location;
             sibl._embedded.location = {
               id: 'SIBL'
@@ -1890,8 +2403,6 @@ console, $location, $ */
       {label: 'Locations', name: '', id: undefined, active: false}
     ];
     
-    // Assign Today's hours
-    getHoursToday(divisions);
     // Assign short name to every location in every division
     _.each(divisions, function (division) {
       var location = division._embedded.location;
@@ -1925,6 +2436,9 @@ console, $location, $ */
 
     loadSIBL();
     loadTerms();
+    configureGlobalAlert();
+    // Assign Today's hours or Alert Closing Msg
+    getHoursOrAlert(divisions);
 
     $scope.selectCategory = function (index, term) {
       if ($scope.categorySelected === index) {
@@ -1939,6 +2453,27 @@ console, $location, $ */
       // Reset the subterm button.
       $scope.categorySelected = index;
     };
+
+    function configureGlobalAlert() {
+      $scope.globalClosingMessage;
+      if ($nyplAlerts.alerts.length) {
+        $scope.globalClosingMessage =
+          nyplAlertsService.getCurrentActiveMessage($nyplAlerts.alerts);
+      }
+    }
+
+    function closingMessageClass(location_alerts) {
+      var alerts = nyplAlertsService.activeClosings(location_alerts);
+      return (alerts) ? true : false;
+    }
+
+    function getlocationHours(hours) {
+      return $filter('timeFormat')(nyplUtility.hoursToday(hours));
+    }
+
+    function branchClosedMessage() {
+      return "<b>Branch is temporarily closed.</b>";
+    }
 
     function getSubjectFilters() {
       if ($scope.filter_results[0].active) {
@@ -2150,7 +2685,7 @@ console, $location, $ */
     };
 
   }
-  CollectionsCtrl.$inject = ["$scope", "$rootScope", "$timeout", "config", "divisions", "nyplLocationsService", "nyplUtility"];
+  CollectionsCtrl.$inject = ["$scope", "$rootScope", "$timeout", "$filter", "$nyplAlerts", "config", "divisions", "nyplLocationsService", "nyplAlertsService", "nyplUtility"];
 
   angular
     .module('nypl_research_collections')
@@ -2225,25 +2760,6 @@ console, $location, $ */
   //   };
   // }
 
-  /**
-   * @ngdoc directive
-   * @name nypl_locations.directive:todayshours
-   * @restrict E
-   * @scope
-   * @description
-   * ...
-   */
-  function todayshours() {
-    return {
-      restrict: 'E',
-      templateUrl: 'scripts/directives/templates/todaysHours.html',
-      replace: true,
-      scope: {
-        hours: '@',
-        holiday:  '='
-      }
-    };
-  }
 
   /**
    * @ngdoc directive
@@ -2257,74 +2773,6 @@ console, $location, $ */
       scope.$on('$stateChangeStart', function () {
         $window.scrollTo(0, 0);
       });
-    };
-  }
-
-  /**
-   * @ngdoc directive
-   * @name nypl_locations.directive:nyplSiteAlerts
-   * @restrict E
-   * @requires $timeout
-   * @requires nyplLocationsService
-   * @requires nyplUtility
-   * @description
-   * ...
-   */
-  function nyplSiteAlerts($timeout, nyplLocationsService, nyplUtility) {
-    return {
-      restrict: 'E',
-      templateUrl: 'scripts/directives/templates/alerts.html',
-      replace: true,
-      // Must be global for unit test to pass. Must find better way to test.
-      // scope: {},
-      link: function (scope, element, attrs) {
-        var alerts;
-        $timeout(function () {
-          nyplLocationsService.alerts().then(function (data) {
-            alerts = data.alerts;
-            scope.sitewidealert = nyplUtility.alerts(alerts);
-          });
-        }, 200);
-      }
-    };
-  }
-  nyplSiteAlerts.$inject = ["$timeout", "nyplLocationsService", "nyplUtility"];
-
-  /**
-   * @ngdoc directive
-   * @name nypl_locations.directive:nyplLibraryAlert
-   * @restrict E
-   * @requires nyplUtility
-   * @scope
-   * @description
-   * ...
-   */
-  function nyplLibraryAlert(nyplUtility) {
-    function alertExpired(startDate, endDate) {
-      var sDate = new Date(startDate),
-        eDate   = new Date(endDate),
-        today   = new Date();
-      if (sDate.getTime() <= today.getTime() && eDate.getTime() >= today.getTime()) {
-        return false;
-      }
-      return true;
-    };
-
-    return {
-      restrict: 'E',
-      templateUrl: 'scripts/directives/templates/library-alert.html',
-      replace: true,
-      scope: {
-          exception: '='
-      },
-      link: function (scope, element, attrs) {
-        if (scope.exception) {
-          scope.alertExpired = alertExpired(scope.exception.start, scope.exception.end);
-          if (scope.exception.description !== '' && scope.alertExpired === false) {
-            scope.libraryAlert = scope.exception.description;
-          }
-        }
-      }
     };
   }
 
@@ -2484,288 +2932,13 @@ console, $location, $ */
     };
   }
 
-  /**
-   * @ngdoc directive
-   * @name nypl_locations.directive:nyplAutofill
-   * @restrict AEC
-   * @scope
-   * @description
-   * ...
-   */
-  function nyplAutofill($state, $analytics) {
-    return {
-      restrict: 'AEC',
-      templateUrl: 'scripts/directives/templates/autofill.html',
-      scope: {
-        data: '=',
-        model: '=ngModel',
-        mapView: '&',
-        geoSearch: '&'
-      },
-      link: function ($scope, elem, attrs, controller) {
-        $scope.focused = false;
-        $scope.activated = false;
-        $scope.geocodingactive = false;
-        $scope.filtered = [];
-        $scope.items;
-        $scope.active;
-        $scope.currentIndex;
-
-        var input  = angular.element(document.getElementById('searchTerm')),
-          html   = angular.element(document.getElementsByTagName('html'));
-
-        input.bind('focus', function() {
-          $scope.$apply( function() { 
-            controller.openAutofill();
-          });
-        });
-
-        input.bind('click', function(e) {
-          e.stopPropagation();
-        });
-
-        input.bind('keyup', function(e) {
-          // Tab & Enter keys
-          if (e.keyCode === 13) {
-            $scope.$apply( function() {
-              // User has pressed up/down arrows
-              if ($scope.activated) {
-                // Transition to location page
-                if ($scope.active.slug){
-                  $scope.activated = false;
-                  controller.closeAutofill();
-                  $scope.model = $scope.active.name;
-                  $state.go(
-                    'location', 
-                    { location: $scope.active.slug }
-                  );
-                }
-                else {
-                  //Geocoding Search
-                  $scope.geoSearch({term: $scope.model});
-                  $scope.geocodingactive = false;
-                  $scope.activated = false;
-                  if (input.blur()) {
-                    controller.closeAutofill();
-                  }
-                }
-              }
-              // User has pressed enter with autofill
-              else if (controller.setSearchText($scope.model)) {
-                  $scope.model = $scope.items[0].name;
-                  controller.closeAutofill();
-                  $analytics.eventTrack('Accept',
-                    { category: 'Locations', label: $scope.model });
-                  $state.go(
-                    'location',
-                    { location: $scope.items[0].slug }
-                  );
-              }
-              // No autofill, down/up arrows not pressed
-              else {
-                // Geocoding Search only
-                $scope.geoSearch({term: $scope.model});
-                if (input.blur()) {
-                  controller.closeAutofill();
-                }
-              }
-            });
-          }
-
-          // Right Arrow
-          if (e.keyCode === 39) {
-            $scope.$apply( function() {
-              controller.setSearchText($scope.model);
-            });
-          }
-
-          // Backspace
-          if (e.keyCode === 8) {
-            $scope.$apply( function() { $scope.lookahead = ''; });
-          }
-
-          // Escape key
-          if (e.keyCode === 27) {
-            /*$scope.$apply( function() { 
-               if (input.blur()) {
-                controller.closeAutofill();
-                $scope.activated = false;
-              }
-            });*/
-          }
-        });
-
-        // Tab, Enter and Escape keys
-        input.bind('keydown', function(e) {
-          if (e.keyCode === 9 || e.keyCode === 13 || e.keyCode === 27) {
-            e.preventDefault();
-          }
-
-          // Up Arrow
-          if (e.keyCode === 38) {
-            e.preventDefault();
-            $scope.$apply(function() {
-              if (!$scope.activated) {
-                controller.activateFirstItem();
-              }
-              else {
-                controller.activatePreviousItem();
-              }
-            });
-          }
-
-          // Down Arrow
-          if (e.keyCode === 40) {
-            e.preventDefault();
-            $scope.$apply(function() {
-              if (!$scope.activated) {
-                controller.activateFirstItem();
-              }
-              else {
-                controller.activateNextItem();
-              }
-              controller.activateGeocodingItem();
-            });
-          }
-        });
-
-        html.bind('click', function(e) {
-          $scope.$apply( function() {
-            controller.closeAutofill();
-          });
-        });
-
-        function initAutofill() {
-          $scope.$watch('model', function(newValue, oldValue) {
-            controller.updateSearchText($scope.data, newValue);
-          });
-
-          $scope.$on('$stateChangeSuccess', function() {
-            controller.resetSearchTerms();
-            controller.closeAutofill();
-          });
-        }
-
-        initAutofill();
-      },
-      controller: ['$scope', function($scope) {
-        $scope.lookahead = '',
-        $scope.currentWord = '',
-        $scope.completeWord = '';
-
-        this.closeAutofill = function() {
-          return $scope.focused = false;
-        };
-
-        this.openAutofill = function() {
-          return $scope.focused = true;
-        };
-
-
-        this.activate = function(item) {
-          return item;
-        };
-
-        this.activateFirstItem = function() {
-          $scope.active = $scope.filtered[0];
-          $scope.currentIndex = $scope.filtered.indexOf($scope.active);
-          $scope.activated = true;
-        };
-
-        this.activateNextItem = function() {
-          $scope.geocodingactive = false;
-          if ($scope.currentIndex < $scope.filtered.length && $scope.currentIndex >= 0) {
-            $scope.currentIndex = $scope.filtered.indexOf($scope.active) + 1;
-            $scope.active = this.activate($scope.filtered[$scope.currentIndex]);
-          }
-          else {
-            $scope.active = undefined;
-            $scope.currentIndex = -1;
-          }
-        };
-
-        this.activatePreviousItem = function() {
-          $scope.geocodingactive = false;
-          if ($scope.currentIndex === -1) {
-            $scope.currentIndex = $scope.filtered.length - 1;
-            $scope.active = this.activate($scope.filtered[$scope.currentIndex]);         
-          }
-          else if ($scope.currentIndex <= $scope.filtered.length && $scope.currentIndex > 0) {
-            $scope.currentIndex = $scope.currentIndex - 1;
-            $scope.active = this.activate($scope.filtered[$scope.currentIndex]);
-          }
-        };
-
-        this.activateGeocodingItem = function () {
-          if(!$scope.active && $scope.activated) {
-            $scope.active = this.activate($scope.model);
-            $scope.geocodingactive = true;
-          }
-        };
-
-        this.setSearchText = function(model) {
-          if ( $scope.completeWord === $scope.model || 
-            $scope.completeWord === '' || 
-            $scope.model === '') return;
-          return $scope.model = $scope.completeWord;
-        };
-
-        this.resetSearchTerms = function() {
-          $scope.lookahead   = '';
-          $scope.currentWord = '';
-        };
-
-        this.filterStartsWith = function(data, searchTerm) {
-          return _.filter(data, function(elem) {
-            if (elem.name) {
-              return elem.name.substring(0, searchTerm.length).toLowerCase() 
-                === searchTerm.toLowerCase();
-            }
-            return false;
-          });
-        };
-
-        this.filterTermWithin = function(data, searchTerm) {
-          return _.filter(data, function(elem) {
-            if (elem.name) {
-              return elem.name.toLowerCase().
-                indexOf(searchTerm.toLowerCase()) >= 0;
-            }
-            return false;
-          });
-        };
-
-        this.updateSearchText = function(data, searchTerm) {
-          if (searchTerm === '' || !searchTerm || !data) return;
-
-          if (searchTerm.length > 1) {
-            $scope.items    = this.filterStartsWith(data, searchTerm);
-            $scope.filtered = this.filterTermWithin(data, searchTerm);
-
-            if ($scope.items[0]) {
-              $scope.lookahead   = $scope.items[0].name.substring(searchTerm.length);
-              $scope.currentWord = searchTerm;
-            }
-            else {
-              this.resetSearchTerms();
-            }
-            return $scope.completeWord = $scope.currentWord + $scope.lookahead;
-          }
-        };
-      }]
-    };
-
-  }
-
   angular
     .module('nypl_research_collections')
     .directive('collapse', collapse)
     .directive('closeSubMenu', closeSubMenu)
     .directive('collapsibleFilters', collapsibleFilters)
     .directive('nyplFooter', nyplFooter)
-    .directive('nyplSiteAlerts', nyplSiteAlerts)
     .directive('loadingWidget', loadingWidget);
-
 })();
 
 /*jslint indent: 4, maxlen: 80, nomen: true */
@@ -2778,11 +2951,21 @@ console, $location, $ */
      * @ngdoc filter
      * @name nypl_locations.filter:timeFormat
      * @param {object} timeObj Object with hours for today and tomorrow.
-     * @returns {string} Closed or open times for a branch.
+     * @returns {string} Closed or open times for a branch with possible
+     *  alert returned.
      * @description
-     * Filter formats military time to standard time
+     *  timeFormat() filter formats military time to standard time. 
+     *  In addition, if an alert is present, it displays 
+     *  the approapriate message for a relevant alert.
+     *  1) all day closing 2) early/late opening/closing
      */
-    function timeFormat() {
+    function timeFormat($sce) {
+        function getMilitaryHours(time) {
+            var components = time.split(':'),
+                hours = parseInt(components[0], 10);
+            return hours;
+        }
+
         function clockTime(time) {
             var components = time.split(':'),
                 hours = ((parseInt(components[0], 10) + 11) % 12 + 1),
@@ -2792,26 +2975,62 @@ console, $location, $ */
             return hours + ":" + minutes + meridiem;
         }
 
+        function closingHoursDisplay(hours, alerts) {
+            var sDate, eDate, allDay, regHours,
+                openHour, closedHour, displayString;
+
+            if (!alerts.length) {
+                sDate = moment(alerts.applies.start);
+                eDate = moment(alerts.applies.end);
+                openHour = getMilitaryHours(hours.open);
+                closedHour = getMilitaryHours(hours.close);
+                allDay = (eDate.isAfter(sDate, 'day')) ? true : false;
+
+                // First, check if this is an all day closing
+                // Then, verify that it is an early closing or late opening
+                // Finally, if the user enters something outside of those bounds
+                // default to a change in hours.
+                if (allDay || alert.infinite === true) {
+                    displayString = 'Closed *';
+                } else if (sDate.hours() <= openHour && eDate.hours() >= closedHour) {
+                    displayString = 'Closed *'
+                } else if (openHour < sDate.hours() && closedHour <= eDate.hours()) {
+                    displayString = 'Closing early *';
+                } else if (closedHour > eDate.hours() && openHour >= sDate.hours()) {
+                    displayString = 'Opening late *';
+                } else {
+                    displayString = 'Change in hours *';
+                }
+            }
+            return $sce.trustAsHtml(displayString);
+        }
+
         return function output(timeObj) {
             // The time object may have just today's hours
             // or be an object with today's and tomorrow's hours
-            var time = timeObj !== undefined && timeObj.today !== undefined ?
+            var alerts,
+                time = timeObj !== undefined && timeObj.today !== undefined ?
                     timeObj.today :
                     timeObj;
 
             // Checking if thruthy needed for async calls
             if (time) {
+                alerts = time.alert || null;
+
                 if (time.open === null) {
                     return 'Closed';
+                } else if (alerts) {
+                    return closingHoursDisplay(time, alerts);
                 }
                 return clockTime(time.open) + ' - ' + clockTime(time.close);
             }
 
-            console.log('timeFormat() filter function error: Argument is' +
+            console.log('timeFormat() filter error: Argument is' +
                 ' not defined or empty, verify API response for time');
             return '';
         };
     }
+    timeFormat.$inject = ["$sce"];
 
     /**
      * @ngdoc filter
@@ -2868,11 +3087,15 @@ console, $location, $ */
         }
 
         return function (elem) {
+            // Not sure yet if this will suffice to get the dynamic
+            // hours today
+            // moment().get('hours'); or get('hour')??
+
             var open_time, closed_time,
-                now = new Date(),
+                now = moment(),
                 today, tomorrow,
                 tomorrow_open_time, tomorrow_close_time,
-                hour_now_military = now.getHours();
+                tomorrows_alert, hour_now_military = now.get('hour');
 
             // If truthy async check
             if (elem) {
@@ -2896,6 +3119,11 @@ console, $location, $ */
                     closed_time = getHoursObject(today.close);
                 }
 
+                // Assign alert msg for tomorrow if defined
+                if (tomorrow.alert !== null) {
+                    tomorrows_alert = tomorrow.alert.closed_for || null;
+                }
+
                 // Assign tomorrow's open time object
                 if (tomorrow.open !== null) {
                     tomorrow_open_time = getHoursObject(tomorrow.open);
@@ -2910,7 +3138,13 @@ console, $location, $ */
                 // before midnight, display that it will be open 'tomorrow',
                 // if there is data for tomorrow's time.
                 if (hour_now_military >= closed_time.military) {
-                    if (tomorrow_open_time && tomorrow_close_time) {
+
+                    // If an alert is set for tomorrow, display that first
+                    // before displaying the hours for tomorrow
+                    if (tomorrows_alert) {
+                        return 'Tomorrow: ' + tomorrows_alert;
+                    }
+                    else if (tomorrow_open_time && tomorrow_close_time) {
                         return 'Open tomorrow ' + tomorrow_open_time.hours +
                             (parseInt(tomorrow_open_time.mins, 10) !== 0 ? ':' + tomorrow_open_time.mins : '')
                             + tomorrow_open_time.meridian + '-' + tomorrow_close_time.hours +
@@ -3119,17 +3353,47 @@ console, $location, $ */
      * @methodOf nypl_locations.service:nyplUtility
      * @param {object} hours Object with a regular property that is an
      *  array with the open and close times for every day.
-     * @returns {object} An object with the open and close times for
-     *  the current and tomorrow days.
+     * @param {object} alerts Object with an array of alerts pertaining
+     *  to each location/division api endpoint.
+     * @returns {object} An object with the open/close times for
+     *  the today/tomorrow and an alert property for tomorrow's
+     *  potential alert.
      * @description ...
      */
-    utility.hoursToday = function (hours) {
+    utility.hoursToday = function (hours, alertsObj) {
       var date = new Date(),
         today = date.getDay(),
         tomorrow = today + 1,
-        hoursToday;
+        hoursToday,
+        alerts,
+        alertStartDate,
+        tomorrowsAlert;
+
+      if(alertsObj) {
+        // Retrieve only global closing alerts
+        // Order is established by API
+        if (alertsObj.all_closings && alertsObj.all_closings.length) {
+          alerts = alertsObj.all_closings;
+        }
+      }
 
       if (hours) {
+        // Obtain tomorrow's alert
+        if (alerts && alerts.length) {
+          tomorrowsAlert = _.find(alerts, function(alert){
+            if (alert.applies) {
+              alertStartDate = moment(alert.applies.start);
+              // Priority: 1) Global 2) Location 3) Division
+              if (alert.scope === 'all' && alertStartDate.day() === tomorrow) {
+                return alert;
+              } else if (alert.scope === 'location' && alertStartDate.day() === tomorrow) {
+                return alert;
+              }
+              return alert.scope === 'division' && alertStartDate.day() === tomorrow;
+            }
+          });
+        }
+
         hoursToday = {
           'today': {
             'day': hours.regular[today].day,
@@ -3139,7 +3403,8 @@ console, $location, $ */
           'tomorrow': {
             'day': hours.regular[tomorrow % 7].day,
             'open': hours.regular[tomorrow % 7].open,
-            'close': hours.regular[tomorrow % 7].close
+            'close': hours.regular[tomorrow % 7].close,
+            'alert' : tomorrowsAlert || null
           }
         };
       }
@@ -3303,107 +3568,6 @@ console, $location, $ */
       });
 
       return social_media;
-    };
-
-    /**
-     * @ngdoc function
-     * @name alerts
-     * @methodOf nypl_locations.service:nyplUtility
-     * @param {array} alerts ...
-     * @description ...
-     */
-    utility.alerts = function (alerts) {
-      var today = new Date(),
-        todaysAlert = [],
-        alert_start,
-        alert_end;
-
-      if (!alerts) {
-        return null;
-      }
-
-      if (Array.isArray(alerts) && alerts.length > 0) {
-        _.each(alerts, function (alert) {
-          alert_start = new Date(alert.start);
-          alert_end = new Date(alert.end);
-
-          if (alert_start <= today && today <= alert_end) {
-            todaysAlert.push(alert.body);
-          }
-        });
-
-        if (!angular.isUndefined(todaysAlert) && todaysAlert.length) {
-          return _.uniq(todaysAlert);
-        }
-      }
-      return null;
-    };
-
-
-    /**
-     * @ngdoc function
-     * @name holidayClosings
-     * @methodOf nypl_locations.service:nyplUtility
-     * @param {obj} date ...
-     * @description ...
-     */
-    utility.holidayClosings = function (date) {
-
-      function sameDay (day1, day2) {
-        return day1.getFullYear() === day2.getFullYear()
-          && day1.getDate() === day2.getDate()
-          && day1.getMonth() === day2.getMonth();
-      }
-
-      var holiday,
-          today = date || new Date(),
-          holidays = [
-            {
-              day: new Date(2015, 0, 26),
-              title: "Closing at 5 pm due to severe weather" // Winter storm early closing
-            },
-            {
-              day: new Date(2015, 0, 27),
-              title: "Closed due to severe weather" // Winter storm early closing
-            },           
-            {
-              day: new Date(2015, 1, 16),
-              title: "Closed for Presidents' Day"
-            },
-            {
-              day: new Date(2015, 3, 5),
-              title: "Closed for Easter"
-            },
-            {
-              day: new Date(2015, 4, 23),
-              title: "Closed for Memorial Day weekend"
-            },
-            {
-              day: new Date(2015, 4, 24),
-              title: "Closed for Memorial Day weekend"
-            },
-            {
-              day: new Date(2015, 4, 25),
-              title: "Closed for Memorial Day weekend"
-            },
-            {
-              day: new Date(2015, 6, 4),
-              title: "Closed for Independence Day"
-            }
-          ];
-
-      holiday = _.filter(holidays, function(item) {
-                  if ( sameDay(item.day, today) ) {
-                    return item;
-                  }
-                });
-      if (holiday.length > 0) {
-        return {
-          day: holiday[0].day,
-          title: holiday[0].title
-        };
-      }
-      return undefined;
     };
 
     /**

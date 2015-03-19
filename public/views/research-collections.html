@@ -42,7 +42,8 @@
         <div class='sub-filters'>
           <ul class='three-columns' data-ng-class="{'two-columns': activeCategory == 'Locations', 'three-columns': activeCategory != 'Locations'}">
             <li class="term {{term.name | slugify}} subjectSubterms" data-ng-repeat="term in terms[0].terms" data-ng-show="activeCategory == 'Subjects'">
-              <a href="" data-ng-click="filterDivisionsBy($index, term)" close-sub-menu
+              <a data-ng-class="{'not-full-width': term.terms.length}" href=""
+                data-ng-click="filterDivisionsBy($index, term)" close-sub-menu
                 data-ng-model="term.name" data-ng-class="{active: $index == selectedSubjectsSubterm}"
                 analytics-on="click" analytics-category="Research Collections"
                 analytics-event="Click" analytics-label="{{terms[0].name}}: {{term.name}}">
@@ -84,8 +85,9 @@
               <a data-ng-href="/locations/divisions/{{division.slug}}"
                 analytics-on="click" analytics-category="Research Collections"
                 analytics-event="Division Image" analytics-label="{{division.name}}">
-                <img class="img--outline division-image" data-ng-src="{{division.images.collection_item}}"
-                  alt="Image for {{division.name}}" title="Image for {{division.name}}" style="max-height: 235px;" />
+                <img data-ng-if="division.images.collection_item" class="img--outline division-image"
+                  data-ng-src="{{division.images.collection_item}}" alt="Image for {{division.name}}"
+                  title="Image for {{division.name}}" style="max-height: 235px;" />
               </a>
               <h4 class="division-name">
                 <a data-ng-href="/locations/divisions/{{division.slug}}"
@@ -95,7 +97,19 @@
                 </a>
               </h4>
               <span class="icon-location">{{division._embedded.location.short_name}}</span>
-              <p class="icon-clock" data-ng-if="division.hours">Hours Today: {{division.hoursToday | timeFormat}}</p>
+
+              <!-- Today's Hours or Branch Closing -->
+              <div class="hours-info">
+                <p class="icon-clock" data-ng-if="globalClosingMessage && division.open">
+                  Today: <strong>{{globalClosingMessage}}</strong>
+                </p>
+                <p data-ng-if="!globalClosingMessage || !division.open">
+                  <span class="icon-clock" data-ng-if="division.todaysHoursDisplay && division.open"
+                    data-ng-bind-html="division.todaysHoursDisplay">
+                  </span>
+                  <span data-ng-bind-html="division.hoursOrClosingMessage"></span>
+                </p>
+              </div>
             </div>
 
             <!-- SIBL  -->
@@ -103,8 +117,9 @@
               <a data-ng-href="/locations/{{division.slug}}"
                 analytics-on="click" analytics-category="Research Collections"
                 analytics-event="Division Image" analytics-label="{{division.name}}">
-                <img class="img--outline division-image" data-ng-src="{{division.images.interior}}"
-                  alt="Image for {{division.name}}" title="Image for {{division.name}}" style="max-height: 235px;" />
+                <img data-ng-if="division.images.interior" class="img--outline division-image"
+                  data-ng-src="{{division.images.interior}}" alt="Image for {{division.name}}"
+                  title="Image for {{division.name}}" style="max-height: 235px;" />
               </a>
               <h4 class="division-name">
                 <a data-ng-href="/locations/{{division.slug}}"
@@ -113,7 +128,19 @@
                   {{division.name}}
                 </a>
               </h4>
-              <p class="icon-clock" data-ng-if="division.hours">Hours Today: {{division.hoursToday | timeFormat}}</p>
+
+              <!-- Today's Hours or Branch Closing -->
+              <div class="hours-info">
+                <p class="icon-clock" data-ng-if="globalClosingMessage && division.open">
+                  Today: <strong>{{globalClosingMessage}}</strong>
+                </p>
+                <p data-ng-if="!globalClosingMessage || !division.open">
+                  <span class="icon-clock" data-ng-if="division.todaysHoursDisplay && division.open"
+                    data-ng-bind-html="division.todaysHoursDisplay">
+                  </span>
+                  <span data-ng-bind-html="division.hoursOrClosingMessage"></span>
+                </p>
+              </div>
             </div>
             <!-- SIBL END -->
           </div>
