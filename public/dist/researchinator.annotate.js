@@ -600,7 +600,7 @@ angular.module('nypl_research_collections', [
   function nyplGlobalAlerts($rootScope) {
     return {
       restrict: 'E',
-      template: "<div class='nypl-global-alerts' data-ng-if='$root.alerts'>" +
+      template: "<div class='nypl-global-alerts' data-ng-if='$root.alerts.length'>" +
                   "<div data-ng-repeat='alert in $root.alerts'>" +
                     "<p data-ng-bind-html='alert.msg'></p>" +
                   "</div>" +
