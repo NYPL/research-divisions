@@ -447,7 +447,7 @@
     return {
       restrict: 'E',
       template: "<div class='nypl-location-alerts'" +
-                    "data-ng-if='locationAlerts'>" +
+                    "data-ng-if='locationAlerts.length'>" +
                   "<div data-ng-repeat='alert in locationAlerts'>" +
                     "<p data-ng-bind-html='alert.msg'></p>" +
                   "</div>" +
