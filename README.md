@@ -64,7 +64,7 @@ A list of all the dependencies used in the Researchinator, Locations project.
 
 Third Party
 * jQuery
-* AngularJs v1.2.14
+* AngularJs v1.3.0
   * ngSanitize
   * ngAnimate
   * [ui-router](https://github.com/angular-ui/ui-router)
@@ -75,6 +75,8 @@ Third Party
 
 NYPL Components
 These are internal modules found in [public/scripts/components](public/scripts/components).
+* nyplAlerts
+  * nypl_alerts.js - Module that provides an AngularJS Provider, Service methods and Directives for handling global/location based closing/non-closing alerts (Underscore.js is a dependency).
 * nyplBreadcrumbs
   * nypl_breadcrumbs.js - Module that provides an AngularJS directive for breacrumbs navigation.
 * nyplFeedback
