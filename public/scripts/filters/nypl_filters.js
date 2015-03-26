@@ -208,6 +208,12 @@
         };
     }
 
+    function unslugify() {
+        return function (text) {
+            return capitalize()(text.replace(/\-/g, ' '));
+        };
+    }
+
      angular
         .module('nypl_research_collections')
         .filter('timeFormat', timeFormat)
@@ -215,5 +221,6 @@
         .filter('capitalize', capitalize)
         .filter('hoursTodayFormat', hoursTodayFormat)
         .filter('truncate', truncate)
-        .filter('slugify', slugify);
+        .filter('slugify', slugify)
+        .filter('unslugify', unslugify);
 })();
