@@ -60,6 +60,7 @@ function nyplInterceptor($q, $injector) {
  * @requires angulartics
  * @requires angulartics.google.analytics
  * @requires nyplBreadcrumbs
+ * @requires nyplAlerts
  * @description
  * Research collections.
  */
@@ -75,7 +76,8 @@ angular.module('nypl_research_collections', [
     'nyplSSO',
     'nyplBreadcrumbs',
     'nyplSearch',
-    'ngAria'
+    'ngAria',
+    'nyplAlerts'
 ])
 .config([
     '$analyticsProvider',
@@ -84,13 +86,15 @@ angular.module('nypl_research_collections', [
     '$locationProvider',
     '$stateProvider',
     '$urlRouterProvider',
+    '$nyplAlertsProvider',
     function (
         $analyticsProvider,
         $crumbProvider,
         $httpProvider,
         $locationProvider,
         $stateProvider,
-        $urlRouterProvider
+        $urlRouterProvider,
+        $nyplAlertsProvider
     ) {
         'use strict';
 
@@ -99,6 +103,12 @@ angular.module('nypl_research_collections', [
         // Assign proper Breadcrumb name/paths
         $crumbProvider.setOptions({
             primaryState: {name:'Home', customUrl: 'http://nypl.org' }
+        });
+
+        // nyplAlerts required config settings
+        $nyplAlertsProvider.setOptions({
+            api_root: locations_cfg.config.api_root,
+            api_version: locations_cfg.config.api_version
         });
 
         $httpProvider.interceptors.push(nyplInterceptor);
