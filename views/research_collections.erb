@@ -1,5 +1,5 @@
 <!doctype html>
-<html xmlns:ng="http://angularjs.org" id="ng-app" data-ng-app="nypl_research_collections" data-ng-strict-di>
+<html xmlns:ng="http://angularjs.org" id="ng-app" data-ng-app="nypl_research_collections">
   <head>
 
     <% if ! settings.env_config["optimizely"].nil? %>
@@ -16,7 +16,7 @@
     <meta name="twitter:card" content="summary" />
     <meta property="og:title" content="NYPL Research Divisions" />
     <meta property="og:site_name" content="The New York Public Library" />
-    <meta property="og:url" content="http://nypl.org/research-collections" />
+    <meta property="og:url" content="http://nypl.org/research-divisions" />
     <meta property="og:description" content="The mission of The New York Public Library is to inspire lifelong learning, advance knowledge, and strengthen our communities." />
     <meta property="og:type" content="website" />
 
@@ -31,8 +31,8 @@
 <% end %>
 
 <% if @rq.forwarded? %>
-    <base href="/research-collections/">
-    <link rel="stylesheet" type="text/css" href="/research-collections/css/research_collections.min.css">
+    <base href="/research-divisions/">
+    <link rel="stylesheet" type="text/css" href="/research-divisions/css/research_collections.min.css">
 <% else %>
     <base href="/">
     <link rel="stylesheet" type="text/css" href="/css/research_collections.min.css">
@@ -44,8 +44,8 @@
       <div class="browser-upgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/?locale=en">upgrade your browser</a> to improve your experience.</div>
     <![endif]-->
 
-    <!-- Site Wide Alerts -->
-    <nypl-site-alerts></nypl-site-alerts>
+    <!-- NYPL Global Alerts -->
+    <nypl-global-alerts></nypl-global-alerts>
 
     <!-- Header -->
     <div ng-include="'views/header.html'"></div>

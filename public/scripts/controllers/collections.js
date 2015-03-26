@@ -8,20 +8,42 @@ console, $location, $ */
     $scope,
     $rootScope,
     $timeout,
+    $filter,
+    $nyplAlerts,
     config,
     divisions,
     nyplLocationsService,
-    nyplUtility,
-    researchCollectionService
+    nyplAlertsService,
+    nyplUtility
   ) {
-    var rcValues = researchCollectionService.getResearchValues(),
-      sibl,
+    var sibl,
       research_order = config.research_order || ['SASB', 'LPA', 'SC', 'SIBL'],
-      getHoursToday = function (obj) {
+      getHoursOrAlert = function (obj) {
+        var alerts,
+          alertMsg,
+          hoursMessageOpts;
+
         _.each(obj, function (elem) {
-          if (elem.hours) {
-            elem.hoursToday = nyplUtility.hoursToday(elem.hours);
+          if (elem._embedded.alerts) {
+            alerts = elem._embedded.alerts;
+            alertMsg = nyplAlertsService.getCurrentActiveMessage(alerts);
           }
+
+          hoursMessageOpts = {
+            message: alertMsg,
+            open: elem.open,
+            hours: elem.hours,
+            hoursFn: getlocationHours,
+            closedFn: branchClosedMessage
+          };
+          // CSS class for a closing
+          elem.closingMessageClass = closingMessageClass(alerts);
+          // Assign proper title for hours today or closing
+          elem.todaysHoursDisplay = alertMsg ? 'Today:' : 'Today\'s Hours:';
+          // Hours or closing message that will display
+          elem.hoursOrClosingMessage =
+            nyplAlertsService
+              .getHoursOrMessage(hoursMessageOpts);
         });
       },
       loadTerms = function () {
@@ -34,49 +56,25 @@ console, $location, $ */
               var newTerms = term.terms,
                 subjectsSubterms = [],
                 index = term.name === 'Subjects' ? 0 : 1;
-
-                // Get the parent term if there are no children terms.
-                // _.each(term.terms, function (subterm) {
-                //   if (!subterm.terms) {
-                //     subjectsSubterms.push({
-                //       name: subterm.name,
-                //       id: subterm.id
-                //     });
-                //   } else {
-                //     _.each(subterm.terms, function  (term) {
-                //       subjectsSubterms.push(term);
-                //     });
-                //   }
-                // });
-
               dataTerms[index] = {
                 id: term.id,
                 name: term.name,
                 terms: newTerms
               };
             });
-
             dataTerms.push({
               name: 'Locations',
               locations: $scope.divisionLocations
             });
             $scope.terms = dataTerms;
           });
-          // .finally(function (data) {
-          //   $scope.terms[2] = ({
-          //     name: 'Locations',
-          //     locations: $scope.divisionLocations
-          //   });
-          // });
-          // .catch(function (error) {
-          //     throw error;
-          // });
       },
       loadSIBL = function () {
         return nyplLocationsService
           .singleLocation('sibl')
           .then(function (data) {
-            getHoursToday([data.location]);
+            // Assign Today's hours or Alert Closing Msg
+            getHoursOrAlert([data.location]);
             sibl = data.location;
             sibl._embedded.location = {
               id: 'SIBL'
@@ -99,8 +97,6 @@ console, $location, $ */
       {label: 'Locations', name: '', id: undefined, active: false}
     ];
     
-    // Assign Today's hours
-    getHoursToday(divisions);
     // Assign short name to every location in every division
     _.each(divisions, function (division) {
       var location = division._embedded.location;
@@ -111,7 +107,7 @@ console, $location, $ */
     $scope.divisions = divisions;
     $scope.terms = [];
 
-    $scope.filteredDivisions = rcValues.filteredDivisions || _.chain(divisions)
+    $scope.filteredDivisions = _.chain(divisions)
       .sortBy(function (elem) {
         return elem.name;
       })
@@ -134,6 +130,9 @@ console, $location, $ */
 
     loadSIBL();
     loadTerms();
+    configureGlobalAlert();
+    // Assign Today's hours or Alert Closing Msg
+    getHoursOrAlert(divisions);
 
     $scope.selectCategory = function (index, term) {
       if ($scope.categorySelected === index) {
@@ -144,13 +143,31 @@ console, $location, $ */
 
       $scope.activeCategory = term.name;
 
-      // Save the filter. Need to add one for the the parent term.
-      // researchCollectionService.setResearchValue('subterms', subterms);
-
       // For the data-ng-class for the active buttons.
       // Reset the subterm button.
       $scope.categorySelected = index;
     };
+
+    function configureGlobalAlert() {
+      $scope.globalClosingMessage;
+      if ($nyplAlerts.alerts.length) {
+        $scope.globalClosingMessage =
+          nyplAlertsService.getCurrentActiveMessage($nyplAlerts.alerts);
+      }
+    }
+
+    function closingMessageClass(location_alerts) {
+      var alerts = nyplAlertsService.activeClosings(location_alerts);
+      return (alerts) ? true : false;
+    }
+
+    function getlocationHours(hours) {
+      return $filter('timeFormat')(nyplUtility.hoursToday(hours));
+    }
+
+    function branchClosedMessage() {
+      return "<b>Branch is temporarily closed.</b>";
+    }
 
     function getSubjectFilters() {
       if ($scope.filter_results[0].active) {
@@ -347,10 +364,6 @@ console, $location, $ */
           $scope.activeCategory = undefined;
         }, 700);
       }
-
-      // // Save the filtered divisions for later.
-      // researchCollectionService
-      //   .setResearchValue('filteredDivisions', $scope.filteredDivisions);
 
       return filterDivisions();
     };

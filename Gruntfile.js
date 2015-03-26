@@ -24,7 +24,22 @@ module.exports = function (grunt) {
     ngAnnotate: {
       researchinator: {
         files: {
-          'public/dist/researchinator.annotate.js': ['public/scripts/**/*.js']
+          'public/dist/researchinator.annotate.js': [
+            //'public/scripts/**/*.js'
+            'public/scripts/app.js',
+            'public/scripts/components/nypl_alerts/nypl_alerts.js',
+            'public/scripts/components/nypl_breadcrumbs/*.js',
+            'public/scripts/components/nypl_feedback/*.js',
+            'public/scripts/components/nypl_navigation/*.js',
+            'public/scripts/components/nypl_search/*.js',
+            'public/scripts/components/nypl_sso/*.js',
+            'public/scripts/components/nypl_coordinates.js',
+            'public/scripts/components/nypl_locations_api.js',
+            'public/scripts/controllers/*.js',
+            'public/scripts/directives/*.js',
+            'public/scripts/filters/*.js',
+            'public/scripts/services/*.js'
+          ]
         }
       }
     },
@@ -60,6 +75,7 @@ module.exports = function (grunt) {
           'public/scripts/components/nypl_navigation/nypl_navigation.js',
           'public/scripts/components/nypl_breadcrumbs/nypl_breadcrumbs.js',
           'public/scripts/components/nypl_feedback/nypl_feedback.js',
+          'public/scripts/components/nypl_alerts/nypl_alerts.js',
           'public/scripts/filters/nypl_filters.js',
           'public/scripts/controllers/locations.js',
           'public/scripts/controllers/division.js',
@@ -73,11 +89,40 @@ module.exports = function (grunt) {
         startPage: '/',
         title: 'Researchinator ngDocs',
         image: 'public/images/nypl_logo.png',
-        imageLink: 'http://research-collections.nypl.org',
-        titleLink: 'http://research-collections.nypl.org',
+        imageLink: 'http://research-divisions.nypl.org',
+        titleLink: 'http://research-divisions.nypl.org',
         bestMatch: true,
       },
       all: ['public/scripts/**/*.js']
+    },
+    concat: {
+      options: {
+      stripBanners: true,
+        banner: "/*!\n <%= locinator %>*/\n",
+      },
+      basic_with_components: {
+        src: ['public/css/research_collections.scss',
+              'public/scripts/components/nypl_alerts/styles/nypl-alerts.scss'],
+        dest: 'public/css/research_collections-concat.scss',
+      },
+    },
+    sass: {
+      basic: {
+        options: {
+          style: 'compressed'
+        },
+        files: {
+          'public/css/research_collections.min.css': 'public/css/research_collections.scss'
+        }
+      },
+      basic_with_components: {
+        options: {
+          style: 'compressed'
+        },
+        files: {
+          'public/css/research_collections.min.css': 'public/css/research_collections-concat.scss'
+        }
+      }
     }
   });
 
@@ -86,9 +131,17 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-ng-annotate');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-ngdocs');
+  grunt.loadNpmTasks('grunt-contrib-concat');
+  grunt.loadNpmTasks('grunt-contrib-sass');
 
   grunt.registerTask('buildJS', [
     'ngAnnotate', 'uglify'
+  ]);
+
+  grunt.registerTask('sass-basic', ['sass:basic']);
+  // Additional tasks to handle all Component styles
+  grunt.registerTask('sass-components', [
+    'concat:basic_with_components', 'sass:basic_with_components'
   ]);
 
   grunt.registerTask('docs', ['jsdoc']);
