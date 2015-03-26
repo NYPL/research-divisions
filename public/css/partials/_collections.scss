@@ -12,6 +12,15 @@
   .rc-intro {
     margin: 10px 0;
   }
+
+  #container__divisions {
+    .division-wrapper {
+      margin-bottom: 40px;
+      @include breakpoint($min, $post-palm) {
+        margin-bottom: 55px;
+      }
+    }
+  }
 }
 
 .collection-filters {
@@ -58,7 +67,7 @@
       }
 
       .main-filter-toggle {
-        display: inline;
+        display: inline-table;
         position: absolute;
         width: 88px;
         left: 0px;
@@ -126,9 +135,20 @@
           display: inline-block;
           text-decoration: none;
           border: 1px solid #CCC;
-          width: 82%;
+          width: 97%;
+          &.not-full-width {
+            width: 82%;
+            @include breakpoint($min, 360px) {
+              width: 85%;
+            }
+
+            @include breakpoint($min, 481px) {
+              width: auto;
+              padding: 5px 10px;
+            }
+          }
           @include breakpoint($min, 360px) {
-            width: 85%;
+            width: 94%;
           }
 
           @include breakpoint($min, 481px) {
@@ -140,6 +160,16 @@
             border: 1px solid #0090c4;
             color: #0090c4;
             border-radius: 2px;
+          }
+        }
+
+        &.locationSubterms {
+          a {
+            width: 100%;
+            text-align: center;
+            @include breakpoint($min, 481px) {
+              width: 70%;
+            }
           }
         }
       }
