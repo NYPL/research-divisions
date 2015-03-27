@@ -42,9 +42,9 @@
         <div class='sub-filters'>
           <ul class='three-columns' data-ng-class="{'two-columns': activeCategory == 'Locations', 'three-columns': activeCategory != 'Locations'}">
             <li class="term {{term.name | slugify}} subjectSubterms" data-ng-repeat="term in terms[0].terms" data-ng-show="activeCategory == 'Subjects'">
-              <a data-ng-class="{'not-full-width': term.terms.length}" href=""
-                data-ng-click="filterDivisionsBy($index, term)" close-sub-menu
-                data-ng-model="term.name" data-ng-class="{active: $index == selectedSubjectsSubterm}"
+              <a data-ng-class="{'not-full-width': term.terms.length, 'active': $index == selectedSubjectsSubterm}"
+                href="" data-ng-model="term.name" close-sub-menu
+                data-ng-click="filterDivisionsBy($index, term)"
                 analytics-on="click" analytics-category="Research Collections"
                 analytics-event="Click" analytics-label="{{terms[0].name}}: {{term.name}}">
                 {{::term.name}}
