@@ -146,6 +146,9 @@ console, $location, $ */
               searchSubject.name + ' - ' +searchSubjectSubterm.name;
             $scope.filter_results[0].active = true;
             $scope.filter_results[0].id = searchSubjectSubterm.id;
+          } else {
+            // Nothing found from query parameter so remove it
+            $location.search('subjects', null);
           }
         }
 
@@ -163,6 +166,8 @@ console, $location, $ */
             $scope.filter_results[1].name = searchMedia.name;
             $scope.filter_results[1].active = true;
             $scope.filter_results[1].id = searchMedia.id;
+          } else {
+            $location.search('media', null);
           }
         }
 
@@ -182,6 +187,8 @@ console, $location, $ */
               (searchLocations.slug).slice(1);
             $scope.filter_results[2].active = true;
             $scope.filter_results[2].id = searchLocations.id;
+          } else {
+            $location.search('locations', null);
           }
         }
 
