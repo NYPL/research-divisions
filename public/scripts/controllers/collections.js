@@ -70,76 +70,7 @@ console, $location, $ */
             });
             $scope.terms = dataTerms;
 
-            /*******************************************/
-            var searchSubject, searchSubjectSubterm, searchMedia, searchLocations;
-
-            if (params.subjects) {
-              _.each($scope.terms[0].terms, function (topLvlTerms) {
-                var findSubterm;
-
-                if (!searchSubject) {
-                  if (topLvlTerms.name === $filter('unslugify')(params.subjects)) {
-                    searchSubject = topLvlTerms;
-                  } else {
-                    findSubterm = _.findWhere(topLvlTerms.terms,
-                      {name: $filter('unslugify')(params.subjects)});
-
-                    if (findSubterm) {
-                      searchSubject = topLvlTerms;
-                      searchSubjectSubterm = findSubterm;
-                    }
-                  }
-                }
-
-              });
-
-              if (searchSubject && !searchSubjectSubterm) {
-                $scope.filter_results[0].name = searchSubject.name;
-                $scope.filter_results[0].active = true;
-                $scope.filter_results[0].id = searchSubject.id;
-                $scope.filter_results[0].subterms = searchSubject.terms;
-              } else if (searchSubjectSubterm) {
-                $scope.filter_results[0].name = searchSubject.name + ' - ' + searchSubjectSubterm.name;
-                $scope.filter_results[0].active = true;
-                $scope.filter_results[0].id = searchSubjectSubterm.id;
-              }
-            }
-
-            if (params.media) {
-              searchMedia = _.findWhere($scope.terms[1].terms,
-                {name: $filter('unslugify')(params.media)});
-
-              if (searchMedia) {
-                $scope.filter_results[1].name = searchMedia.name;
-                $scope.filter_results[1].active = true;
-                $scope.filter_results[1].id = searchMedia.id;
-              }
-            }
-
-            if (params.locations) {
-              searchLocations = _.findWhere($scope.terms[2].locations,
-                {slug: params.locations});
-
-              if (searchLocations) {
-                $scope.filter_results[2].name =
-                  (searchLocations.slug).charAt(0).toUpperCase() +
-                  (searchLocations.slug).slice(1);
-                $scope.filter_results[2].active = true;
-                $scope.filter_results[2].id = searchLocations.id;
-              }
-            }
-
-            $scope.selectedSubjectsSubterm = _.indexOf($scope.terms[0].terms, searchSubject);
-            $scope.selectedMediaSubterm = _.indexOf($scope.terms[1].terms, searchMedia)
-            $scope.selectedLocationsSubterm = _.indexOf($scope.terms[2].locations, searchLocations)
-
-            // Remove the queries from the url once the page loads
-            // $location.search('subjects', null);
-            // $location.search('media', null);
-            // $location.search('locations', null);
-
-            filterDivisions();
-            /*******************************************/
+            filterByParams();
           });
       },
       loadSIBL = function () {
@@ -161,6 +92,107 @@ console, $location, $ */
               location.short_name = config.research_shortnames[location.id];
             });
           });
+      },
+      filterByParams = function () {
+        setSubjectFilter();
+        setMediaFilter();
+        setLocationFilter();
+
+        filterDivisions();
+      },
+      setSubjectFilter = function () {
+        var searchSubject, searchSubjectSubterm;
+
+        if (params.subjects) {
+          _.each($scope.terms[0].terms, function (topLevelTerm) {
+            var findSubterm;
+
+            // If the Subject term or subterm is not found, then look for it.
+            if (!searchSubject) {
+              // If the term matches a top level Subject term,
+              // return that match.
+              if (topLevelTerm.name === $filter('unslugify')(params.subjects)) {
+                searchSubject = topLevelTerm;
+              } else {
+                // If it's not a top level term, then we must look at the
+                // subterms array.
+                findSubterm = _.findWhere(topLevelTerm.terms,
+                  {name: $filter('unslugify')(params.subjects)});
+
+                // If it's found, we want to return both the parent term
+                // and the subterm.
+                if (findSubterm) {
+                  searchSubject = topLevelTerm;
+                  searchSubjectSubterm = findSubterm;
+                }
+              }
+            }
+
+          });
+
+          // If only the top level Subject term was found,
+          // we want to add it as a filter and include the subterms.
+          if (searchSubject && !searchSubjectSubterm) {
+            $scope.filter_results[0].name = searchSubject.name;
+            $scope.filter_results[0].active = true;
+            $scope.filter_results[0].id = searchSubject.id;
+            $scope.filter_results[0].subterms = searchSubject.terms;
+          } else if (searchSubjectSubterm) {
+            // If the matching filter is a subterm, we want to add the
+            // parent term name to the filtered result.
+            // E.g. Fine Arts - Architecture, where Fine Arts is the
+            // parent term. 
+            $scope.filter_results[0].name =
+              searchSubject.name + ' - ' +searchSubjectSubterm.name;
+            $scope.filter_results[0].active = true;
+            $scope.filter_results[0].id = searchSubjectSubterm.id;
+          }
+        }
+
+        $scope.selectedSubjectsSubterm =
+          _.indexOf($scope.terms[0].terms, searchSubject);
+      },
+      setMediaFilter = function () {
+        var searchMedia;
+
+        if (params.media) {
+          searchMedia = _.findWhere($scope.terms[1].terms,
+            {name: $filter('unslugify')(params.media)});
+
+          if (searchMedia) {
+            $scope.filter_results[1].name = searchMedia.name;
+            $scope.filter_results[1].active = true;
+            $scope.filter_results[1].id = searchMedia.id;
+          }
+        }
+
+        $scope.selectedMediaSubterm =
+          _.indexOf($scope.terms[1].terms, searchMedia);
+      },
+      setLocationFilter = function () {
+        var searchLocations;
+
+        if (params.locations) {
+          searchLocations = _.findWhere($scope.terms[2].locations,
+            {slug: params.locations});
+
+          if (searchLocations) {
+            $scope.filter_results[2].name =
+              (searchLocations.slug).charAt(0).toUpperCase() +
+              (searchLocations.slug).slice(1);
+            $scope.filter_results[2].active = true;
+            $scope.filter_results[2].id = searchLocations.id;
+          }
+        }
+
+        $scope.selectedLocationsSubterm =
+          _.indexOf($scope.terms[2].locations, searchLocations);
+      },
+      removeQueryParams = function () {
+        // Remove the queries from the url once the page loads
+        $location.search('subjects', null);
+        $location.search('media', null);
+        $location.search('locations', null);
       };
 
     $rootScope.title = "Research Divisions";
@@ -425,9 +457,15 @@ console, $location, $ */
     $scope.filterDivisionsBy = function (index, selectedTerm) {
       // Comment out if you don't want the queries to appear in the url
       if ($scope.activeCategory === 'Locations') {
-        $location.search($scope.activeCategory.toLowerCase(), selectedTerm.slug);
+        $location.search(
+          $scope.activeCategory.toLowerCase(),
+          selectedTerm.slug
+        );
       } else {
-        $location.search($scope.activeCategory.toLowerCase(), (selectedTerm.name).replace(/\s+/g, '-').toLowerCase());
+        $location.search(
+          $scope.activeCategory.toLowerCase(),
+          (selectedTerm.name).replace(/\s+/g, '-').toLowerCase()
+        );
       }
 
       // Display the correct list for the selected category
