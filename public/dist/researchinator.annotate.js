@@ -5,47 +5,46 @@
 // the start and end of each request
 // Credit: Jim Lasvin -- https://github.com/lavinjj/angularjs-spinner
 function nyplInterceptor($q, $injector) {
-    var $http, notificationChannel;
+  var $http, notificationChannel;
 
-    return {
-        request: function (config) {
-            // get $http via $injector because of circular dependency problem
-            $http = $http || $injector.get('$http');
-            // don't send notification until all requests are complete
-            if ($http.pendingRequests.length < 1) {
-                // get requestNotificationChannel via $injector
-                // because of circular dependency problem
-                notificationChannel = notificationChannel ||
-                    $injector.get('requestNotificationChannel');
-                // send a notification requests are complete
-                notificationChannel.requestStarted();
-            }
-            return config;
-        },
-        response: function (response) {
-            $http = $http || $injector.get('$http');
-            // don't send notification until all requests are complete
-            if ($http.pendingRequests.length < 1) {
-                notificationChannel = notificationChannel ||
-                    $injector.get('requestNotificationChannel');
-                // send a notification requests are complete
-                notificationChannel.requestEnded();
-            }
-                return response;
-
-        },
-        responseError: function (rejection) {
-            $http = $http || $injector.get('$http');
-            // don't send notification until all requests are complete
-            if ($http.pendingRequests.length < 1) {
-                notificationChannel = notificationChannel ||
-                    $injector.get('requestNotificationChannel');
-                // send a notification requests are complete
-                notificationChannel.requestEnded();
-            }
-            return $q.reject(rejection);
-        }
-    };
+  return {
+    request: function (config) {
+      // get $http via $injector because of circular dependency problem
+      $http = $http || $injector.get('$http');
+      // don't send notification until all requests are complete
+      if ($http.pendingRequests.length < 1) {
+        // get requestNotificationChannel via $injector
+        // because of circular dependency problem
+        notificationChannel = notificationChannel ||
+          $injector.get('requestNotificationChannel');
+        // send a notification requests are complete
+        notificationChannel.requestStarted();
+      }
+      return config;
+    },
+    response: function (response) {
+      $http = $http || $injector.get('$http');
+      // don't send notification until all requests are complete
+      if ($http.pendingRequests.length < 1) {
+        notificationChannel = notificationChannel ||
+          $injector.get('requestNotificationChannel');
+        // send a notification requests are complete
+        notificationChannel.requestEnded();
+      }
+      return response;
+    },
+    responseError: function (rejection) {
+      $http = $http || $injector.get('$http');
+      // don't send notification until all requests are complete
+      if ($http.pendingRequests.length < 1) {
+        notificationChannel = notificationChannel ||
+          $injector.get('requestNotificationChannel');
+        // send a notification requests are complete
+        notificationChannel.requestEnded();
+      }
+      return $q.reject(rejection);
+    }
+  };
 }
 nyplInterceptor.$inject = ["$q", "$injector"];
 
@@ -66,110 +65,116 @@ nyplInterceptor.$inject = ["$q", "$injector"];
  * Research collections.
  */
 angular.module('nypl_research_collections', [
-    'ngSanitize',
-    'ui.router',
-    'ngAnimate',
-    'locationService',
-    'coordinateService',
-    'angulartics',
-    'angulartics.google.analytics',
-    'nyplNavigation',
-    'nyplSSO',
-    'nyplBreadcrumbs',
-    'nyplSearch',
-    'ngAria',
-    'nyplAlerts'
+  'ngSanitize',
+  'ui.router',
+  'ngAnimate',
+  'locationService',
+  'coordinateService',
+  'angulartics',
+  'angulartics.google.analytics',
+  'nyplNavigation',
+  'nyplSSO',
+  'nyplBreadcrumbs',
+  'nyplSearch',
+  'ngAria',
+  'nyplAlerts'
 ])
 .config([
-    '$analyticsProvider',
-    '$crumbProvider',
-    '$httpProvider',
-    '$locationProvider',
-    '$stateProvider',
-    '$urlRouterProvider',
-    '$nyplAlertsProvider',
-    function (
-        $analyticsProvider,
-        $crumbProvider,
-        $httpProvider,
-        $locationProvider,
-        $stateProvider,
-        $urlRouterProvider,
-        $nyplAlertsProvider
-    ) {
-        'use strict';
+  '$analyticsProvider',
+  '$crumbProvider',
+  '$httpProvider',
+  '$locationProvider',
+  '$stateProvider',
+  '$urlRouterProvider',
+  '$nyplAlertsProvider',
+  function (
+    $analyticsProvider,
+    $crumbProvider,
+    $httpProvider,
+    $locationProvider,
+    $stateProvider,
+    $urlRouterProvider,
+    $nyplAlertsProvider
+  ) {
+    'use strict';
 
-        $analyticsProvider.virtualPageviews(false);
+    $analyticsProvider.virtualPageviews(false);
 
-        // Assign proper Breadcrumb name/paths
-        $crumbProvider.setOptions({
-            primaryState: {name:'Home', customUrl: 'http://nypl.org' }
-        });
+    // Assign proper Breadcrumb name/paths
+    $crumbProvider.setOptions({
+      primaryState: {name:'Home', customUrl: 'http://nypl.org' }
+    });
 
-        // nyplAlerts required config settings
-        $nyplAlertsProvider.setOptions({
-            api_root: locations_cfg.config.api_root,
-            api_version: locations_cfg.config.api_version
-        });
+    // nyplAlerts required config settings
+    $nyplAlertsProvider.setOptions({
+      api_root: locations_cfg.config.api_root,
+      api_version: locations_cfg.config.api_version
+    });
 
-        $httpProvider.interceptors.push(nyplInterceptor);
+    $httpProvider.interceptors.push(nyplInterceptor);
 
-        // uses the HTML5 History API
-        $locationProvider.html5Mode(true);
+    // uses the HTML5 History API
+    $locationProvider.html5Mode(true);
 
-        $stateProvider
-            .state('home', {
-                url: '/',
-                templateUrl: 'views/research-collections.html',
-                controller: 'CollectionsCtrl',
-                label: 'Research Collections',
-                resolve: {
-                    config: getConfig,
-                    divisions: LoadDivisions
-                },
-                data: {
-                    crumbName: 'Research Divisions'
-                }
-            })
-            .state('lost', {
-                url: '/404',
-                templateUrl: 'views/404.html'
-            });
-
-        $urlRouterProvider.otherwise('/');
-        $urlRouterProvider.rule(function ($injector, $location) {
-            var path = $location.url();
-
-            // Remove trailing slash if found
-            if (path[path.length - 1] === '/') {
-                return path.slice(0, -1);
-            }
-        });
-
-         function LoadDivisions(config, nyplLocationsService) {
-            return nyplLocationsService
-                .allDivisions()
-                .then(function (data) {
-                    return data.divisions;
-                })
-                .catch(function (err) {
-                    throw err;
-                });
+    $stateProvider
+      .state('home', {
+        url: '/?subjects&media&locations',
+        reloadOnSearch: false,
+        templateUrl: 'views/research-collections.html',
+        controller: 'CollectionsCtrl',
+        label: 'Research Divisions',
+        resolve: {
+          config: getConfig,
+          divisions: LoadDivisions,
+          params: getQueryParams
+        },
+        data: {
+          crumbName: 'Research Divisions'
         }
-        LoadDivisions.$inject = ["config", "nyplLocationsService"];
+      })
+      .state('lost', {
+        url: '/404',
+        templateUrl: 'views/404.html'
+      });
 
-        function getConfig(nyplLocationsService) {
-            return nyplLocationsService.getConfig();
+      $urlRouterProvider.otherwise('/');
+      $urlRouterProvider.rule(function ($injector, $location) {
+        var path = $location.url();
+
+        // Remove trailing slash if found
+        if (path[path.length - 1] === '/') {
+          return path.slice(0, -1);
         }
-        getConfig.$inject = ["nyplLocationsService"];
+      });
 
-    }
+      function LoadDivisions(config, nyplLocationsService) {
+        return nyplLocationsService
+          .allDivisions()
+          .then(function (data) {
+            return data.divisions;
+          })
+          .catch(function (err) {
+            throw err;
+          });
+      }
+      LoadDivisions.$inject = ["config", "nyplLocationsService"];
+
+      function getConfig(nyplLocationsService) {
+        return nyplLocationsService.getConfig();
+      }
+      getConfig.$inject = ["nyplLocationsService"];
+
+      function getQueryParams($stateParams) {
+        return $stateParams;
+      }
+      getQueryParams.$inject = ["$stateParams"];
+  }
 ])
 .run(["$analytics", "$rootScope", "$location", function ($analytics, $rootScope, $location) {
-    $rootScope.$on('$viewContentLoaded', function () {
-        $analytics.pageTrack('/research-divisions');
-        $rootScope.current_url = $location.absUrl();
-    });
+  $rootScope.$on('$viewContentLoaded', function () {
+    $analytics.pageTrack('/research-divisions');
+    $rootScope.current_url = $location.absUrl();
+  });
 }]);
 
 
@@ -2314,12 +2319,14 @@ console, $location, $ */
     $rootScope,
     $timeout,
     $filter,
+    $location,
     $nyplAlerts,
     config,
     divisions,
-    nyplLocationsService,
     nyplAlertsService,
-    nyplUtility
+    nyplLocationsService,
+    nyplUtility,
+    params
   ) {
     var sibl,
       research_order = config.research_order || ['SASB', 'LPA', 'SC', 'SIBL'],
@@ -2372,6 +2379,8 @@ console, $location, $ */
               locations: $scope.divisionLocations
             });
             $scope.terms = dataTerms;
+
+            filterByParams();
           });
       },
       loadSIBL = function () {
@@ -2393,6 +2402,107 @@ console, $location, $ */
               location.short_name = config.research_shortnames[location.id];
             });
           });
+      },
+      filterByParams = function () {
+        setSubjectFilter();
+        setMediaFilter();
+        setLocationFilter();
+
+        filterDivisions();
+      },
+      setSubjectFilter = function () {
+        var searchSubject, searchSubjectSubterm;
+
+        if (params.subjects) {
+          _.each($scope.terms[0].terms, function (topLevelTerm) {
+            var findSubterm;
+
+            // If the Subject term or subterm is not found, then look for it.
+            if (!searchSubject) {
+              // If the term matches a top level Subject term,
+              // return that match.
+              if (topLevelTerm.name === $filter('unslugify')(params.subjects)) {
+                searchSubject = topLevelTerm;
+              } else {
+                // If it's not a top level term, then we must look at the
+                // subterms array.
+                findSubterm = _.findWhere(topLevelTerm.terms,
+                  {name: $filter('unslugify')(params.subjects)});
+
+                // If it's found, we want to return both the parent term
+                // and the subterm.
+                if (findSubterm) {
+                  searchSubject = topLevelTerm;
+                  searchSubjectSubterm = findSubterm;
+                }
+              }
+            }
+
+          });
+
+          // If only the top level Subject term was found,
+          // we want to add it as a filter and include the subterms.
+          if (searchSubject && !searchSubjectSubterm) {
+            $scope.filter_results[0].name = searchSubject.name;
+            $scope.filter_results[0].active = true;
+            $scope.filter_results[0].id = searchSubject.id;
+            $scope.filter_results[0].subterms = searchSubject.terms;
+          } else if (searchSubjectSubterm) {
+            // If the matching filter is a subterm, we want to add the
+            // parent term name to the filtered result.
+            // E.g. Fine Arts - Architecture, where Fine Arts is the
+            // parent term. 
+            $scope.filter_results[0].name =
+              searchSubject.name + ' - ' +searchSubjectSubterm.name;
+            $scope.filter_results[0].active = true;
+            $scope.filter_results[0].id = searchSubjectSubterm.id;
+          }
+        }
+
+        $scope.selectedSubjectsSubterm =
+          _.indexOf($scope.terms[0].terms, searchSubject);
+      },
+      setMediaFilter = function () {
+        var searchMedia;
+
+        if (params.media) {
+          searchMedia = _.findWhere($scope.terms[1].terms,
+            {name: $filter('unslugify')(params.media)});
+
+          if (searchMedia) {
+            $scope.filter_results[1].name = searchMedia.name;
+            $scope.filter_results[1].active = true;
+            $scope.filter_results[1].id = searchMedia.id;
+          }
+        }
+
+        $scope.selectedMediaSubterm =
+          _.indexOf($scope.terms[1].terms, searchMedia);
+      },
+      setLocationFilter = function () {
+        var searchLocations;
+
+        if (params.locations) {
+          searchLocations = _.findWhere($scope.terms[2].locations,
+            {slug: params.locations});
+
+          if (searchLocations) {
+            $scope.filter_results[2].name =
+              (searchLocations.slug).charAt(0).toUpperCase() +
+              (searchLocations.slug).slice(1);
+            $scope.filter_results[2].active = true;
+            $scope.filter_results[2].id = searchLocations.id;
+          }
+        }
+
+        $scope.selectedLocationsSubterm =
+          _.indexOf($scope.terms[2].locations, searchLocations);
+      },
+      removeQueryParams = function () {
+        // Remove the queries from the url once the page loads
+        $location.search('subjects', null);
+        $location.search('media', null);
+        $location.search('locations', null);
       };
 
     $rootScope.title = "Research Divisions";
@@ -2433,8 +2543,7 @@ console, $location, $ */
       .flatten()
       .value();
 
-    loadSIBL();
-    loadTerms();
+    loadSIBL().then(loadTerms);
     configureGlobalAlert();
     // Assign Today's hours or Alert Closing Msg
     getHoursOrAlert(divisions);
@@ -2656,6 +2765,19 @@ console, $location, $ */
     }
 
     $scope.filterDivisionsBy = function (index, selectedTerm) {
+      // Comment out if you don't want the queries to appear in the url
+      if ($scope.activeCategory === 'Locations') {
+        $location.search(
+          $scope.activeCategory.toLowerCase(),
+          selectedTerm.slug
+        );
+      } else {
+        $location.search(
+          $scope.activeCategory.toLowerCase(),
+          (selectedTerm.name).replace(/\s+/g, '-').toLowerCase()
+        );
+      }
+
       // Display the correct list for the selected category
       showSubtermsForCategory(index);
 
@@ -2674,6 +2796,9 @@ console, $location, $ */
     };
 
     $scope.removeFilter = function (filter) {
+      // Remove query param from url
+      $location.search(filter.label.toLowerCase(), null);
+
       $scope['selected' + filter.label + 'Subterm'] = undefined;
       filter.active = false;
       filter.name = '';
@@ -2684,7 +2809,7 @@ console, $location, $ */
     };
 
   }
-  CollectionsCtrl.$inject = ["$scope", "$rootScope", "$timeout", "$filter", "$nyplAlerts", "config", "divisions", "nyplLocationsService", "nyplAlertsService", "nyplUtility"];
+  CollectionsCtrl.$inject = ["$scope", "$rootScope", "$timeout", "$filter", "$location", "$nyplAlerts", "config", "divisions", "nyplAlertsService", "nyplLocationsService", "nyplUtility", "params"];
 
   angular
     .module('nypl_research_collections')
@@ -3211,6 +3336,12 @@ console, $location, $ */
         };
     }
 
+    function unslugify() {
+        return function (text) {
+            return capitalize()(text.replace(/\-/g, ' '));
+        };
+    }
+
      angular
         .module('nypl_research_collections')
         .filter('timeFormat', timeFormat)
@@ -3218,7 +3349,8 @@ console, $location, $ */
         .filter('capitalize', capitalize)
         .filter('hoursTodayFormat', hoursTodayFormat)
         .filter('truncate', truncate)
-        .filter('slugify', slugify);
+        .filter('slugify', slugify)
+        .filter('unslugify', unslugify);
 })();
 
 /*jslint nomen: true, indent: 2, maxlen: 80, browser: true */
