@@ -443,6 +443,7 @@ console, $location, $ */
       }
 
       // Exists so remove it
+      $location.search(label.toLowerCase(), null);
       $scope['selected' + label + 'Subterm'] = undefined;
       _.each($scope.filter_results, function (subterm) {
         if (subterm.label === label) {
@@ -471,7 +472,7 @@ console, $location, $ */
       } else {
         $location.search(
           $scope.activeCategory.toLowerCase(),
-          (selectedTerm.name).replace(/\s+/g, '-').toLowerCase()
+          $filter('slugify')(selectedTerm.name)
         );
       }
 
