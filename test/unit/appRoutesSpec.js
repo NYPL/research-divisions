@@ -7,12 +7,11 @@ describe('Researchinator State Routing', function () {
 
   var $rootScope, $injector, $state, $httpBackend, nyplLocationsService,
     configObj = {
-      api_root: 'dev.locations.api.nypl.org',
+      api_root: 'http://dev.refinery.aws.nypl.org/api/nypl/locations',
       featured_amenities: { global: 3, local: 2 }
     };
 
   function testStateConfig(stateConfig, expectedConfig) {
-    console.log(expectedConfig);
     expect(stateConfig.url).toEqual(expectedConfig.url);
     expect(stateConfig.abstract).toBe(expectedConfig.abstract);
     expect(stateConfig.templateUrl).toEqual(expectedConfig.templateUrl);

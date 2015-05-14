@@ -121,7 +121,7 @@
             var defer = $q.defer();
 
             $http.jsonp(
-                api + '/divisions/?callback=JSON_CALLBACK', {cache: true}
+                api + '/divisions?callback=JSON_CALLBACK', {cache: true}
             )
             .success(function (data) {
                 defer.resolve(data);
