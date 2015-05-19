@@ -2521,12 +2521,9 @@ console, $location, $ */
     
     // Assign short name to every location in every division
     _.each(divisions, function (division) {
-      console.log(division);
       var location = division._embedded.location;
-      if (location) {
-        location.short_name =
-          config.research_shortnames[location.id];
-        }
+      location.short_name =
+        config.research_shortnames[location.id];
     });
 
     $scope.divisions = divisions;
@@ -2539,20 +2536,19 @@ console, $location, $ */
       .flatten()
       .value();
 
-      $scope.divisionLocations = [];
-    // $scope.divisionLocations = _.chain(divisions)
-    //   .pluck('_embedded')
-    //   .flatten()
-    //   .pluck('location')
-    //   .indexBy('id')
-    //   .sortBy(function (elem) {
-    //     return nyplUtility.researchLibraryOrder(
-    //       research_order,
-    //       elem.id
-    //     );
-    //   })
-    //   .flatten()
-    //   .value();
+    $scope.divisionLocations = _.chain(divisions)
+      .pluck('_embedded')
+      .flatten()
+      .pluck('location')
+      .indexBy('id')
+      .sortBy(function (elem) {
+        return nyplUtility.researchLibraryOrder(
+          research_order,
+          elem.id
+        );
+      })
+      .flatten()
+      .value();
 
     loadSIBL().then(loadTerms);
     configureGlobalAlert();
@@ -2993,6 +2989,9 @@ console, $location, $ */
           $analytics.eventTrack('Click',
                     { category: 'footer', label: linkHref });
         });
+
+        // Dynamic Year
+        scope.year = new Date().getFullYear();
       }
     };
   }
