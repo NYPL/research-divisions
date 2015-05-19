@@ -312,8 +312,8 @@ angular.module('nypl_research_collections', [
               return elem;
             }
             // Covers early openings
-            else if (today.day() === sDate.day() &&
-                eDate.day() === today.day() && eDate.valueOf()
+            else if (today.toDate() === sDate.toDate() &&
+                eDate.toDate() === today.toDate() && eDate.valueOf()
                 >= today.valueOf()) {
               return elem;
             }
@@ -614,7 +614,7 @@ angular.module('nypl_research_collections', [
       scope: false
     };
   }
-  nyplGlobalAlerts.$inject = ["$rootScope"];
+  nyplGlobalAlerts.$inject = ['$rootScope'];
 
   /**
    * @ngdoc directive
@@ -627,13 +627,13 @@ angular.module('nypl_research_collections', [
   function nyplLocationAlerts(nyplAlertsService) {
     return {
       restrict: 'E',
-      template: "<div class='nypl-location-alerts'" +
+      template: "<div class='nypl-location-alerts' " +
                     "data-ng-if='locationAlerts.length'>" +
                   "<div data-ng-repeat='alert in locationAlerts'>" +
                     "<p data-ng-bind-html='alert.msg'></p>" +
                   "</div>" +
                 "</div>",
-      replace: true,
+      replace: false,
       scope: {
         alerts: '=alerts',
         type: '@'
@@ -648,7 +648,7 @@ angular.module('nypl_research_collections', [
       }
     };
   }
-  nyplLocationAlerts.$inject = ["nyplAlertsService"];
+  nyplLocationAlerts.$inject = ['nyplAlertsService'];
 
   // Initialize Alerts data through Provider
   function initAlerts($nyplAlerts, $rootScope, nyplAlertsService) {
@@ -661,8 +661,8 @@ angular.module('nypl_research_collections', [
       throw error;
     });
   }
-  initAlerts.$inject = ["$nyplAlerts", "$rootScope", "nyplAlertsService"];
 
+  initAlerts.$inject = ['$nyplAlerts', '$rootScope', 'nyplAlertsService'];
 
   /**
    * @ngdoc overview
