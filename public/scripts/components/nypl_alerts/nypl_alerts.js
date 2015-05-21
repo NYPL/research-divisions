@@ -132,8 +132,8 @@
               return elem;
             }
             // Covers early openings
-            else if (today.day() === sDate.day() &&
-                eDate.day() === today.day() && eDate.valueOf()
+            else if (today.toDate() === sDate.toDate() &&
+                eDate.toDate() === today.toDate() && eDate.valueOf()
                 >= today.valueOf()) {
               return elem;
             }
@@ -434,6 +434,7 @@
       scope: false
     };
   }
+  nyplGlobalAlerts.$inject = ['$rootScope'];
 
   /**
    * @ngdoc directive
@@ -446,13 +447,13 @@
   function nyplLocationAlerts(nyplAlertsService) {
     return {
       restrict: 'E',
-      template: "<div class='nypl-location-alerts'" +
+      template: "<div class='nypl-location-alerts' " +
                     "data-ng-if='locationAlerts.length'>" +
                   "<div data-ng-repeat='alert in locationAlerts'>" +
                     "<p data-ng-bind-html='alert.msg'></p>" +
                   "</div>" +
                 "</div>",
-      replace: true,
+      replace: false,
       scope: {
         alerts: '=alerts',
         type: '@'
@@ -467,6 +468,7 @@
       }
     };
   }
+  nyplLocationAlerts.$inject = ['nyplAlertsService'];
 
   // Initialize Alerts data through Provider
   function initAlerts($nyplAlerts, $rootScope, nyplAlertsService) {
@@ -480,6 +482,7 @@
     });
   }
 
+  initAlerts.$inject = ['$nyplAlerts', '$rootScope', 'nyplAlertsService'];
 
   /**
    * @ngdoc overview
