@@ -9,8 +9,8 @@ describe('NYPL Directive Unit Tests', function () {
   'use strict';
 
   var httpBackend, compile, scope,
-    api = 'http://dev.locations.api.nypl.org',
-    api_version = 'v0.6',
+    api = 'http://dev.refinery.aws.nypl.org/api/nypl/locations',
+    api_version = 'v1.0',
     jsonpCallback = '?callback=JSON_CALLBACK';
 
   beforeEach(function () {
