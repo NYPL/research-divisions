@@ -123,7 +123,7 @@
               <ul>
               <li><a href="http://nypl.org/collections/articles-databases">Articles and Databases</a></li>
               <li><a href="http://nypl.org/events/online-exhibitions">Online Exhibitions</a></li>
-              <li><a href="http://digitalgallery.nypl.org/">Digital Gallery</a></li>
+              <li><a href="http://digitalcollections.nypl.org/">Digital Collections</a></li>
               <li><a href="http://nypl.org/collections/labs">NYPL Labs</a></li>
               <li><a href="http://nypl.org/online_projects">Digital Projects</a></li>
               </ul>
@@ -154,8 +154,12 @@
               <h5>Collections</h5>
               <ul>
                 <li>
-                  <a data-ng-if="activenav == 'Locations'" href="http://nypl.org/research-divisions">Research Divisions</a>
-                  <a data-ng-if="activenav == 'Research'" href="/research-divisions">Research Divisions</a>
+                  <a data-ng-if="activenav == 'Locations' || menuitem == 'profiles'" href="http://nypl.org/research-divisions">Research Divisions</a>
+                  <a data-ng-if="menuitem == 'division'" href="/research-divisions">Research Divisions</a>
+                </li>
+                <li>
+                  <a data-ng-if="activenav == 'Locations' || menuitem == 'division'" href="/staff-profiles">Staff Profiles</a>
+                  <a data-ng-if="menuitem == 'profiles'" data-ui-sref="home">Staff Profiles</a>
                 </li>
                 <li>
                   <a href="http://archives.nypl.org">Manuscripts and Archives</a>

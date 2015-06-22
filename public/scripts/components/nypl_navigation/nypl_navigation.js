@@ -23,7 +23,8 @@
     return {
       restrict: 'E',
       scope: {
-        activenav: '@'
+        activenav: '@',
+        menuitem: '@'
       },
       replace: true,
       templateUrl: 'scripts/components/nypl_navigation/nypl_navigation.html',
@@ -61,6 +62,7 @@
       }
     };
   }
+  nyplNavigation.$inject = ['ssoStatus', '$window', '$rootScope'];
 
   /**
    * @ngdoc directive
