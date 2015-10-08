@@ -23,6 +23,15 @@ input[type="text"] {
 	border: none;
 }
 
+// To make the width of the subscribe container wider.
+.EmailSubscription-Wrapper {
+  -webkit-box-sizing: content-box;
+  -moz-box-sizing: content-box;
+  -ms-box-sizing: content-box;
+  -o-box-sizing: content-box;
+  box-sizing: content-box;
+}
+
 // Loader
 #loadingWidget {
 	display: none;
