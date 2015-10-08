@@ -13,6 +13,11 @@
 	}
 }
 
+// To override NYPLBase button:hover rule.
+#Header-NavMenu-SearchButton:hover {
+	border: none;
+}
+
 // Loader
 #loadingWidget {
 	display: none;
