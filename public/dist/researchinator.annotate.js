@@ -1291,7 +1291,8 @@ angular.module('nypl_research_collections', [
     return {
       restrict: 'E',
       scope: {
-        activenav: '@'
+        activenav: '@',
+        menuitem: '@'
       },
       replace: true,
       templateUrl: 'scripts/components/nypl_navigation/nypl_navigation.html',
@@ -1329,7 +1330,7 @@ angular.module('nypl_research_collections', [
       }
     };
   }
-  nyplNavigation.$inject = ["ssoStatus", "$window", "$rootScope"];
+  nyplNavigation.$inject = ['ssoStatus', '$window', '$rootScope'];
 
   /**
    * @ngdoc directive
