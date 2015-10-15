@@ -2,7 +2,8 @@
 .research-collections {
 
   button {
-    &.active {
+    color: #fff;
+    &:hover, &.active {
       background: #fff;
       border: 1px solid #0090c4;
       color: #0090c4;
