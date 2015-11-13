@@ -7,6 +7,14 @@ require 'erb'
 class Researchinator < Sinatra::Base
   configure do
     set :researchinator_env, ENV['RESEARCHINATOR_ENV']
+    if settings.researchinator_env === 'development'
+      set :refinery_api, 'dev-'
+    elsif settings.researchinator_env === 'qa'
+      set :refinery_api, 'qa-'
+    else
+      set :refinery_api, ''
+    end
+
     configs = JSON.parse(File.read('researchinator.json'))
     if configs["environments"].has_key?(ENV['RESEARCHINATOR_ENV'])
       set :env_config, configs["environments"][ENV['RESEARCHINATOR_ENV']]
