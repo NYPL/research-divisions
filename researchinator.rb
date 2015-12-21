@@ -6,7 +6,6 @@ require 'erb'
 
 class Researchinator < Sinatra::Base
   configure do
-    set :researchinator_env, ENV['RESEARCHINATOR_ENV']
     configs = JSON.parse(File.read('researchinator.json'))
     if configs["environments"].has_key?(ENV['RESEARCHINATOR_ENV'])
       set :env_config, configs["environments"][ENV['RESEARCHINATOR_ENV']]
@@ -14,6 +13,21 @@ class Researchinator < Sinatra::Base
       set :env_config, 
         configs["environments"][configs["environments"]["default"]]
     end
+
+    if ENV['RESEARCHINATOR_ENV'].nil?
+      set :researchinator_env, configs["environments"]["default"]
+    else
+      set :researchinator_env, ENV['RESEARCHINATOR_ENV']
+    end
+
+    if settings.researchinator_env === 'development'
+      set :refinery_api, 'dev-'
+    elsif settings.researchinator_env === 'qa'
+      set :refinery_api, 'qa-'
+    else
+      set :refinery_api, ''
+    end
+
     set :divisions_with_appointments, configs["divisions_with_appointments"]
     set :featured_amenities, configs["featured_amenities"]
     set :research_order, configs["research_order"]
