@@ -128,7 +128,7 @@
                 ['hours', 'mins', 'meridian', 'military'],
                 [((parseInt(time[0], 10) + 11) % 12 + 1),
                     time[1],
-                    (time[0] >= 12 ? 'PM' : 'AM'),
+                    (time[0] >= 12 ? ' PM' : ' AM'),
                     parseInt(time[0], 10)]
             );
         }
