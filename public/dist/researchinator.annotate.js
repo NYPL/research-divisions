@@ -3103,15 +3103,6 @@ console, $location, $ */
             return hours;
         }
 
-        // function clockTime(time) {
-        //     var components = time.split(':'),
-        //         hours = ((parseInt(components[0], 10) + 11) % 12 + 1),
-        //         minutes = components[1],
-        //         meridiem = components[0] >= 12 ? 'pm' : 'am';
-
-        //     return hours + ":" + minutes + meridiem;
-        // }
-
         function closingHoursDisplay(hours, alerts) {
             var sDate, eDate, allDay, regHours,
                 openHour, closedHour, displayString;
@@ -3159,7 +3150,6 @@ console, $location, $ */
                 } else if (alerts) {
                     return closingHoursDisplay(time, alerts);
                 }
-                console.log('>>>>>>>><<<<<<<<');
                 return apStyle(time.open, 'time') + '–' + apStyle(time.close, 'time');
             }
 
@@ -3218,7 +3208,7 @@ console, $location, $ */
                 ['hours', 'mins', 'meridian', 'military'],
                 [((parseInt(time[0], 10) + 11) % 12 + 1),
                     time[1],
-                    (time[0] >= 12 ? 'pm' : 'am'),
+                    (time[0] >= 12 ? ' PM' : ' AM'),
                     parseInt(time[0], 10)]
             );
         }
