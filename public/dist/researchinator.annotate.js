@@ -4,6 +4,7 @@
 // Declare an http interceptor that will signal
 // the start and end of each request
 // Credit: Jim Lasvin -- https://github.com/lavinjj/angularjs-spinner
+nyplInterceptor.$inject = ["$q", "$injector"];
 function nyplInterceptor($q, $injector) {
   var $http, notificationChannel;
 
@@ -46,7 +47,6 @@ function nyplInterceptor($q, $injector) {
     }
   };
 }
-nyplInterceptor.$inject = ["$q", "$injector"];
 
 
 /**
@@ -98,6 +98,9 @@ angular.module('nypl_research_collections', [
   ) {
     'use strict';
 
+      getConfig.$inject = ["nyplLocationsService"];
+      LoadDivisions.$inject = ["config", "nyplLocationsService"];
+      getQueryParams.$inject = ["$stateParams"];
     $analyticsProvider.virtualPageviews(false);
 
     // Assign proper Breadcrumb name/paths
@@ -157,17 +160,14 @@ angular.module('nypl_research_collections', [
             throw err;
           });
       }
-      LoadDivisions.$inject = ["config", "nyplLocationsService"];
 
       function getConfig(nyplLocationsService) {
         return nyplLocationsService.getConfig();
       }
-      getConfig.$inject = ["nyplLocationsService"];
 
       function getQueryParams($stateParams) {
         return $stateParams;
       }
-      getQueryParams.$inject = ["$stateParams"];
   }
 ])
 .run(["$analytics", "$rootScope", "$location", function ($analytics, $rootScope, $location) {
@@ -687,6 +687,7 @@ angular.module('nypl_research_collections', [
   'use strict';
  
   /** @namespace $Crumb */
+  nyplBreadcrumbs.$inject = ["$interpolate", "$state", "$crumb"];
   function $Crumb() {
     var options = {
       primaryState: {
@@ -1162,7 +1163,6 @@ angular.module('nypl_research_collections', [
       }
     };
   }
-  nyplBreadcrumbs.$inject = ["$interpolate", "$state", "$crumb"];
 
   /**
    * @ngdoc overview
@@ -1208,6 +1208,7 @@ angular.module('nypl_research_collections', [
    *    data-side="right" data-height="500" data-width="290"></nypl-feedback>
    * </pre>
    */
+  nyplFeedback.$inject = ["$sce", "$rootScope"];
   function nyplFeedback($sce, $rootScope) {
     return {
       restrict: 'E',
@@ -1251,7 +1252,6 @@ angular.module('nypl_research_collections', [
       }
     };
   }
-  nyplFeedback.$inject = ["$sce", "$rootScope"];
 
   /**
    * @ngdoc overview
@@ -1416,6 +1416,7 @@ angular.module('nypl_research_collections', [
    *  <nypl-search></nypl-search>
    * </pre>
    */
+  nyplSearch.$inject = ["$analytics"];
   function nyplSearch($analytics) {
     return {
       restrict: 'E',
@@ -1583,7 +1584,6 @@ angular.module('nypl_research_collections', [
       }
     };
   }
-  nyplSearch.$inject = ["$analytics"];
 
   /**
    * @ngdoc overview
@@ -1624,6 +1624,7 @@ angular.module('nypl_research_collections', [
    *  <nypl-sso></nypl-sso>
    * </pre>
    */
+  nyplSSO.$inject = ["ssoStatus", "$window", "$rootScope"];
   function nyplSSO(ssoStatus, $window, $rootScope) {
     return {
       restrict: 'E',
@@ -1735,7 +1736,6 @@ angular.module('nypl_research_collections', [
       }
     };
   }
-  nyplSSO.$inject = ["ssoStatus", "$window", "$rootScope"];
 
   /**
    * @ngdoc service
@@ -1843,6 +1843,7 @@ angular.module('nypl_research_collections', [
    * AngularJS service to get a user's geolocation coordinates and calculate
    * the distance between two points.
    */
+  nyplCoordinatesService.$inject = ["$q", "$window"];
   function nyplCoordinatesService($q, $window) {
     var geoCoords = null,
       coordinatesService = {};
@@ -1972,7 +1973,6 @@ angular.module('nypl_research_collections', [
 
     return coordinatesService;
   }
-  nyplCoordinatesService.$inject = ["$q", "$window"];
 
   /**
    * @ngdoc overview
@@ -2004,6 +2004,7 @@ angular.module('nypl_research_collections', [
      * AngularJS service to call different API endpoints.
      */
 
+    nyplLocationsService.$inject = ["$http", "$q"];
     function nyplLocationsService($http, $q) {
         var api, config,
             jsonp_cb = '?callback=JSON_CALLBACK',
@@ -2294,7 +2295,6 @@ angular.module('nypl_research_collections', [
 
         return locationsApi;
     }
-    nyplLocationsService.$inject = ["$http", "$q"];
 
     /**
      * @ngdoc overview
@@ -2315,6 +2315,7 @@ console, $location, $ */
 
 (function () {
 
+  CollectionsCtrl.$inject = ["$scope", "$rootScope", "$timeout", "$filter", "$location", "$nyplAlerts", "config", "divisions", "nyplAlertsService", "nyplLocationsService", "nyplUtility", "params"];
   function CollectionsCtrl(
     $scope,
     $rootScope,
@@ -2818,7 +2819,6 @@ console, $location, $ */
     };
 
   }
-  CollectionsCtrl.$inject = ["$scope", "$rootScope", "$timeout", "$filter", "$location", "$nyplAlerts", "config", "divisions", "nyplAlertsService", "nyplLocationsService", "nyplUtility", "params"];
 
   angular
     .module('nypl_research_collections')
@@ -2841,6 +2841,8 @@ console, $location, $ */
    * Credit: Jim Lasvin -- https://github.com/lavinjj/angularjs-spinner
    * declare the directive that will show and hide the loading widget
    */
+  nyplFooter.$inject = ["$analytics"];
+  loadingWidget.$inject = ["requestNotificationChannel"];
   function loadingWidget(requestNotificationChannel) {
     return {
       restrict: "A",
@@ -2866,7 +2868,6 @@ console, $location, $ */
       }
     };
   }
-  loadingWidget.$inject = ["requestNotificationChannel"];
 
   /**
    * @ngdoc directive
@@ -2996,7 +2997,6 @@ console, $location, $ */
       }
     };
   }
-  nyplFooter.$inject = ["$analytics"];
 
   /**
    * @ngdoc directive
@@ -3095,20 +3095,12 @@ console, $location, $ */
      *  the approapriate message for a relevant alert.
      *  1) all day closing 2) early/late opening/closing
      */
+    timeFormat.$inject = ["$sce"];
     function timeFormat($sce) {
         function getMilitaryHours(time) {
             var components = time.split(':'),
                 hours = parseInt(components[0], 10);
             return hours;
-        }
-
-        function clockTime(time) {
-            var components = time.split(':'),
-                hours = ((parseInt(components[0], 10) + 11) % 12 + 1),
-                minutes = components[1],
-                meridiem = components[0] >= 12 ? 'pm' : 'am';
-
-            return hours + ":" + minutes + meridiem;
         }
 
         function closingHoursDisplay(hours, alerts) {
@@ -3158,7 +3150,7 @@ console, $location, $ */
                 } else if (alerts) {
                     return closingHoursDisplay(time, alerts);
                 }
-                return clockTime(time.open) + ' - ' + clockTime(time.close);
+                return apStyle(time.open, 'time') + '–' + apStyle(time.close, 'time');
             }
 
             console.log('timeFormat() filter error: Argument is' +
@@ -3166,7 +3158,6 @@ console, $location, $ */
             return '';
         };
     }
-    timeFormat.$inject = ["$sce"];
 
     /**
      * @ngdoc filter
@@ -3217,7 +3208,7 @@ console, $location, $ */
                 ['hours', 'mins', 'meridian', 'military'],
                 [((parseInt(time[0], 10) + 11) % 12 + 1),
                     time[1],
-                    (time[0] >= 12 ? 'pm' : 'am'),
+                    (time[0] >= 12 ? ' PM' : ' AM'),
                     parseInt(time[0], 10)]
             );
         }
@@ -3310,6 +3301,78 @@ console, $location, $ */
 
     /**
      * @ngdoc filter
+     * @name nypl_locations.filter:apStyle
+     * @param {string} input ...
+     * @returns {string} ...
+     * @description
+     * Converts time stamps to NYPL AP style
+     */
+    function apStyle (input, format) {
+        if (!input) {
+            return '';
+        }
+        if (!format) {
+            return input;
+        }
+        if (format === 'time') {
+            return apTime(input);
+        }
+        if (format === 'date') {
+            return apDate(input);
+        }
+        if (format === 'day') {
+            return apDay(input);
+        }
+        if (format === 'month' ) {
+            return apMonth(input);
+        }
+
+        function apTime (input) {
+            var timeArray = input.split(':'),
+                militaryHour = parseInt(timeArray[0], 10),
+                hour = (militaryHour + 11) % 12 + 1,
+                minute = (timeArray[1] === '00') ? '' : ':' + timeArray[1],
+                meridiem = (militaryHour >= 12) ? ' PM' : ' AM';
+
+            return hour + minute + meridiem;
+        }
+
+        function apDate (input) {
+            var date = parseInt(input, 10).toString();
+
+            return date;
+        }
+
+        function apDay (input) {
+            var day = input.split('.')[0].slice(0, 3);
+
+            if (day === 'Tue') {
+                return 'Tues';
+            }
+            if (day ==='Thu') {
+                return 'Thurs';
+            }
+            return day;
+        }
+
+        function apMonth (input) {
+            var month = input.slice(0, 3);
+
+            if (month === 'Jun') {
+                return 'June';
+            }
+            if (month === 'Jul') {
+                return 'July';
+            }
+            if (month === 'Sep') {
+                return 'Sept';
+            }
+            return month;
+        }
+    }
+
+    /**
+     * @ngdoc filter
      * @name nypl_locations.filter:truncate
      * @param {string} text ...
      * @param {number} [length] ...
@@ -3377,6 +3440,7 @@ console, $location, $ */
    * @description
    * ...
    */
+  researchCollectionService.$inject = ["$filter"];
   function researchCollectionService($filter) {
     var researchService = {},
       researchValues = {};
@@ -3423,7 +3487,6 @@ console, $location, $ */
 
     return researchService;
   }
-  researchCollectionService.$inject = ["$filter"];
 
   angular
     .module('nypl_research_collections')
@@ -3444,6 +3507,8 @@ console, $location, $ */
    * @description
    * Credit: Jim Lasvin -- https://github.com/lavinjj/angularjs-spinner
    */
+  nyplUtility.$inject = ["$sce", "$window", "nyplCoordinatesService"];
+  requestNotificationChannel.$inject = ["$rootScope"];
   function requestNotificationChannel($rootScope) {
     // private notification messages
     var _START_REQUEST_ = '_START_REQUEST_',
@@ -3476,7 +3541,6 @@ console, $location, $ */
 
     return notificationChannel;
   }
-  requestNotificationChannel.$inject = ["$rootScope"];
 
   /**
    * @ngdoc service
@@ -3979,7 +4043,6 @@ console, $location, $ */
 
     return utility;
   }
-  nyplUtility.$inject = ["$sce", "$window", "nyplCoordinatesService"];
 
    angular
     .module('nypl_research_collections')
