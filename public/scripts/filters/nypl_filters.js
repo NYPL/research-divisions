@@ -23,15 +23,6 @@
             return hours;
         }
 
-        function clockTime(time) {
-            var components = time.split(':'),
-                hours = ((parseInt(components[0], 10) + 11) % 12 + 1),
-                minutes = components[1],
-                meridiem = components[0] >= 12 ? 'pm' : 'am';
-
-            return hours + ":" + minutes + meridiem;
-        }
-
         function closingHoursDisplay(hours, alerts) {
             var sDate, eDate, allDay, regHours,
                 openHour, closedHour, displayString;
@@ -79,7 +70,7 @@
                 } else if (alerts) {
                     return closingHoursDisplay(time, alerts);
                 }
-                return clockTime(time.open) + ' - ' + clockTime(time.close);
+                return apStyle(time.open, 'time') + '–' + apStyle(time.close, 'time');
             }
 
             console.log('timeFormat() filter error: Argument is' +
@@ -137,7 +128,7 @@
                 ['hours', 'mins', 'meridian', 'military'],
                 [((parseInt(time[0], 10) + 11) % 12 + 1),
                     time[1],
-                    (time[0] >= 12 ? 'pm' : 'am'),
+                    (time[0] >= 12 ? ' PM' : ' AM'),
                     parseInt(time[0], 10)]
             );
         }
@@ -226,6 +217,78 @@
             }
             return 'Not available';
         };
+    }
+
+    /**
+     * @ngdoc filter
+     * @name nypl_locations.filter:apStyle
+     * @param {string} input ...
+     * @returns {string} ...
+     * @description
+     * Converts time stamps to NYPL AP style
+     */
+    function apStyle (input, format) {
+        if (!input) {
+            return '';
+        }
+        if (!format) {
+            return input;
+        }
+        if (format === 'time') {
+            return apTime(input);
+        }
+        if (format === 'date') {
+            return apDate(input);
+        }
+        if (format === 'day') {
+            return apDay(input);
+        }
+        if (format === 'month' ) {
+            return apMonth(input);
+        }
+
+        function apTime (input) {
+            var timeArray = input.split(':'),
+                militaryHour = parseInt(timeArray[0], 10),
+                hour = (militaryHour + 11) % 12 + 1,
+                minute = (timeArray[1] === '00') ? '' : ':' + timeArray[1],
+                meridiem = (militaryHour >= 12) ? ' PM' : ' AM';
+
+            return hour + minute + meridiem;
+        }
+
+        function apDate (input) {
+            var date = parseInt(input, 10).toString();
+
+            return date;
+        }
+
+        function apDay (input) {
+            var day = input.split('.')[0].slice(0, 3);
+
+            if (day === 'Tue') {
+                return 'Tues';
+            }
+            if (day ==='Thu') {
+                return 'Thurs';
+            }
+            return day;
+        }
+
+        function apMonth (input) {
+            var month = input.slice(0, 3);
+
+            if (month === 'Jun') {
+                return 'June';
+            }
+            if (month === 'Jul') {
+                return 'July';
+            }
+            if (month === 'Sep') {
+                return 'Sept';
+            }
+            return month;
+        }
     }
 
     /**
