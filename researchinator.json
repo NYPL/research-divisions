@@ -21,7 +21,7 @@
     },
     "qa": {
       "url": "http://qa.research-collections.nypl.org",
-      "api": "http://qa-refinery.nypl.org/api/nypl/locations",
+      "api": "https://qa-refinery.nypl.org/api/nypl/locations",
       "api_version": "v1.0",
       "nyplbase": "https://d3rw2mydk59brd.cloudfront.net/nyplbase/0.1.1/css/nyplbase.min.css",
       "optimizely": null,
@@ -39,7 +39,7 @@
     },
     "development": {
       "url": "http://dev.research-collections.nypl.org",
-      "api": "http://dev-refinery.nypl.org/api/nypl/locations",
+      "api": "https://dev-refinery.nypl.org/api/nypl/locations",
       "api_version": "v1.0",
       "nyplbase": "https://d3rw2mydk59brd.cloudfront.net/nyplbase/0.1.1/css/nyplbase.min.css",
       "optimizely": null,
@@ -57,7 +57,7 @@
     },
     "local": {
       "url": "localhost:9292",
-      "api": "http://dev-refinery.nypl.org/api/nypl/locations",
+      "api": "https://dev-refinery.nypl.org/api/nypl/locations",
       "api_version": "v1.0",
       "nyplbase": "https://d3rw2mydk59brd.cloudfront.net/nyplbase/0.1.1/css/nyplbase.min.css",
       "optimizely": null,
