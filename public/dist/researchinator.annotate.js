@@ -2589,7 +2589,7 @@ console, $location, $ */
     }
 
     function branchClosedMessage() {
-      return "<b>Branch is temporarily closed.</b>";
+      return "<b>Division is temporarily closed.</b>";
     }
 
     function getSubjectFilters() {
