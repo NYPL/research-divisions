@@ -6,7 +6,7 @@
       "api": "https://refinery.nypl.org/api/nypl/locations",
       "api_version": "v1.0",
       "nyplbase": "//d2znry4lg8s0tq.cloudfront.net/nyplbase/0.1.7/css/nyplbase.min.css",
-      "optimizely": null,
+      "optimizely": "//cdn.optimizely.com/js/284748925.js",
       "google_analytics": "UA-1420324-3",
       "google_maps": "AIzaSyCeqpIM6ylCguHdJq0Mp9WpaSrLJ3xrBWM",
       "angular_src": "ux-static",
