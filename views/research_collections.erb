@@ -24,11 +24,7 @@
 
     <link rel="shortcut icon" type="image/ico" href="//d2znry4lg8s0tq.cloudfront.net/images/favicon.ico">
 
-<% if settings.env_config["angular_src"] == "ux-static-staging" %>
-    <link rel="stylesheet" href="//d3rw2mydk59brd.cloudfront.net/nyplbase/0.1.7/css/nyplbase.min.css">
-<% else %>
-    <link rel="stylesheet" type="text/css" href="//d2znry4lg8s0tq.cloudfront.net/nyplbase/0.1.7/css/nyplbase.min.css">
-<% end %>
+    <link rel="stylesheet" href="<%= settings.env_config['nyplbase'] %>" type="text/css" media="screen" />
 
 <% if @rq.forwarded? %>
     <base href="/research-divisions/">
@@ -63,7 +59,7 @@
         <!-- Locinator App -->
         <div class="nypl-locations" data-ui-view data-autoscroll="false" scrolltop></div>
     </div>
-    
+
     <!-- Footer -->
     <nypl-footer></nypl-footer>
 
@@ -106,6 +102,8 @@
 <% else %>
 <%= erb :full_app %>
 <% end %>
-
+    <!-- Optonster -->
+    <script src="https://assets.nypl.org/js/advocacy.js"></script>
+    <!-- /OptinMonster -->
 </body>
 </html>
