@@ -47,15 +47,15 @@ Every enviroment has a set of specific environments variables that the app uses,
 
 Running `bundle exec rackup` on each of the development, qa, or production branches will start the app in its respective default development, qa, and production environment.
 
-Since new features are tested on the development branch, we want to switch environments without switching branches. To do so we start the Sinatra app telling it what environment we want in the RESEARCHINATOR variable.
+Since new features are tested on the development branch, we want to switch environments without switching branches. To do so we start the Sinatra app telling it what environment we want in the researchinator_env variable.
 
 Running
 
-    RESEARCHINATOR=development bundle exec rackup
+    researchinator_env=development bundle exec rackup
 
 will start the app in the development environment. Likewise, running
 
-    RESEARCHINATOR=production bundle exec rackup
+    researchinator_env=production bundle exec rackup
 
 will start the app in the production environment.
 
