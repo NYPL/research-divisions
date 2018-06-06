@@ -11,3 +11,4 @@ test/results
 \#*\#
 test/coverage/*
 public/bower_components
+package-lock.json
