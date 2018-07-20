@@ -52,13 +52,13 @@
                 }
             }
         </style>
-        <script type="text/javascript" src="https://<%= settings.refinery_api %>header.nypl.org/dgx-header.min.js" async></script>
+        <script type="text/javascript" src="https://<%= settings.refinery_api %>header.nypl.org/dgx-header.min.js?skipNav=mainContent" async></script>
     </div>
 
-    <div class="wrapper">
+    <main class="wrapper" id="mainContent">
         <!-- Locinator App -->
         <div class="nypl-locations" data-ui-view data-autoscroll="false" scrolltop></div>
-    </div>
+    </main>
 
     <!-- Footer -->
     <nypl-footer></nypl-footer>
