@@ -9,8 +9,8 @@ describe('NYPL Directive Unit Tests', function () {
   'use strict';
 
   var httpBackend, compile, scope,
-    api = 'http://dev.refinery.aws.nypl.org/api/nypl/locations',
-    api_version = 'v1.0',
+    api = 'https://dev-refinery.nypl.org/api/nypl/ndo',
+    api_version = 'v0.1',
     jsonpCallback = '?callback=JSON_CALLBACK';
 
   beforeEach(function () {
@@ -111,7 +111,7 @@ describe('NYPL Directive Unit Tests', function () {
   //     expect($translate.use).toHaveBeenCalledWith('en');
   //   });
   // });
- 
+
 
   /*
    * <div scrolltop></div>

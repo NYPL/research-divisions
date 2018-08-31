@@ -1,5 +1,8 @@
 ## CHANGELOG
 
+### v1.5.2
+- Small change to the karma version.
+
 ### v1.5.1
 - Adding focusable="false" to SVGs in the Footer. Adding main element and adding skipnav to the header.
 
