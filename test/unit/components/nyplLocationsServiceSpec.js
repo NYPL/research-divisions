@@ -2,7 +2,7 @@
 /*globals element, by, google, module, window, jasmine, document,
 describe, expect, beforeEach, inject, it, angular, spyOn, afterEach */
 
-/* 
+/*
  * locationService is an NYPL AngularJS Module that has a service which calls
  * all the different endpoints from the API and returns a deferred object
  * with data or an error.
@@ -11,12 +11,12 @@ describe('NYPL locationService Module', function () {
   'use strict';
 
   /*
-   * nyplLocationsService is an Angularjs service that calls and returns 
+   * nyplLocationsService is an Angularjs service that calls and returns
    * data from different API endpoints.
    */
   describe('nyplLocationsService', function () {
-    var api = 'http://dev.refinery.aws.nypl.org/api/nypl/locations',
-      api_version = 'v1.0',
+    var api = 'https://dev-refinery.nypl.org/api/nypl/ndo',
+      api_version = 'v0.1',
       jsonpCallback = '?callback=JSON_CALLBACK',
       error_message = 'Could not reach API: ',
       nyplLocationsService,
@@ -265,7 +265,7 @@ describe('NYPL locationService Module', function () {
       *   If the amenity parameter exists, it will return a list
       *   of locations where the amenity can be found. Otherwise, it will call
       *   the /amenities endpoint and return all the amenities available
-      *   in the API. 
+      *   in the API.
       */
       describe('nyplLocationsService.amenities(amenity)', function () {
         // First test is for all amenities
