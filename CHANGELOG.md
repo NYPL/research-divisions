@@ -1,5 +1,8 @@
 ## CHANGELOG
 
+### v1.5.3
+- Add non-profit status information to Footer.
+
 ### v1.5.2
 - Small change to the karma version.
 
