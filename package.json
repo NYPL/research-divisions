@@ -1,15 +1,7 @@
 {
   "name": "research_divisions",
-  "version": "1.5.1",
-  "dependencies": {
-    "jasmine-reporters": "^2.1.1",
-    "jasmine-spec-reporter": "^2.4.0",
-    "karma": "^0.12.22",
-    "karma-jasmine": "^0.2.2",
-    "karma-jasmine-jquery": "^0.1.1",
-    "protractor": "^3.1.1",
-    "protractor-html-screenshot-reporter": "0.0.10"
-  },
+  "version": "1.5.3",
+  "dependencies": {},
   "devDependencies": {
     "grunt": "^0.4.5",
     "grunt-contrib-concat": "~0.5.1",
@@ -20,15 +12,16 @@
     "grunt-ngdocs": "^0.2.5",
     "jasmine-reporters": "^2.1.1",
     "jasmine-spec-reporter": "^2.4.0",
-    "karma": "~0.12",
-    "karma-chrome-launcher": "~0.1.2",
+    "karma": "2.0.0",
+    "karma-chrome-launcher": "2.2.0",
     "karma-coverage": "^0.2.6",
-    "karma-firefox-launcher": "~0.1.3",
+    "karma-firefox-launcher": "1.1.0",
     "karma-jasmine": "^0.2.2",
     "karma-jasmine-jquery": "^0.1.1",
     "karma-junit-reporter": "~0.2.1",
     "karma-ng-html2js-preprocessor": "^0.1.0",
     "karma-script-launcher": "~0.1.0",
+    "protractor": "^3.1.1",
     "protractor-html-screenshot-reporter": "0.0.10"
   }
 }
