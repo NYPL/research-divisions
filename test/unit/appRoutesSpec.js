@@ -7,7 +7,7 @@ describe('Researchinator State Routing', function () {
 
   var $rootScope, $injector, $state, $httpBackend, nyplLocationsService,
     configObj = {
-      api_root: 'http://dev.refinery.aws.nypl.org/api/nypl/locations',
+      api_root: 'https://dev-refinery.nypl.org/api/nypl/ndo',
       featured_amenities: { global: 3, local: 2 }
     };
 
@@ -59,7 +59,7 @@ describe('Researchinator State Routing', function () {
         expect($injector.invoke(stateConfig.resolve.config)).toEqual(configObj);
       });
 
-      
+
       it('should return the 404 state', function () {
         state = 'lost';
         stateConfig = $state.get(state);
