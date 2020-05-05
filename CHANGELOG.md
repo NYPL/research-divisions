@@ -2,6 +2,7 @@
 
 ### v1.5.4
 - Removed Tumblr icon link in Footer.
+- Updated YouTube icon to match brand guidelines.
 - Added system-font-css to Footer.
 
 ### v1.5.3
