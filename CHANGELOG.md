@@ -1,5 +1,9 @@
 ## CHANGELOG
 
+### v1.5.5
+- Updating to use NYPL "text-only" svg logo.
+- Adding SASB building facade image.
+
 ### v1.5.4
 - Removed Tumblr icon link in Footer.
 - Updated YouTube icon to match brand guidelines.
