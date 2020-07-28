@@ -381,7 +381,7 @@ describe('NYPL locationService Module', function () {
               // The actual API call has many properties for one location
               mockedLocationAmenitiesAPICall = {
                 locations: {
-                  name: 'Science, Industry and Business Library (SIBL)',
+                  name: 'Business Center at Stavros Niarchos Foundation Library (SIBL)',
                   _embedded: {
                     amenities: [
                       {id: 4, name: "Computers for Public Use", _links: {}},
@@ -406,7 +406,7 @@ describe('NYPL locationService Module', function () {
             httpBackend.flush();
 
             expect(amenities_result.locations.name)
-              .toEqual('Science, Industry and Business Library (SIBL)');
+              .toEqual('Business Center at Stavros Niarchos Foundation Library (SIBL)');
             expect(amenities_result.locations._embedded.amenities.length)
               .toBe(4);
             expect(amenities_result).toEqual(mockedLocationAmenitiesAPICall);
