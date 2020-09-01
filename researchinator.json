@@ -16,7 +16,7 @@
         "SASB": "Schwarzman Building",
         "SC": "Schomburg Center",
         "LPA": "Library for the Performing Arts",
-        "SIBL": "Science, Industry and Business Library"
+        "SIBL": "Business Center at Stavros Niarchos Foundation Library"
       }
     },
     "qa": {
@@ -34,7 +34,7 @@
         "SASB": "Schwarzman Building",
         "SC": "Schomburg Center",
         "LPA": "Library for the Performing Arts",
-        "SIBL": "Science, Industry and Business Library"
+        "SIBL": "Business Center at Stavros Niarchos Foundation Library"
       }
     },
     "development": {
@@ -52,7 +52,7 @@
         "SASB": "Schwarzman Building",
         "SC": "Schomburg Center",
         "LPA": "Library for the Performing Arts",
-        "SIBL": "Science, Industry and Business Library"
+        "SIBL": "Business Center at Stavros Niarchos Foundation Library"
       }
     },
     "local": {
@@ -70,7 +70,7 @@
         "SASB": "Schwarzman Building",
         "SC": "Schomburg Center",
         "LPA": "Library for the Performing Arts",
-        "SIBL": "Science, Industry and Business Library"
+        "SIBL": "Business Center at Stavros Niarchos Foundation Library"
       }
     }
   },

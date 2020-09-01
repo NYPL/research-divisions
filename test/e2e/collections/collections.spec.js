@@ -194,13 +194,13 @@ describe('Research Collections', function () {
             .toEqual('Schomburg Center');
         });
 
-      it('should display that Science, Industry and Business Library (SIBL) ' +
+      it('should display that Business Center at Stavros Niarchos Foundation Library (SIBL) ' +
         'was clicked', function () {
-          element(by.linkText('Science, Industry and Business Library'))
+          element(by.linkText('Business Center at Stavros Niarchos Foundation Library'))
             .click();
 
           expect(collectionsPage.currentLocationsFilter.getText())
-            .toEqual('Science, Industry and Business Library');
+            .toEqual('Business Center at Stavros Niarchos Foundation Library');
         });
     });
 
@@ -234,7 +234,7 @@ describe('Research Collections', function () {
 
       it('should display a Subjects and Locations filter', function () {
         locationFilter.click();
-        element(by.linkText('Science, Industry and Business Library'))
+        element(by.linkText('Business Center at Stavros Niarchos Foundation Library'))
           .click();
         subjectsFilter.click();
         element(by.linkText('Literature')).click();
@@ -242,7 +242,7 @@ describe('Research Collections', function () {
         expect(collectionsPage.currentSubjectFilter.getText())
           .toEqual('Literature');
         expect(collectionsPage.currentLocationsFilter.getText())
-          .toEqual('Science, Industry and Business Library');
+          .toEqual('Business Center at Stavros Niarchos Foundation Library');
       });
 
       it('should display a Media and Locations filter', function () {
@@ -449,7 +449,7 @@ describe('Research Collections', function () {
           element(by.linkText("Women's Studies")).click();
 
           locationFilter.click();
-          element(by.linkText('Science, Industry and Business Library')).click();
+          element(by.linkText('Business Center at Stavros Niarchos Foundation Library')).click();
           expect(collectionsPage.filteredDivisions.count()).toBe(1);
 
           subjectsFilter.click();
