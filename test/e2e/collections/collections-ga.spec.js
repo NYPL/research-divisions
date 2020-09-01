@@ -297,13 +297,13 @@ describe('Research Collections: Google Analytics', function () {
         });
       });
 
-      it('should track a click on Science, Industry and Business Library', function () {
-        element(by.linkText('Science, Industry and Business Library')).click();
+      it('should track a click on Business Center at Stavros Niarchos Foundation Library', function () {
+        element(by.linkText('Business Center at Stavros Niarchos Foundation Library')).click();
 
         browser.executeScript('return window.ga_msg;').then(function (ga) {
           expect(ga[1][2].eventCategory).toEqual('Research Collections');
           expect(ga[1][2].eventAction).toEqual('Click');
-          expect(ga[1][2].eventLabel).toEqual('Locations: Science, Industry and Business Library');
+          expect(ga[1][2].eventLabel).toEqual('Locations: Business Center at Stavros Niarchos Foundation Library');
         });
       });
     }); // End Locations Filters
