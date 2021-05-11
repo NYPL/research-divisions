@@ -1,3 +1,6 @@
+# Deprecated
+As of April 2021, this app is no longer in use at NYPL, and the current implementation is part of Location Finder (Scout) app: https://github.com/NYPL/dxp-react-search. Please contact the DXP/RENO team in Digital for more information.
+
 # The Researchinator
 
 ## Installing Dependencies
